@@ -1,0 +1,55 @@
+{
+  "packageId": "com.nxwod.twa",
+  "host": "nxwod.com",
+  "name": "NX_WOD",
+  "launcherName": "NxWOD",
+  "display": "standalone",
+  "themeColor": "#E74C3C",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#020024",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://nxwod.com/_nuxt/nxwod.fe140114.png",
+  "maskableIconUrl": "https://nxwod.com/_nuxt/nxwod.fe140114.png",
+  "monochromeIconUrl": "https://nxwod.com/_nuxt/nxwod.fe140114.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "/home/leandrocesar/leandrocesar.com/nxwodcom/android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://nxwod.com/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "playBilling": {
+      "enabled": true
+    },
+    "locationDelegation": {
+      "enabled": true
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://nxwod.com/",
+  "minSdkVersion": 21,
+  "orientation": "default",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "1"
+}

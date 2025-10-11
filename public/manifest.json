@@ -1,0 +1,7 @@
+{
+  "display": "standalone",
+  "theme_color": "#e74c3c",
+  "background_color": "#e74c3c",
+  "start_url": "/",
+  "scope": "/"
+}

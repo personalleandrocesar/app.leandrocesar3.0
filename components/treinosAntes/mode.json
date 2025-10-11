@@ -1,0 +1,71 @@
+{
+    "treinos": [{
+            "one": [
+                {
+                    "a": [
+                        { 
+                            "num": "Exercício 1", 
+                            "nome": "Panturrilha aparelho em pé", 
+                            "sets": 2, 
+                            "reps": "20 (2t)", 
+                            "rest": "40\"", 
+                            "grupo": "", 
+                            "obs": "FAzer com 2 tempos a cada repetição.", 
+                            "img": "https://m.leandrocesar.com/exe/panturrilhaAparelho.gif" 
+                    
+                        },
+                        { 
+                            "num": "Exercício 2", 
+                            "nome": "Panturrilha aparelho em pé", 
+                            "sets": 2, 
+                            "reps": "20 (2t)", 
+                            "rest": "40\"", 
+                            "grupo": "", 
+                            "obs": "FAzer com 2 tempos a cada repetição.", 
+                            "img": "https://m.leandrocesar.com/exe/panturrilhaAparelho.gif" 
+                    
+                        }
+                        
+                    ],
+                    "b": [
+                        {
+                            "num": "Exercício 10",
+                            "nome": "Panturrilha aparelho em pé",
+                            "sets": 2,
+                            "reps": "20 (2t)",
+                            "rest": "40\"",
+                            "grupo": "",
+                            "obs": "FAzer com 2 tempos a cada repetição.",
+                            "img": "https://m.leandrocesar.com/exe/panturrilhaAparelho.gif"
+                        }
+                    ],
+                    "c": [
+                        {
+                            "num": "Exercício 10",
+                            "nome": "Panturrilha aparelho em pé",
+                            "sets": 2,
+                            "reps": "20 (2t)",
+                            "rest": "40\"",
+                            "grupo": "",
+                            "obs": "FAzer com 2 tempos a cada repetição.",
+                            "img": "https://m.leandrocesar.com/exe/panturrilhaAparelho.gif"
+                        }
+                    ]
+                }
+            ],
+            "two": [
+                {
+                    "num": "Exercício 10",
+                    "nome": "Panturrilha aparelho em pé",
+                    "sets": 2,
+                    "reps": "20 (2t)",
+                    "rest": "40\"",
+                    "grupo": "",
+                    "obs": "FAzer com 2 tempos a cada repetição.",
+                    "img": "https://m.leandrocesar.com/exe/panturrilhaAparelho.gif"
+                }
+            ] 
+
+        }
+    ]
+}

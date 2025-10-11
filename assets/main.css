@@ -1,0 +1,242 @@
+@import './base.css';
+
+* {
+  font-family: "Orbitron-SemiBold";
+  user-select: none;
+}
+
+@font-face {
+  font-family: 'Orbitron-SemiBold';
+  src: url('~/assets/Orbitron-SemiBold.otf') format('opentype');
+}
+
+
+#app {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: normal;
+}
+
+code {
+  border-left: 3px solid;
+  margin: 0 0 10px 0px;
+  padding-left: 10px;
+}
+
+.content-title-img {
+  margin: 10px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  flex-wrap: nowrap;
+  line-height: 1.2;
+}
+
+.content-main {
+  margin: 10px 5px 50px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  font-size: 1.1rem;
+}
+
+.content-main p {
+  margin-bottom: 15px;
+  text-indent: 20px;
+}
+
+.content-detail {
+  margin: 10px 10px 50px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  font-size: 1.1rem;
+
+}
+
+.content-details {
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+}
+
+/*
+table {
+  border-collapse: collapse;
+  letter-spacing: 1px;
+  font-size: 0.8rem;
+  width: 100%;
+  font-weight: bolder;    
+  border-radius: 8px;
+}
+
+
+td{
+  border: .1px solid #04be7a90;
+  padding: 10px 20px;
+}
+
+th {
+  border: .1px solid #04be7a70;
+  background-color: #04be7a90;  
+  padding: 10px 20px;
+}
+
+tbody:nth-child(2n + 1) {
+  background-color: #04be7a10;
+  font-weight: bolder;  
+}
+
+tbody:nth-child(2n) {
+  background-color: #04be7a40;
+}
+
+tbody:hover {
+  background-color: #04be7a60;
+  cursor: pointer;
+}
+
+td {
+  text-align: center;
+}
+
+
+caption {
+  padding: 10px;
+}*/
+
+
+.anima {
+  animation-direction: top;
+  animation: opacityAnimation 1s;
+}
+
+@keyframes opacityAnimation {
+  0% {
+    opacity: .2;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.top {
+  animation-direction: top;
+  animation: transformAnimation .5s;
+}
+
+.topHome {
+  animation-direction: top;
+  animation: transformAnimationHome .5s;
+}
+
+.loading-content {
+  animation: zoomInOut 1.2s infinite linear;
+}
+
+
+@keyframes opacityAnimation {
+  0% {
+    opacity: .2;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.top {
+  animation-direction: top;
+  animation: transformAnimation .5s;
+}
+
+.topHome {
+  animation-direction: top;
+  animation: transformAnimationHome .5s;
+}
+
+.loading-content {
+  animation: zoomInOut 1.2s infinite linear;
+}
+
+.zoom {
+  animation: zoom .4s cubic-bezier(0.86, 0, 0.07, 1);
+}
+
+@keyframes zoom {
+  0% {
+      opacity: 0; /* Torna invisível */
+  }
+
+  100% {
+        opacity: 1; /* Torna visível */
+  }
+}
+
+.zoomOut {
+  animation: zoomOut .8s cubic-bezier(0.86, 0, 0.07, 1);
+}
+
+@keyframes zoomOut {
+  0% {
+    transform: translate(-50%, -50%) scale(0); /* Encolhe novamente */
+      opacity: 0; /* Torna invisível */
+  }
+
+  100% {
+      transform: translate(-50%, -50%) scale(1); /* Zoom para o tamanho normal */
+        opacity: 1; /* Torna visível */
+  }
+}
+.zoomIn {
+  animation: zoomIn 1.4s cubic-bezier(0.86, 0, 0.07, 1);
+}
+
+@keyframes zoomIn {
+  0% {
+      transform: translate(-50%, -50%) scale(1); /* Zoom para o tamanho normal */
+        opacity: 1; /* Torna visível */
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(0); /* Encolhe novamente */
+      opacity: 0; /* Torna invisível */
+  }
+}
+
+@keyframes transformAnimation {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes transformAnimationHome {
+  0% {
+    transform: translateY(55%);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes zoomInOut {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
