@@ -603,7 +603,7 @@ input {
 }
 
 input:focus-visible {
-  border: solid 1pxvar(--player-color);
+  border: solid 1px var(--player-color);
   background-color: var(--player-color)10;
 }
 
@@ -618,15 +618,15 @@ input:hover {
 
 input:focus {
   border: 0 none;
-  background: #777;
-  color:#fff;
+  background: #f4f4f4;
+  color:#000;
   border: solid 2px #000;
   outline: 0;
 }
 .dark-mode input:focus {
-  color: #000;
-  background: #888;
-  border: solid 2px #000;
+  color: #fff;
+  background: #181d26;
+  border: solid 2px #fff;
 }
 
 body input {

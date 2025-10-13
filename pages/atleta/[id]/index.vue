@@ -34,14 +34,14 @@ console.log(usuarios.data.value)
 
 // useHead em forma de função — reativo por conta do selectedColor
 useHead(() => ({
-  titleTemplate: `${primeiroNome.value} ${pessoa.lastName} - Atleta | Nx_WOD`,
+  titleTemplate: `${primeiroNome.value} ${pessoa.lastName} - Atleta | Personal Leandro Cesar`,
   meta: [
     {
       name: 'theme-color',
       // se selectedColor for um ref, .value dá a string; fallback para a var CSS ou cor padrão
       content: selectedColor?.value
         || getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim()
-        || '#7CFF89'
+        || '#2ecc71'
     }
   ]
 }))
@@ -49,7 +49,7 @@ useHead(() => ({
 // garante valor inicial caso o composable não tenha setado
 onMounted(() => {
   if (!selectedColor?.value) {
-    selectedColor.value = getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim() || '#7CFF89'
+    selectedColor.value = getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim() || '#2ecc71'
   }
 })
 const classeSelecionada = ref(null)
@@ -2881,11 +2881,14 @@ input[type="file"] {
   border-radius: 5px;
   margin: 0 0 50px 0;
   width: 90%;
-  background-color: #020024;
+  background-color: #ffffff;
   color: #ffffff;
   color: var(--player-color);
   box-shadow: 0 0 20px var(--player-color);
   font-family: 'Orbitron-Regular', sans-serif;
+}
+.dark-mode .hud-notifications {
+  background-color: #0f141e;
 }
 
 .notify {

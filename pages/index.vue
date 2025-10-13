@@ -1,6 +1,6 @@
 <script setup>
 useHead({
-    titleTemplate: 'Nx_WOD',
+    titleTemplate: 'Personal Leandro Cesar',
 })
 
 const { selectedColor, selectedClass, classColors, resetColorToDefault } = usePlayerColor()
@@ -13,7 +13,7 @@ useHead(() => ({
       // se selectedColor for um ref, .value dá a string; fallback para a var CSS ou cor padrão
       content: selectedColor?.value
         || getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim()
-        || '#7CFF89'
+        || '#2ecc71'
     }
   ]
 }))
@@ -21,7 +21,7 @@ useHead(() => ({
 // garante valor inicial caso o composable não tenha setado
 onMounted(() => {
   if (!selectedColor?.value) {
-    selectedColor.value = getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim() || '#7CFF89'
+    selectedColor.value = getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim() || '#2ecc71'
   }
 })
 </script>
