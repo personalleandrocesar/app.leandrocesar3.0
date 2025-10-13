@@ -10,6 +10,10 @@
   src: url('~/assets/Orbitron-SemiBold.otf') format('opentype');
 }
 
+@font-face {
+  font-family: 'Helvetica';
+  src: url('~/assets/Helvetica.ttf') format('truetype');
+}
 
 #app {
   font-family: 'Ubuntu', sans-serif;

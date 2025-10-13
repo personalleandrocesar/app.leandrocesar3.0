@@ -73,16 +73,18 @@ onMounted(() => {
     max-width: 400px;
     margin: 0 auto;
     font-family: 'Orbitron', sans-serif;
-    color: #ffffff;
 }
 
 .float-xp-bar {
-    background: #ffffff33;
+    background: #00000015;
     height: 10px;
     border-radius: 10px;
     margin-top: 5px;
     overflow: hidden;
     position: relative;
+}
+.dark-mode .float-xp-bar {
+  background: #4c4c4c;
 }
 
 .float-xp-progress {
@@ -100,8 +102,11 @@ onMounted(() => {
 .float-xp-text {
     text-align: right;
     font-size: 0.9rem;
-    color: #fff;
+    color: #000;
     margin: 0.25rem 0 1rem 0;
+}
+.dark-mode .float-xp-text {
+  color: #fff;
 }
 
 .star {

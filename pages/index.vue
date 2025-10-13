@@ -13,7 +13,7 @@ useHead(() => ({
       // se selectedColor for um ref, .value dá a string; fallback para a var CSS ou cor padrão
       content: selectedColor?.value
         || getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim()
-        || '#000000'
+        || '#7CFF89'
     }
   ]
 }))
@@ -21,7 +21,7 @@ useHead(() => ({
 // garante valor inicial caso o composable não tenha setado
 onMounted(() => {
   if (!selectedColor?.value) {
-    selectedColor.value = getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim() || '#000000'
+    selectedColor.value = getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim() || '#7CFF89'
   }
 })
 </script>
@@ -68,6 +68,9 @@ onMounted(() => {
   
   .right-column {
     overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .left-column img {
@@ -111,6 +114,9 @@ onMounted(() => {
     background-size: cover; /* cobre toda a tela */
       background-position: center; /* centraliza a imagem */
       background-repeat: no-repeat; /* não repete */
+      display: flex;
+        justify-content: center;
+        align-items: center;
   }
 
   .left-column img {

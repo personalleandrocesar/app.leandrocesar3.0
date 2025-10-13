@@ -132,6 +132,9 @@ onMounted(() => {
 }
 
 strong {
+  color: #000;
+}
+.dark-mode strong {
   color: #fff;
 }
 

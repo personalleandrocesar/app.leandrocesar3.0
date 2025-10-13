@@ -2,10 +2,10 @@ import { ref, watch, onMounted } from 'vue'
 
 export function usePlayerColor() {
     const selectedClass = ref('Guerreiro')
-    const selectedColor = ref('#000000')
+    const selectedColor = ref('#ecc71')
 
     const classColors: Record<string, string> = {
-        Guerreiro: '#000000',
+        Guerreiro: '#2ecc71',
         Mago: '#9b59b6',
         Clérigo: '#b800ff',
         Curandeiro: '#2ecc71',

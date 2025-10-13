@@ -105,7 +105,11 @@ onMounted(() => {
   margin: 0;
 }
 strong {
-  color: #fff;
+  color: #000;
+}
+
+.dark-mode strong {
+  color: #ffffff;
 }
 
 span {

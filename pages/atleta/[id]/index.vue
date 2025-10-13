@@ -41,7 +41,7 @@ useHead(() => ({
       // se selectedColor for um ref, .value dá a string; fallback para a var CSS ou cor padrão
       content: selectedColor?.value
         || getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim()
-        || '#000000'
+        || '#7CFF89'
     }
   ]
 }))
@@ -49,7 +49,7 @@ useHead(() => ({
 // garante valor inicial caso o composable não tenha setado
 onMounted(() => {
   if (!selectedColor?.value) {
-    selectedColor.value = getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim() || '#000000'
+    selectedColor.value = getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim() || '#7CFF89'
   }
 })
 const classeSelecionada = ref(null)
@@ -915,8 +915,8 @@ topClients.sort((a, b) => b.xp - a.xp)
         </div>
 
         <div>
-          <span class="float-rank">RANK <p style="color: #ffffff">{{ rankAtual }}</p></span>
-          <span v-if="rankAtual === 'S' && nivelAtualS" class="float-nivel">Nível <p style="color: #ffffff">{{
+          <span class="float-rank">RANK <p>{{ rankAtual }}</p></span>
+          <span v-if="rankAtual === 'S' && nivelAtualS" class="float-nivel">Nível <p>{{
               nivelAtualS }}</p></span>
         </div>
       </div>
@@ -941,12 +941,12 @@ topClients.sort((a, b) => b.xp - a.xp)
     <div class="panel">
         <div>
             <span class="float-rank" v-if="proximoNivelS === null">
-            Próximo Rank → <span style="color:#ffffff">{{ proximoRank }}</span>
+            Próximo Rank → <span>{{ proximoRank }}</span>
             </span>
             
             <!-- mostra nível apenas se houver próximo nível de S -->
             <span v-if="proximoNivelS !== null" class="float-rank">
-            Próximo Nível → <span style="color:#ffffff">{{ proximoNivelS }}</span>
+            Próximo Nível → <span>{{ proximoNivelS }}</span>
             </span>
         </div>
     </div>
@@ -1599,8 +1599,8 @@ topClients.sort((a, b) => b.xp - a.xp)
           </div>
 
           <div>
-            <span class="float-rank">RANK <p style="color: #ffffff">{{rankAtual}}</p></span>
-            <span v-if="rankAtual === 'S' && nivelAtualS" class="float-nivel">Nível <p style="color: #ffffff">
+            <span class="float-rank">RANK <p>{{rankAtual}}</p></span>
+            <span v-if="rankAtual === 'S' && nivelAtualS" class="float-nivel">Nível <p>
                 {{ nivelAtualS }}</p></span>
           </div>
 
@@ -1899,10 +1899,15 @@ topClients.sort((a, b) => b.xp - a.xp)
   padding: 2rem 1rem;
   margin: 1.5rem 1rem 1.5rem 1rem;
   border-radius: 10px;  
-  background-color: #020024;
-  color: #ffffff;
+  background-color: #fff;
+  color: #000;
   box-shadow: 0 0 20px var(--player-color);
   font-family: 'Orbitron-Regular', sans-serif;
+}
+
+.dark-mode .panel {
+  background-color: #0f141e;
+  color: #fff;
 }
 
 .panel-treino {
@@ -1911,12 +1916,14 @@ topClients.sort((a, b) => b.xp - a.xp)
   margin: 1rem.5rem;
   overflow-y:auto;
   border-radius: 10px;  
-  background-color: #020024;
-  color: #ffffff;
+  background-color: #ffffff;
   box-shadow: 0 0 20px var(--player-color);
   font-family: 'Orbitron-Regular', sans-serif;
 }
 
+.dark-mode .panel-treino {
+  background-color: #0f141e;
+}
 
 .header {
   display: flex;
@@ -1927,8 +1934,12 @@ topClients.sort((a, b) => b.xp - a.xp)
 }
 
 .header h2 {
-  color: #fff;
+  color: #000;
   font-size: 1.1rem;
+}
+.dark-mode .header h2 {
+  color: #fff;
+
 }
 
 .header h4 {
@@ -2050,7 +2061,7 @@ topClients.sort((a, b) => b.xp - a.xp)
 .start-button {
   background: var(--player-color);
   border: none;
-  color: #fff;
+  color: #000;
   padding: 0.75rem;
   width: 100%;
   border-radius: 8px;
@@ -2058,6 +2069,9 @@ topClients.sort((a, b) => b.xp - a.xp)
   cursor: pointer;
   box-shadow: 0 0 10px var(--player-color);
   transition: background 0.3s;
+}
+.dark-mode .start-button {
+  color: #fff;
 }
 
 .start-button:hover {
@@ -2574,10 +2588,15 @@ topClients.sort((a, b) => b.xp - a.xp)
   border-radius: 10px;
   margin: 0;
   width: 350px;
-  background-color: #020024;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #000000;
   box-shadow: 0 0 20px var(--player-color);
   font-family: 'Orbitron-Regular', sans-serif;
+}
+
+.dark-mode .hud {
+  background-color: #0f141e;
+  color: #ffffff;
 }
 
 .hud h3 span {
@@ -2613,8 +2632,11 @@ topClients.sort((a, b) => b.xp - a.xp)
 }
 
 .float-header h2 {
-  color: #fff;
+  color: #000;
   font-size: 1.1rem;
+}
+.dark-mode .float-header h2 {
+  color: #fff;
 }
 
 .float-header h4 {
@@ -2623,16 +2645,20 @@ topClients.sort((a, b) => b.xp - a.xp)
 
 span {
   font-size: 0.9rem;
-  font-family: sans-serif;
+  font-family:  Orbitron-SemiBold;
 }
 
 .classe,
 .titulo {
+  color: #000;
+}
+.dark-mode .classe, .dark-mode .titulo {
   color: #fff;
 }
 
 .float-rank {
   border: 1px solid var(--player-color);
+  font-weight: bolder;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   color: var(--player-color);
@@ -2642,9 +2668,23 @@ span {
   flex-direction: row;
 }
 
+.float-rank span{
+  color: #000;
+}
+
+.dark-mode .float-rank span {
+  color: #fff;
+}
+
 .float-rank p {
   margin-left: .7rem;
+  color: #000;
 }
+
+.dark-mode .float-rank p {
+  color: #fff;
+}
+
 .float-nivel {
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
@@ -2740,6 +2780,10 @@ hr {
 }
 
 .float-rank-ladder p.active {
+  color: #000000;
+  font-weight: bold;
+}
+.dark-mode .float-rank-ladder p.active {
   color: #ffffff;
   font-weight: bold;
 }
@@ -2782,7 +2826,7 @@ hr {
 .float-start-button {
   background: var(--player-color);
   border: none;
-  color: #fff;
+  color: #000;
   padding: 0.75rem;
   width: 100%;
   border-radius: 8px;
@@ -2790,6 +2834,9 @@ hr {
   cursor: pointer;
   box-shadow: 0 0 10px var(--player-color);
   transition: background 0.3s;
+}
+.dark-mode .float-start-button {
+  color: #fff;
 }
 
 .float-start-button:hover {
@@ -2951,12 +2998,17 @@ input[type="file"] {
   border-radius: 5px;
   margin: 0 0 50px 0;
   width: 90%;
-  background-color: #020024;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #000000;
   color: var(--player-color);
   box-shadow: 0 0 20px var(--player-color);
   font-family: 'Orbitron-Regular', sans-serif;
 }
+.dark-mode .hud-aparency {
+  background-color: #0f141e;
+  color: ffffff;
+}
+
 
 .hud-treino {
   position: fixed;
@@ -3018,12 +3070,16 @@ input[type="file"] {
   border-radius: 5px;
   margin: 0 0 50px 0;
   width: 90%;
-  background-color: #020024;
-  color: #ffffff;
+  background-color: #fff;
+  color: #000000;
   color: var(--player-color);
   box-shadow: 0 0 20px var(--player-color);
   font-family: 'Orbitron-Regular', sans-serif;
 }
+.dark-mode hud-ranking {
+  background-color: #0f141e;
+  color: #ffffff;
+} 
 
 .ranking-box {
   margin-top: 20px;
@@ -3048,12 +3104,16 @@ input[type="file"] {
 }
 
 .ranking-item {
-  background: rgba(170, 169, 169, 0.116);
+  background: #f5f5f5;
   display: flex;
-  border-radius: 20px;
+  border-radius: 8px;
   align-items: center;
   padding:5px 5px;
   margin: 5px 0px;
+}
+
+.dark-mode .ranking-item {
+  background: #171d28;
 }
 
 .ranking-item:last-child {
@@ -3092,6 +3152,10 @@ input[type="file"] {
 .rank-name {
   font-size: 1rem;
   font-weight: bold;
+  color: #777;
+}
+.dark-mode .rank-name {
+  color: #fff;
 }
 
 .rank-rank {
@@ -3249,6 +3313,7 @@ ul {
 
 .exercise-square input {
     text-align: center;
+    border: none;
 }
 
 .exercise-square:nth-child(1) {
@@ -3628,11 +3693,15 @@ border-radius: 8px;
   bottom: 0;
   left: 0;
   right: 0;
-  background: #020024;
+  background: #fff;
   display: flex;
   justify-content: space-around;
   align-items: center;
   padding: 12px 0;
+  box-shadow: 0 -1px 5px #00000020;
+}
+.dark-mode .bottom-menu {
+  background: #0f141e;
   box-shadow: 0 -1px 5px #ffffff20;
 }
 
@@ -3666,8 +3735,8 @@ border-radius: 8px;
 }
 
 .central-button .circle {
-  background: #020024;
-  color: white;
+  background: #ffffff;
+  color: #333;
   border-radius: 50%;
   width: 55px;
   height: 55px;
@@ -3680,11 +3749,16 @@ border-radius: 8px;
   border: 4px solid var(--player-color);
   /* color:#33e4fc; */
 }
+.dark-mode .central-button .circle {
+  background: #0f141e;
+  color:#ffffff;
+}
 
 .central-button .circle:hover {
   background: var(--player-color);
   box-shadow: 0 4px 10px var(--player-color);
   border: 4px solid var(--player-color);
+  color: #000;
 }
 
 .dark-mode body input {
@@ -3734,8 +3808,11 @@ border-radius: 8px;
 }
 
 .medida-top label {
-    filter: invert(1);
     font-weight: bold;
+}
+
+.dark-mode .medida-top label {
+  color: #000;
 }
 
 .medida {
@@ -3749,8 +3826,11 @@ border-radius: 8px;
 }
 
 .medida label {
-    filter: invert(1);
     font-weight: bold;
+}
+
+.dark-mode .medida label {
+  color: #000;
 }
 
 .lado {
@@ -3847,11 +3927,11 @@ border-radius: 8px;
 
 .braco-direita {
   top: 20%;
-  right:2%;
+  left:2%;
 }
 .braco-direita-contraido {
   top: 27%;
-  right: 2%;
+  left: 2%;
 }
 .antebraco-direita {
   top: 40%;
@@ -3976,9 +4056,7 @@ border-radius: 8px;
   font-size: 12px;
   font-weight: bold;
 }
-.d-cutanea label {
-    filter: invert(1);
-}
+
 .tricipital {
   top:40%;
   left:5%;
@@ -4040,9 +4118,8 @@ border-radius: 8px;
 }
 
 .buttons-avaliacao h5 {
-    color: #fff;
+    color: #000;
     margin: 15px 3px 0 3px;
-
     border: 2px solid var(--player-color);
     border-radius: 4px;
     padding: 4px 8px;
@@ -4050,6 +4127,9 @@ border-radius: 8px;
     font-family: sans-serif;
     font-weight: bold;
     cursor: pointer;
+}
+.dark-mode .buttons-avaliacao h5{
+  color: #fff;
 }
 .buttons-avaliacao h5:hover {
     color: var(--player-color);
