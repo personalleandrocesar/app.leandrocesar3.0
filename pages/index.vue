@@ -8,7 +8,7 @@ const { selectedColor, selectedClass, classColors, resetColorToDefault } = usePl
 // useHead em forma de função — reativo por conta do selectedColor
 useHead(() => ({
   meta: [
-    { name: 'theme-color', content: '#000000' },
+    { name: 'theme-color', content: '#0f141e' },
   ]
 }))
 </script>
