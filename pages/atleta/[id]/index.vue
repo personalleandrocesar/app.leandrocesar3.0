@@ -3311,6 +3311,7 @@ ul {
   border-radius: 8px;
   background-color: var(--player-color)40;
   backdrop-filter: blur(35px);
+  font-size: .8rem;
   border: 1px solid var(--player-color); 
 }
 
@@ -3336,7 +3337,11 @@ ul {
   width: 37px;
 }
 .exercise-square:nth-child(4) {
-  width: 20%
+  width: 20%;
+  overflow: hidden;
+}
+.exercise-square:nth-child(4) input {
+  width: 37px;
 }
 .exercise-square h4:nth-child(12) {
   color: var(--player-color);

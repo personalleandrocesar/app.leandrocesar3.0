@@ -8,26 +8,12 @@ const { selectedColor, selectedClass, classColors, resetColorToDefault } = usePl
 // useHead em forma de função — reativo por conta do selectedColor
 useHead(() => ({
   meta: [
-    {
-      name: 'theme-color',
-      // se selectedColor for um ref, .value dá a string; fallback para a var CSS ou cor padrão
-      content: selectedColor?.value
-        || getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim()
-        || '#2ecc71'
-    }
+    { name: 'theme-color', content: '#000000' },
   ]
 }))
-
-// garante valor inicial caso o composable não tenha setado
-onMounted(() => {
-  if (!selectedColor?.value) {
-    selectedColor.value = getComputedStyle(document.documentElement).getPropertyValue('--player-color').trim() || '#2ecc71'
-  }
-})
 </script>
 
 <template>
-  <div>
     <div class="grid-container">
       <div class="left-column desktop">
         <img src="~/assets/treino-hard.jpg">
@@ -35,7 +21,6 @@ onMounted(() => {
       <div class="right-column">
         <Login />
       </div>
-    </div>
   </div>
 
 </template>
