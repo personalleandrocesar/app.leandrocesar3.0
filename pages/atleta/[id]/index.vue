@@ -4064,6 +4064,9 @@ border-radius: 8px;
   font-size: 12px;
   font-weight: bold;
 }
+.dark-mode .d-cutanea {
+  color: #000;
+}
 
 .tricipital {
   top:40%;
