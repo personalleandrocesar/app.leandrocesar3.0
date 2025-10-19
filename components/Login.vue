@@ -44,7 +44,7 @@ const enterClient = () => {
     dontUser.value = true;
     setTimeout(() => {
       dontUser.value = false;
-    }, 5000); // Define um timeout para limpar a mensagem após 5 segundos
+    }, 2000); // Define um timeout para limpar a mensagem após 5 segundos
   }
 };
 
@@ -150,13 +150,22 @@ function close () {
 </script>
 <template>
 <div v-if='divLogin'>
-  <div v-if='dontUser' class="dont-user top">
-    Usuário não encontrado!
-  </div>
-  <div v-else-if='dontPerson' class="dont-user top">
-    Personal não encontrado!
-  </div>
   <div>
+ <div v-if='dontUser' class="float">
+                <div class="notific-float zoomOut">
+                    <div>
+                        <Icon name='material-symbols:x-circle-outline-rounded' style="color: red; zoom:2.2" />
+                    </div>
+                    <div>
+                        <div>
+                            <h3>
+                                Usuário não encontrado!
+                            </h3>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
     
     <div class="head-name">
       <div class="name">
@@ -682,5 +691,59 @@ h4:nth-child(1) {
   margin: -2px 0px 2px 4px;
   transform: translateX(6px);
 }
+.float{
+    position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1002;
+      background: #ecedf060;
+      backdrop-filter: blur(1px); /* Desfoque do fundo */
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Sombras (opcional) */
+      color: #333; /* Cor do texto */
+      width: 100%; /* Largura fixa */
+      height: 100vh; /* Altura fixa */
+      padding: 20px; /* Espaçamento interno */
+      text-align: center;
+}
 
+.notific-float {
+    background: #fff;
+    width:576px; /* Largura fixa */
+      height: 128px; /* Altura fixa */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative; /* Fixa a div em relação à tela */
+    top: 50%; /* Posiciona a div no meio da altura */
+    left: 50%; /* Posiciona a div no meio da largura */
+    transform: translate(
+        -50%,
+        -50%
+    ); /* Centraliza ajustando a posição do elemento */
+    z-index: 9999; /* Garante que esteja acima de todo o conteúdo */
+    color: #000;
+    padding:20px; /* Espaço interno */
+    border-radius: 10px; /* Cantos arredondados (opcional) */
+    text-align: left; /* Alinha o texto centralizado */
+    backdrop-filter: blur(10px); /* Desfoque do fundo */
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Sombras (opcional) */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+}
+.dark-mode .notific-float {
+    background: #0f141e;
+    color: #fff;
+}
+
+.notific-float h3 {
+  margin: 5px 0 0 0;
+}
+
+
+@media (max-width: 1000px) {
+.notific-float {
+  width: 380px;
+}
+}
 </style>

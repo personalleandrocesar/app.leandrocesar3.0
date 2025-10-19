@@ -446,7 +446,7 @@ const comparacaoAvaliacao = computed(() => {
   return resultado
 })
 
-treinus.value = dataTreino.data.value || [];
+treinus.value = dataTreino.data.value.reverse() || [];
 
 const index = Number(setTreino.value) || 0; // fallback 0 caso não seja número
 console.log(treinus.value[index].serie);
