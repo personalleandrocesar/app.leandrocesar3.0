@@ -743,7 +743,7 @@ h4:nth-child(1) {
 
 @media (max-width: 1000px) {
 .notific-float {
-  width: 380px;
+  width: 350px;
 }
 }
 </style>

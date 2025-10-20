@@ -14,7 +14,7 @@ function vibrarHUD() {
 
 const { xpRelativo, xpClasse, missoesAtuais, proximoNivelS, rankAtual, nivelAtualS, proximoRank, xpMin, xpMax } = usePlayerRank()
 
-      
+
 
 const mostrarHUD = ref(false)
 const { selectedColor, selectedClass, classColors, resetColorToDefault } = usePlayerColor()
@@ -154,7 +154,6 @@ console.log(coachIdCookie.value)
 
 const Series = await useFetch(`https://api.leandrocesar.com/usersnw/${coachIdCookie.value}/team/${route.params.id}`);
 const people = Series.data.value
-console.log(Series.data.value.treinos[0])
 
 const dataConf = await useFetch(`https://api.leandrocesar.com/users/${route.params.id}`)
 const inter = await useFetch(`https://api.leandrocesar.com/users/${route.params.id}`)
@@ -446,10 +445,9 @@ const comparacaoAvaliacao = computed(() => {
   return resultado
 })
 
-treinus.value = dataTreino.data.value.reverse() || [];
+treinus.value = dataTreino.data.value?.reverse() || [];
 
 const index = Number(setTreino.value) || 0; // fallback 0 caso não seja número
-console.log(treinus.value[index].serie);
 console.log(index)
 
 const treinoo = treinus.value.find(t => t.id === setTreino);
@@ -891,6 +889,22 @@ const topClients = [
 
 
 topClients.sort((a, b) => b.xp - a.xp)
+
+const url = 'https://app.leandrocesar.com/img/myFotoTwo.jpg'
+const imageExists = ref(false)
+
+function checkImageExists(url) {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.src = url
+    img.onload = () => resolve(true)
+    img.onerror = () => resolve(false)
+  })
+}
+
+onMounted(async () => {
+  imageExists.value = await checkImageExists(url)
+})
 </script>
 <template>
 
@@ -898,15 +912,32 @@ topClients.sort((a, b) => b.xp - a.xp)
   <div v-if="topPersonDiv" class="hud-container">
     <div class="panel">
       <div class="header">
-        <div class='name'>
+        <div class='name' v-if='imageExists'>
           <div class="logo">
-            <img @click="alternarFoto" :src="pessoa.foto || imagemPrevia" alt="User Photo" />
-            <div v-if="fotoAberta" class="nav-bar">
-              <div class='logo-nav-bar'>
-                <img @click="alternarFoto" :src="pessoa.foto || imagemPrevia">
+            <img v-if='pessoa.foto' @click="alternarFoto" :src="pessoa.foto || imagemPrevia" alt="User Photo" />
+              <div v-if="fotoAberta" class="nav-bar">
+                <div class='logo-nav-bar'>
+                  <img @click="alternarFoto" :src="pessoa.foto || imagemPrevia">
+                </div>
               </div>
-            </div>
           </div>
+
+          <div>
+
+            <h2>{{ primeiroNome }}</h2>
+            <h4>{{ classe }}</h4>
+          </div>
+        </div>
+        <div class='name' v-else>
+          <div class="logo">
+                <Icon name='material-symbols-light:person-outline-rounded' /> 
+              <div v-if="fotoAberta" class="nav-bar">
+                <div class='logo-nav-bar'>
+                  <img @click="alternarFoto" :src="pessoa.foto || imagemPrevia">
+                </div>
+              </div>
+          </div>
+
           <div>
 
             <h2>{{ primeiroNome }}</h2>
@@ -1911,7 +1942,7 @@ topClients.sort((a, b) => b.xp - a.xp)
 }
 
 .panel-treino {
-  border: 2px solid var(--player-color);
+  border: 2px seolid var(--player-color);
   padding: 2rem 1rem;
   margin: 1rem.5rem;
   overflow-y:auto;
@@ -2114,7 +2145,16 @@ topClients.sort((a, b) => b.xp - a.xp)
   object-fit: cover;
   /* Preenche o contêiner sem deformar */
 }
-
+.logo .icon {
+  height: 50px;
+  width: 50px;
+  border-radius: 200px;
+  z-index: 100;
+  opacity: 1;
+  object-fit: cover;
+  color: #fff;
+  /* Preenche o contêiner sem deformar */
+}
 
 .logo-nav-bar img {
   width: 300px;
