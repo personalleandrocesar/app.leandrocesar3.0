@@ -864,6 +864,9 @@ loadTeamImages();
             </div>
 </template>
 <style scoped>
+*{
+  font-family: "Ubuntu";
+}
 .no-user {
     color: #00dc82;
     font-weight: bolder;

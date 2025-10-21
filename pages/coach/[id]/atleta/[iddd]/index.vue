@@ -329,7 +329,7 @@ function openPhoto() {
 
 
 
-    <div v-if='notificTree' class="float">
+    <div @click.self='notifCancel()' v-if='notificTree' class="float">
             <div class="notific-float zoomOut" >
                 <div>
                     <Icon name='material-symbols:person-cancel-outline-rounded' style="color: red; zoom:2.2"/>
@@ -369,6 +369,9 @@ function openPhoto() {
     </div>
 </template>
 <style scoped>
+*{
+  font-family: "ubuntu";
+}
 .nav-bar {
     z-index: 200;
     transform: translateX(0%);
@@ -1485,6 +1488,8 @@ input[type="radio"] {
     background-color: #fff;
 }
 
+
+
 .nav-users {
         display: flex;
         justify-content: space-between;
@@ -1499,6 +1504,15 @@ input[type="radio"] {
         margin-right: 1.5rem;
         border-bottom: solid .1px #00dc8230;
 }
+
+.users-conf .filter {
+ color: #777;
+}
+.dark-mode .filter {
+  color: #ddd;
+}
+
+
 
 .users-conf {
     margin: 6px 0;
@@ -1515,13 +1529,21 @@ input[type="radio"] {
 }
 
 .filter:hover {
-    color: #00dc82;
+    color: #00dc8;
     background-color: #00dc8220;
 }
 
 .filter.router-link-exact-active {
     border-bottom: solid 2px #00dc8270; 
     border-radius: 0;
+}
+
+a {
+  text-decoration: none
+}
+
+.nav-users a.router-link-exact-active {
+  color: #00dc82;
 }
 
 .users-list {

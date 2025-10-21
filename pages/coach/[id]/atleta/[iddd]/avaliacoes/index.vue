@@ -19,7 +19,7 @@ function coachFloatCreate() {
 const menuFloat = ref(false);
 const menuFloatEx = ref(false);
 const user = item;
-const train = item.avaliacoes
+const train = item.treinos
 const seriess = train
 
 function closeNotific () {
@@ -757,7 +757,7 @@ function openPhoto() {
 
                   </div>
                       <h3>Lista de avaliações</h3>
-                      <p>Avaliações já realizados anteriormente, listados por data.</p>
+                      <p>Avaliações anteriores</p>
                   </div>
 
                   <div>
@@ -769,7 +769,7 @@ function openPhoto() {
                                     <!-- <NuxtLink :to="`/coach/${route.params.id}/atleta/${route.params.iddd}/treino/${training.named }`"> -->
                                     <NuxtLink>
                                         <div>
-                                            <h3>{{ training.date.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3-$2-$1') }}</h3>
+                                            <h3>{{ training.name }}</h3>
                                         </div> 
                                     </NuxtLink>
                                 </div>
@@ -778,7 +778,7 @@ function openPhoto() {
                                     <br>
                                     <NuxtLink @click="coachFloatCreate">
                                         <div class='blue'>
-                                            <h3>Criar Avaliação</h3>
+                                            <h3>Criar avaliação</h3>
                                         </div>
 
                                     </NuxtLink>
@@ -812,7 +812,7 @@ function openPhoto() {
                                     <br>
                                     <NuxtLink @click="coachFloatCreate">
                                         <div class='blue'>
-                                            <h3>Criar avaliação</h3>
+                                          <h3>Criar avaliação</h3>
                                         </div>
 
                                     </NuxtLink>
@@ -827,7 +827,7 @@ function openPhoto() {
 
                     <div>
                     <div v-if="selectedTraining">
-                        <h4>Avaliação: {{ selectedTraining.name }}</h4>
+                        <h4>Treino: {{ selectedTraining.name }}</h4>
                         <!-- <span>Criada: {{ creationDate }}</span> -->
                     </div>
                     <div v-else>
@@ -1279,11 +1279,11 @@ function openPhoto() {
         <div class="menu-float zoomOut" >
 
             <div>
-                <div class='conec-one'>
+                <div class='conec'>
 
                     <div>
                     <div v-if="selectedTraining">
-                        <h4>Avaliação: {{ selectedTraining.date.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3-$2-$1') }}</h4>
+                        <h4>Treino: {{ selectedTraining.name }}</h4>
                         <!-- <span>Criada: {{ creationDate }}</span> -->
                     </div>
                     <div v-else>
@@ -1299,12 +1299,16 @@ function openPhoto() {
                 <div class='conec'>
 
                     <div>
+                        <h3>
+                            <Icon name='solar:dumbbells-bold' /> Séries
+                        </h3>
+
                         </div>
                         <div class="new-user" @click="deleteSerie">
-                            <Icon name='material-symbols:add-notes' /> Deletar avaliação
+                            <Icon name='material-symbols:add-notes' /> deletar Serie
                         </div>
                         <div v-if="addCloseTrainning" class="new-user" @click="newTrainning">
-                            <Icon name='material-symbols:add-notes' /> Atualizar avaliação
+                            <Icon name='material-symbols:add-notes' /> Nova Série
                         </div>
                         <div v-else='addCloseTrainning' class="new-user" @click="newTrainning">
                             <Icon name='material-symbols:cancel-rounded' /> Fechar
@@ -1317,196 +1321,21 @@ function openPhoto() {
 <div v-if="main">
 <div class="content">
     <div class='line-two'>
+    <div>
 
-        <div class='contn' >
+        <div>
         
-          <div class="theme-switch-two">
-              <div class='tr-two' v-if="selectedTraining" :key="index" >
-                  
-                      <div>
-                          Data de nascimento
-                      </div>
-                      <input type='text' v-model='selectedTraining.nascimento' />
-              </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
+            <div class="theme-switch-two">
+                <div class='tr-two' v-for="(item, index) in selectedTraining.serie" :key="index"  @click="selectSeries(item)">
+                    <NuxtLink>
                         <div>
-                            Idade
+                            <h3>{{ item.name }}</h3>
                         </div>
-                        <input type='text' v-model='selectedTraining.idade' /> anos
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Massa
-                        </div>
-                        <input type='text' v-model='selectedTraining.massa' /> kg
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Altura
-                        </div>
-                        <input type='text' v-model='selectedTraining.altura' /> m
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Gênero
-                        </div>
-                        <input type='text' v-model='selectedTraining.sexo' /> 
-                </div>
-            </div>
-          <div class="theme-switch-two">
-              <div class='tr-two' v-if="selectedTraining" :key="index" >
-                  
-                      <div>
-                          Pescoço
-                      </div>
-                      <input type='text' v-model='selectedTraining.pescoco' /> cm
-              </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Ombro
-                        </div>
-                        <input type='text' v-model='selectedTraining.ombro' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Tórax
-                        </div>
-                        <input type='text' v-model='selectedTraining.torax' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Tórax Relaxado
-                        </div>
-                        <input type='text' v-model='selectedTraining.toraxRelaxado' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Tórax Contraído
-                        </div>
-                        <input type='text' v-model='selectedTraining.toraxContraido' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Cintura
-                        </div>
-                        <input type='text' v-model='selectedTraining.cintura' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Abdômen
-                        </div>
-                        <input type='text' v-model='selectedTraining.abdomem' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Quadril
-                        </div>
-                        <input type='text' v-model='selectedTraining.quadril' /> cm
-                </div>
-            </div>
-          <div class="theme-switch-two">
-              
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Braço direito relaxado
-                        </div>
-                        <input type='text' v-model='selectedTraining.bracoDireitoRelaxado' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Braço direito contraído
-                        </div>
-                        <input type='text' v-model='selectedTraining.bracoDireitoContraido' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Antebraço direito
-                        </div>
-                        <input type='text' v-model='selectedTraining.antebracoDireito' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Coxa medial direita
-                        </div>
-                        <input type='text' v-model='selectedTraining.coxaMedialDireita' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Coxa distal direita
-                        </div>
-                        <input type='text' v-model='selectedTraining.coxaDistalDireita' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Perna direita
-                        </div>
-                        <input type='text' v-model='selectedTraining.pernaDireita' /> cm
-                </div>
-            </div>
-          <div class="theme-switch-two">
-              
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Braço esquerdo relaxado
-                        </div>
-                        <input type='text' v-model='selectedTraining.bracoEsquerdoRelaxado' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Braço esquerdo contraído
-                        </div>
-                        <input type='text' v-model='selectedTraining.bracoEsquerdoContraido' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Antebraço esquerdo
-                        </div>
-                        <input type='text' v-model='selectedTraining.antebracoEsquerdo' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Coxa medial esquerda
-                        </div>
-                        <input type='text' v-model='selectedTraining.coxaMedialEsquerda' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Coxa distal esquerda
-                        </div>
-                        <input type='text' v-model='selectedTraining.coxaDistalEsquerda' /> cm
-                </div>
-                <div class='tr-two' v-if="selectedTraining" :key="index" >
-                    
-                        <div>
-                            Perna esquerda
-                        </div>
-                        <input type='text' v-model='selectedTraining.pernaEsquerda ' /> cm
+                    </NuxtLink>
                 </div>
             </div>
             
-            <div class="theme-switch-two"> 
+            <div class="theme-switch-two">
             
             
             <div v-if="selectedSeries" class="exercise-list-container">
@@ -1543,6 +1372,7 @@ function openPhoto() {
             </div>
         </div>
 
+        </div>
     </div>
 
 </div>
@@ -1708,6 +1538,9 @@ function openPhoto() {
         
 </template>
 <style scoped>
+*{
+  font-family: "ubuntu";
+}
 .ex-a {
       position: fixed;
     left: 0px;
@@ -1862,7 +1695,6 @@ input[type="file"] {
 .search-input {
   width: 35%;
   padding: 8px;
-  border: 1px solid #ddd;
   border-radius: 4px;
 }
 
@@ -2032,7 +1864,7 @@ li:hover img {
 }
 
 
-.conec-one {
+.conec {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -2040,21 +1872,7 @@ li:hover img {
     margin:5px;
     overflow: auto;
 }
-.conec {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-    margin:5px;
-    overflow: auto;
-}
 
-.conec-one div button {
-    margin: 0 5px;
-    cursor: pointer;
-    border-bottom: solid 3px #00d4ff;
-    padding: 6px 16px;
-}
 .conec div button {
     margin: 0 5px;
     cursor: pointer;
@@ -2087,22 +1905,6 @@ label {
     border-radius: 6px;
 }
 .conec:nth-child(1  ) .icon:hover {
-    background: #00dc8240;
-}
-.conec-one div button:hover {
-    opacity: .8;
-}
-
-.conec-one span {
-    font-size: .85rem;
-}
-
-.conec-one .icon {
-    zoom: 1.6;
-    padding: 3px;
-    border-radius: 6px;
-}
-.conec-one:nth-child(1  ) .icon:hover {
     background: #00dc8240;
 }
 .menu-float {
@@ -2424,6 +2226,11 @@ input:checked + .slider:before {
   margin: 15px;
   
 }
+.theme-switch-two h3{
+  width: 100px;
+  text-align: center;
+}
+
 .theme-switch-two-ex {
   display: flex;
   justify-content: flex-start;
@@ -2546,8 +2353,10 @@ input:checked + .slider:before {
 }
 
 .tr-two {
-  padding: 10px 30px;
+  border: solid .1px #00dc8220;
+  padding: 15px 40px;
   border-radius: 8px;
+  cursor: pointer;
 }
 .tr-two-ex {
   border: solid .1px #00dc8220;
@@ -2748,14 +2557,7 @@ input {
 }
 
 input:nth-child(2) {
-    width: 120px;
-    border: solid .1px #00dc8250;
-}
-
-.dark-mode input:nth-child(2) {
-    width: 120px;
-    color: #fff;
-    border: none;
+    width: 70px;
 }
 
 .cr-fix {
@@ -2764,11 +2566,6 @@ input:nth-child(2) {
     padding: 5px;
     border-radius: 6px;
     backdrop-filter: blur(15px);
-}
-
-.contn {
-    height: 440px;
-    overflow-y: auto;
 }
 
 button {
@@ -2949,6 +2746,7 @@ img {
 h4 {
     margin: 00px;
     text-align: left;
+    color: #999;
 }
 
 
@@ -3396,6 +3194,13 @@ input[type="radio"] {
         border-bottom: solid .1px #00dc8230;
 }
 
+.users-conf .filter {
+ color: #777;
+}
+.dark-mode .filter {
+  color: #ddd;
+}
+
 .users-conf {
     margin: 6px 0;
     padding: 7px;
@@ -3418,13 +3223,22 @@ input[type="radio"] {
     padding: 8px 12px;
     border-radius: 8px;
     cursor: pointer;
-    color: #555;
+    color: #000;
     background-color: #00d4ff;
 }
 
 .filter-two:hover {
     opacity: .8;
 }
+
+a {
+  text-decoration: none
+}
+
+.nav-users a.router-link-exact-active {
+  color: #00dc82;
+}
+
 
 .filter.router-link-exact-active {
     border-bottom: solid 2px #00dc8270;

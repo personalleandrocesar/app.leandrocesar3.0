@@ -1538,6 +1538,9 @@ function openPhoto() {
         
 </template>
 <style scoped>
+*{
+  font-family: "ubuntu";
+}
 .ex-a {
       position: fixed;
     left: 0px;
@@ -2223,6 +2226,11 @@ input:checked + .slider:before {
   margin: 15px;
   
 }
+.theme-switch-two h3{
+  width: 100px;
+  text-align: center;
+}
+
 .theme-switch-two-ex {
   display: flex;
   justify-content: flex-start;
@@ -3186,6 +3194,13 @@ input[type="radio"] {
         border-bottom: solid .1px #00dc8230;
 }
 
+.users-conf .filter {
+ color: #777;
+}
+.dark-mode .filter {
+  color: #ddd;
+}
+
 .users-conf {
     margin: 6px 0;
     padding: 7px;
@@ -3208,13 +3223,22 @@ input[type="radio"] {
     padding: 8px 12px;
     border-radius: 8px;
     cursor: pointer;
-    color: #555;
+    color: #000;
     background-color: #00d4ff;
 }
 
 .filter-two:hover {
     opacity: .8;
 }
+
+a {
+  text-decoration: none
+}
+
+.nav-users a.router-link-exact-active {
+  color: #00dc82;
+}
+
 
 .filter.router-link-exact-active {
     border-bottom: solid 2px #00dc8270;
