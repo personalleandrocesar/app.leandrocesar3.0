@@ -123,7 +123,23 @@ const formattedTime = creationDate.toLocaleTimeString("pt-BR", {
 
 async function submitForm() {
     try {
-        // Requisição para cadastrar os dados
+        // 1️⃣ Verifica se o username já existe
+        const checkResponse = await fetch(`https://api.leandrocesar.com/usersnw/${route.params.id}/team`);
+        if (!checkResponse.ok) {
+            console.error('Erro ao verificar usuários existentes');
+            return;
+        }
+
+        const existingUsers = await checkResponse.json();
+        const usernameClean = username.value.replace(/\s/g, '').toLowerCase();
+        const userExists = existingUsers.some(user => user.username === usernameClean);
+
+        if (userExists) {
+            alert('Esse nome de usuário já está em uso. Escolha outro.');
+            return; // interrompe o processo
+        }
+
+        // 2️⃣ Continua com o POST normalmente
         const response = await fetch(`https://api.leandrocesar.com/usernw/${route.params.id}/team`, {
             method: 'POST',
             headers: {
@@ -139,7 +155,7 @@ async function submitForm() {
                 service: service.value,
                 target: target.value,
                 email: email.value,
-                username: username.value.replace(/\s/g, '').toLowerCase(),
+                username: usernameClean,
                 password: password.value.replace(/\s/g, ''),
                 day: day.value,
                 time: time.value,
@@ -153,34 +169,31 @@ async function submitForm() {
             }),
         });
 
-        if (response.ok) {
-            console.log('Data sent successfully');
-            
-
-            // Segunda requisição para verificar o _id
-            const responseTwo = await fetch(`https://api.leandrocesar.com/usersnw/${route.params.id}/team`);
-            if (!responseTwo.ok) {
-                console.error('Failed to fetch team data');
-                return;
-            }
-
-            const responseData = await responseTwo.json();
-            const createdTeam = responseData.find(item => item.username === username.value); // Ajuste conforme a estrutura da resposta
-            if (createdTeam && createdTeam._id) {
-                console.log(`_id found: ${createdTeam._id}`);
-                setTimeout(() => {
-                    navigateTo(`/coach/${route.params.id}/atleta/${createdTeam._id}`);
-                }, 1500);
-            } else {
-                console.error('No matching team found in the response');
-            }
-        } else {
-            console.error('Failed to send data');
+        if (!response.ok) {
+            console.error('Erro ao enviar os dados');
+            return;
         }
+
+        console.log('Usuário criado com sucesso!');
+
+        // 3️⃣ Busca o novo registro
+        const responseTwo = await fetch(`https://api.leandrocesar.com/usersnw/${route.params.id}/team`);
+        const responseData = await responseTwo.json();
+        const createdTeam = responseData.find(item => item.username === usernameClean);
+        if (createdTeam && createdTeam._id) {
+            console.log(`_id encontrado: ${createdTeam._id}`);
+            setTimeout(() => {
+                navigateTo(`/coach/${route.params.id}/atleta/${createdTeam._id}`);
+            }, 1500);
+        } else {
+            console.error('Usuário criado, mas não encontrado na resposta');
+        }
+
     } catch (error) {
-        console.error('Error sending data:', error);
+        console.error('Erro ao enviar os dados:', error);
     }
 }
+
 
 async function submitUpdate() {
     try {
@@ -285,7 +298,8 @@ const filteredUsers = computed(() => {
     user.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
     user.lastName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
     user.username.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    user._id.toLowerCase().includes(searchQuery.value.toLowerCase()) 
+    user._id.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    user.service.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
 
@@ -504,8 +518,12 @@ loadTeamImages();
                         </td>
                       <td>
                         <span class="user-name">
-                          {{ item.name }}
-                          {{ item.lastName }}
+                          {{ item.name.trim().split(" ")[0]}}
+                          {{ item.lastName.trim().split(" ").pop() }}
+                        </span>
+
+                        <span class="user-username">
+                          ({{ item.username}})
                         </span>
                       </td>
                       <td class="none">
@@ -945,6 +963,10 @@ loadTeamImages();
   font-weight: bold;
 }
 
+.user-username {
+  font-size: 1rem;
+}
+
 /* Status */
 .status-badge {
   padding: 6px 12px;
@@ -998,7 +1020,12 @@ loadTeamImages();
 
 .topbar h3 {
     margin-left: 2rem;
+    color: #000;
 }
+.dark-mode .topbar h3 {
+  color: #fff;
+}
+
 .topbar h4 {
     color: #777;
     margin-left: .2rem;

@@ -1378,10 +1378,10 @@ input:focus {
 .nav h3 {
     margin-left: 5px;
     font-size: 1rem;
-    font-family: "Gagalin";
     letter-spacing: 1.3px;
     color: #000;
     font-weight: normal;
+    font-weight: bolder;
 }
 .dark-mode .nav h3 {
   color: #fff;

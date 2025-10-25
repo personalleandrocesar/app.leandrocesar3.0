@@ -223,8 +223,7 @@ function openPhoto() {
 
     <!-- Informações do usuário -->
     <div class="head-name">
-      <h3>{{ user.name }} {{ user.lastName }}</h3>
-      <h4>{{ user.username }}</h4>
+      <h3>{{ user.username }}</h3>
       <span><b>ID:</b> {{ user._id }}</span>
       <h4 :class="user.status !== 0 ? 'status' : 'statusOff'">
         {{ user.status === 0 ? "Inativo" : "Ativo" }}
@@ -258,7 +257,7 @@ function openPhoto() {
                             <div class="theme-switch">
                                 <div>
                                     <h4>WhatsApp</h4>
-                                    <h3>{{user.whatsapp}}</h3>
+                                    <h3>{{user.whatsapp.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3')}}</h3>
                                 </div>
                                 <div>
                                     <h4>Data de nascimento</h4>
@@ -1833,6 +1832,7 @@ a {
 
 .head-name h3 {
     color: #00dc82;
+    text-transform: uppercase;
 }
 
 .status {

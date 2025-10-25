@@ -2,6 +2,7 @@
 import { ref, watch, computed, nextTick, onMounted } from "vue";
 const route = useRoute();
 
+const { selectedColor, selectedClass, classColors, resetColorToDefault } = usePlayerColor()
 const Users = await useFetch(
     `https://api.leandrocesar.com/usersnw/${route.params.id}/team/${route.params.iddd}`,
 );
@@ -55,6 +56,105 @@ const create = ref(
         named: '',
     }
 )
+
+
+const date = ref('');
+const idade = ref('');
+const massa = ref('');
+const altura = ref('');
+const nascimento = ref('');
+const sexo = ref('');
+const pescoco = ref('');
+const ombro = ref('');
+const torax = ref('');
+const toraxRelaxado = ref('');
+const toraxContraido = ref('');
+const cintura = ref('');
+const abdomem = ref('');
+const quadril = ref('');
+// lado direito
+const bracoDireitoRelaxado = ref('');
+const bracoDireitoContraido = ref('');
+const antebracoDireito = ref('');
+const coxaMedialDireita = ref('');
+const coxaDistalDireita = ref('');
+const pernaDireita = ref('');
+// lado esquerdo
+const bracoEsquerdoRelaxado = ref('');
+const bracoEsquerdoContraido = ref('');
+const antebracoEsquerdo = ref('');
+const coxaMedialEsquerda = ref('');
+const coxaDistalEsquerda = ref('');
+const pernaEsquerda = ref('');
+// Dobras Cutâneas
+const dtorax = ref('');
+const tricipital = ref('');
+const subEscapular = ref('');
+const axilarMedia = ref('');
+const abdominal = ref('');
+const supraEspinhal = ref('');
+const coxa = ref('');
+const perna = ref('');
+// BioImpedância
+const bmi = ref('');
+const fat = ref('');
+const muscle = ref('');
+const rm = ref('');
+const bodyAge = ref('');
+const visceralFat = ref('');
+// Diâmetros ósseos
+const umero = ref('');
+const punho = ref('');
+const femur = ref('');
+const tornozelo = ref('');
+// Testes
+const flexaoBraco = ref('');
+const flexaoAbdominal = ref('');
+// Postura
+const posturaObs = ref('');
+const retroversaoQuadril = ref('');
+const anteroversaoOmbros = ref('');
+const joelhosRecurvados = ref('');
+
+
+
+const dTorax = dtorax.value
+const triceps = tricipital.value
+const supraespinhal = supraEspinhal.value
+
+const homens = dTorax + abdominal + coxa
+const mulheres = triceps + supraespinhal + coxa
+
+const dcHomens = 1.109380 - (0.0008267 * (homens)) + (0.0000016 * (homens * homens)) - (0.0002574 * (idade))
+const dcMulheres = 1.0994921 - (0.0009929 * (mulheres)) + (0.0000023 * (mulheres * mulheres)) - (0.0001392 * (idade))
+
+const percGHomens = (((4.95 / dcHomens) - 4.50) * 100).toFixed(1)
+const percGMulheres = (((4.95 / dcMulheres) - 4.50) * 100).toFixed(1)
+
+const percentualFat = computed(() => {
+    if (sexo === "feminino") {
+        return percGMulheres
+    } return percGHomens
+})
+
+const dataNascimento = ref('');
+const idad = computed(() => {
+  if (dataNascimento.value) {
+    return calcularIdade(dataNascimento.value);
+  }
+  return '';
+});
+
+function calcularIdade(dataNascimento) {
+  const hoje = new Date();
+  const nascimento = new Date(dataNascimento);
+  let idad = hoje.getFullYear() - nascimento.getFullYear();
+  const mes = hoje.getMonth() - nascimento.getMonth();
+  if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+    idad--;
+  }
+  return idad.toString();
+}
 
 async function submitTreino() {
     try {
@@ -433,6 +533,98 @@ async function handleSubmit() {
   }
 }
 
+
+
+async function submitAvaliacao() {
+  try {
+    // 👇 Faz a requisição para o backend
+    const response = await fetch(`https://api.leandrocesar.com/usernw/${route.params.id}/atleta/${route.params.iddd}/avaliacao`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+      avaliacao: {
+          date: date.value,
+          idade: idad.value,
+          massa: massa.value,
+          altura: altura.value,
+          nascimento: dataNascimento.value,
+          sexo: sexo.value,
+          pescoco: pescoco.value,
+          ombro: ombro.value,
+          torax: torax.value,
+          toraxRelaxado: toraxRelaxado.value,
+          toraxContraido: toraxContraido.value,
+          cintura: cintura.value,
+          abdomem: abdomem.value,
+          quadril: quadril.value,
+          // lado direito
+          bracoDireitoRelaxado: bracoDireitoRelaxado.value,
+          bracoDireitoContraido: bracoDireitoContraido.value,
+          antebracoDireito: antebracoDireito.value,
+          coxaMedialDireita: coxaMedialDireita.value,
+          coxaDistalDireita: coxaDistalDireita.value,
+          pernaDireita: pernaDireita.value,
+          // lado esquerdo
+          bracoEsquerdoRelaxado: bracoEsquerdoRelaxado.value,
+          bracoEsquerdoContraido: bracoEsquerdoContraido.value,
+          antebracoEsquerdo: antebracoEsquerdo.value,
+          coxaMedialEsquerda: coxaMedialEsquerda.value,
+          coxaDistalEsquerda: coxaDistalEsquerda.value,
+          pernaEsquerda: pernaEsquerda.value,
+          // Dobras Cutâneas
+          dtorax: dtorax.value,
+          tricipital: tricipital.value,
+          subEscapular: subEscapular.value,
+          axilarMedia: axilarMedia.value,
+          abdominal: abdominal.value,
+          supraEspinhal: supraEspinhal.value,
+          coxa: coxa.value,
+          perna: perna.value,
+          // BioImpedância
+          bmi: bmi.value,
+          fat: fat.value,
+          muscle: muscle.value,
+          rm: rm.value,
+          bodyAge: bodyAge.value,
+          visceralFat: visceralFat.value,
+          // Diâmetros ósseos
+          umero: umero.value,
+          punho: punho.value,
+          femur: femur.value,
+          tornozelo: tornozelo.value,
+          // Testes
+          flexaoBraco: flexaoBraco.value,
+          flexaoAbdominal: flexaoAbdominal.value,
+          // Postura
+          posturaObs: posturaObs.value,
+          retroversaoQuadril: retroversaoQuadril.value,
+          anteroversaoOmbros: anteroversaoOmbros.value,
+          joelhosRecurvados: joelhosRecurvados.value,
+          }
+
+      }), // o corpo tem que ter { avaliacao: {...} }
+    })
+
+    if (response.ok) {
+      console.log('✅ Avaliação enviada com sucesso!')
+      notific.value = true
+      setTimeout(() => {
+        notific.value = false
+        reloadNuxtApp({
+          path: `/coach/${route.params.id}/atleta/${route.params.iddd}`,
+          ttl: 5000,
+        })
+      }, 3000)
+    } else {
+      console.error('❌ Erro ao enviar avaliação')
+    }
+  } catch (error) {
+    console.error('🚨 Erro ao conectar com API:', error)
+  }
+} 
+
 const saveTraining = () => {
   localStorage.setItem('training', JSON.stringify(training.value));
 };
@@ -633,6 +825,48 @@ const photoOpen = ref(false);
 function openPhoto() {
     photoOpen.value = !photoOpen.value;
 }
+const Antropometria = ref(true)
+const ComposicaoCorporal = ref(false)
+const Bioimpedancia= ref(false)
+const AvaliacaoPostural = ref(false)
+const TestesFísicos = ref(false)
+
+function setAntopometria () {
+  Antropometria.value = true;
+  ComposicaoCorporal.value = false;
+  Bioimpedancia.value = false;
+  AvaliacaoPostural.value = false;
+  TestesFísicos.value = false;
+}
+function setComposicaoCorporal () {
+  Antropometria.value =false;
+  ComposicaoCorporal.value = true;
+  Bioimpedancia.value = false;
+  AvaliacaoPostural.value = false;
+TestesFísicos.value = false;
+}
+function setBioimpedancia () {
+  Antropometria.value = false;
+  ComposicaoCorporal.value = false;
+  Bioimpedancia.value = true;
+  AvaliacaoPostural.value = false;
+TestesFísicos.value = false;
+}
+function setTesteFisico () {
+  TestesFísicos.value = true;
+  Antropometria.value = false;
+  ComposicaoCorporal.value = false;
+  Bioimpedancia.value = false;
+  AvaliacaoPostural.value = false;
+}
+
+function setAvaliacaoPostural () {
+  Antropometria.value = false;
+  ComposicaoCorporal.value = false;
+  Bioimpedancia.value = false;
+  AvaliacaoPostural.value = true;
+TestesFísicos.value = false;
+}
 </script>
 
 
@@ -693,8 +927,7 @@ function openPhoto() {
 
     <!-- Informações do usuário -->
     <div class="head-name">
-      <h3>{{ user.name }} {{ user.lastName }}</h3>
-      <h4>{{ user.username }}</h4>
+      <h3>{{ user.username }}</h3>
       <span><b>ID:</b> {{ user._id }}</span>
       <h4 :class="user.status !== 0 ? 'status' : 'statusOff'">
         {{ user.status === 0 ? "Inativo" : "Ativo" }}
@@ -724,8 +957,7 @@ function openPhoto() {
                             <div class="theme-switch">
                                 <div>
                                     <h4>WhatsApp</h4>
-                                    <h3>{{user.whatsapp}}</h3>
-                                </div>
+                                    <h3>{{user.whatsapp.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3')}}</h3>                                </div>
                                 <div>
                                     <h4>Data de nascimento</h4>
                                     <h3>{{user.birthday.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3-$2-$1')}}</h3>
@@ -807,18 +1039,7 @@ function openPhoto() {
                                         </div> 
                                     </NuxtLink>
                                 </div>
-                                <div v-else >
-                                    <h3>Sem avaliação!</h3>
-                                    <br>
-                                    <NuxtLink @click="coachFloatCreate">
-                                        <div class='blue'>
-                                          <h3>Criar avaliação</h3>
-                                        </div>
-
-                                    </NuxtLink>
-                                </div>
-
-                              </div>
+                                                              </div>
                               <div class="float-ex zoom" v-if='menuFloatEx'>
           <div class="menu-float-ex zoomOut" >
 
@@ -1034,17 +1255,16 @@ function openPhoto() {
                           <div class='conec'>
 
                               <div>
-                                    <form @submit.prevent="handleSubmit">
+                                    <form @submit.prevent="handleSubmitAvaliacao()">
                                         <div>
-                                            <input v-model="training.name" id="name" placeholder="Nome do Treino" required />
-                                            <button type="submit">Criar Treino</button>
+                                            <button type="submit"><Icon name="material-symbols:add-notes" />Criar avaliação</button>
                                         </div>
                                     </form>
+                                    <div>
+  </div>
                               </div>
                               <div>
                                 <div>
-                                    <button type="button" @click="addSeries">Adicionar Série</button>
-                                    <button type="button" @click="removeSeriesAll" style="background-color: #ff1900; border: #ff1900 1px solid; color: #fff; font-weight: bolder;">Apagar  Séries</button>
                                     <Icon @click="coachFloatCreate"  name='material-symbols:close-rounded' />
                                 </div>
                               </div>
@@ -1062,87 +1282,342 @@ function openPhoto() {
 
                                 <div>
                                     <div class='plus-serie-title'>
-                                  <h3 class='title'>Adicionar Exercício</h3>
-                                  <div>
-                                  <label><Icon name='solar:dumbbells-bold' /> Selecionar Série:</label>
-                                  <select v-model="selectedSeriesIndex" required>
-                                    <option v-for="(serie, index) in training.serie" :key="index" :value="index">
-                                      {{ serie.name || `Série ${index + 1}` }}
-                                    </option>
-                                  </select>
+                                      <h3 @click='setAntopometria' class='title' :class='{active: Antropometria }'>Antropometria</h3>
+                                  <h3 @click='setComposicaoCorporal' class='title' :class='{active: ComposicaoCorporal}' >Composição Corporal</h3>
+                                  <h3 @click='setBioimpedancia' class='title' :class='{active : Bioimpedancia}'>Bioimpedância</h3>
+                                  <h3 @click='setTesteFisico' class='title' :class='{active: TestesFísicos}'>Testes Físicos</h3>
+                                  <h3 @click='setAvaliacaoPostural' class='title' :class='{active: AvaliacaoPostural}'>Avaliação Postural</h3>
+                                  
                                     </div>
-                                    </div>
-                                  <div class='row'>
-                                    
-                                    <input
-                                      type="search"
-                                      v-model="searchQuery"
-                                      placeholder="Pesquisar exercício"
-                                      @input="updateSearchQuery"
-                                      class="search-input"
-                                      ref='exerciseNameInput'
-                                      @keydown.down.prevent="navigateDropdown(1)"
-                                      @keydown.up.prevent="navigateDropdown(-1)"
-                                      @keydown.enter.prevent="confirmSelection"
-                                    />
-                                    <!-- Lista suspensa de resultados -->
-                                    <ul v-if="filteredUsserss.length > 0 && searchQuery && searchQuery !== selectedUserName" class="dropdown-list">
-                                      <li
-                                        v-for="(user, index) in filteredUsserss"
-                                        :key="user._id"
-                                        :class="['dropdown-item', { 'active': index === highlightedIndex }]"
-                                        @click="selectUser(user)"
-                                      >
-                                        <img :src="user.img" alt="Avatar" class="user-avatar" />
-                                        <div class="user-info">
-                                          <span class="user-name">{{ user.name }}</span>
-                                          <span class="user-username">{{ user.username }}</span>
-                                        </div>
-                                      </li>
-                                    </ul>
-                                    
-                                    <input
-                                      type="number"
-                                      v-model.number="newExercise.sets"
-                                     placeholder="Séries"
-                                      required
-                                      class='td-one'
-                                      @keydown="handleKeyDown"
-                                    />
-                                    <input
-                                      v-model="newExercise.reps"
-                                      placeholder="Repetições"
-                                      required
-                                      @keydown="handleKeyDown"
-                                      class='td-two'
-                                    />
+<form class='form-div' @submit.prevent="submitAvaliacao">
+  <div  v-if='Antropometria'>
+                        <!-- Nome e sobrenome -->
+                        <h3>
+                            Dados pessoais
+                        </h3>
+                        <div class="inputs">
 
+                            <div>
+                                <span>Dia da Avaliação</span>
+                                <input type="date" id="name" v-model="date" autofocus required
+                                    autocomplete="data">
+                            </div>
+                            <div>
+                                <span>Nascimento</span>
+                                <input v-model="dataNascimento" type="date" placeholder="Data de Nascimento">
 
-                                    <input
-                                      v-model="newExercise.obs"
-                                      placeholder="Detalhes"
-                                      @keydown="handleKeyDown"
-                                    />
-                                    <input
-                                      v-model="newExercise.time"
-                                      placeholder="Tempo de descanso"
-                                      @keydown="handleKeyDown"
-                                    />
+                            </div>
+                            <div>
+                                <span>Idade</span>
+                                <input type="text" id="idade" :value.v-model="idad" autofocus
+                                    autocomplete="idade" disabled>
+                            </div>
+                            <div>
+                                <span>Massa</span>
+                                <input type="text" id="massa" v-model="massa" autofocus
+                                    autocomplete="massa">
+                            </div>
+                            <div>
+                                <span>Altura</span>
+                                <input type="text" id="altura" v-model="altura" autofocus
+                                    autocomplete="altura">
+                            </div>
+                            <div>
+                                <span>Gênero</span>
+                                    <select
+                                        name="sexo"
+                                        id="sexo"
+                                        class="select"
+                                        placeholder=""
+                                
+                                        v-model="sexo"
+                                    >
+                                        <option disabled value="">
+                                            Selecione uma opção
+                                        </option>
+                                        <option value="feminino">Feminino</option>
+                                        <option value="masculino">Masculino</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                            </div>
 
-                                    <input
-                                      v-model="newExercise.img"
-                                      type='hidden'
-                                      placeholder="Ex: https://app...gif"
-                                      @keydown="handleKeyDown"
-                                    />
+                        </div>
+                        <br>
+                        <h3>
+                            Circunferência
+                        </h3>
+                        <div class="inputs">
+                            <div>
+                                <span>Pescoço</span>
+                                <input type="text" id="pescoco" v-model="pescoco" autofocus
+                                    autocomplete="pescoco">
+                            </div>
+                            <div>
+                                <span>Ombro</span>
+                                <input type="text" id="ombro" v-model="ombro" autofocus
+                                    autocomplete="ombro">
+                            </div>
+                            <div>
+                                <span>Tórax</span>
+                                <input type="text" id="torax" v-model="torax" autofocus
+                                    autocomplete="torax">
+                            </div>
+                            <div>
+                                <span>Tórax relaxado</span>
+                                <input type="text" id="toraxRelaxado" v-model="toraxRelaxado" autofocus
+                                    autocomplete="toraxRelaxado">
+                            </div>
+                            <div>
+                                <span>Tórax contraído</span>
+                                <input type="text" id="toraxContraido" v-model="toraxContraido" autofocus
+                                    autocomplete="toraxContraido">
+                            </div>
+                            <div>
+                                <span>Cintura</span>
+                                <input type="text" id="cintura" v-model="cintura" autofocus
+                                    autocomplete="cintura">
+                            </div>
+                            <div>
+                                <span>Abdômen</span>
+                                <input type="text" id="abdomem" v-model="abdomem" autofocus
+                                    autocomplete="abdomem">
+                            </div>
+                            <div>
+                                <span>Quadril</span>
+                                <input type="text" id="quadril" v-model="quadril" autofocus
+                                    autocomplete="quadril">
+                            </div>
 
+                        </div>
+                        <br>
+                        <h4>
+                            Lado Direito
+                        </h4>
+                        <div class="inputs">
+                            <div>
+                                <span>Braço Direito Relaxado</span>
+                                <input type="text" id="bracoDireitoRelaxado" v-model="bracoDireitoRelaxado" autofocus
+                                    autocomPescoçoPescoçoplete="bracoDireitoRelaxado">
+                            </div>
+                            <div>
+                                <span>Braço Direito Contraído</span>
+                                <input type="text" id="bracoDireitoContraido" v-model="bracoDireitoContraido" autofocus
+                                    autocomplete="bracoDireitoContraido">
+                            </div>
+                            <div>
+                                <span>Antebraço Direito</span>
+                                <input type="text" id="antebracoDireito" v-model="antebracoDireito" autofocus
+                                    autocomplete="antebracoDireito">
+                            </div>
+                            <div>
+                                <span>Coxa Medial Direita</span>
+                                <input type="text" id="coxaMedialDireita" v-model="coxaMedialDireita" autofocus
+                                    autocomplete="coxaMedialDireita">
+                            </div>
+                            <div>
+                                <span>Coxa Distal Direita</span>
+                                <input type="text" id="coxaDistalDireita" v-model="coxaDistalDireita" autofocus
+                                    autocomplete="coxaDistalDireita">
+                            </div>
+                            <div>
+                                <span>Perna Direita</span>
+                                <input type="text" id="pernaDireita" v-model="pernaDireita" autofocus
+                                    autocomplete="pernaDireita">
+                            </div>
 
+                        </div>
+                        <br>
+                        <h4>
+                            Lado Esquerdo
+                        </h4>
+                        <div class="inputs">
+                            <div>
+                                <span>Braço Esquerdo Relaxado</span>
+                                <input type="text" id="bracoEsquerdoRelaxado" v-model="bracoEsquerdoRelaxado" autofocus
+                                autocomPescoçoPescoçoplete="bracoEsquerdoRelaxado">
+                            </div>
+                            <div>
+                                <span>Braço Esquerdo Contraído</span>
+                                <input type="text" id="bracoEsquerdoContraido" v-model="bracoEsquerdoContraido" autofocus
+                                autocomplete="bracoEsquerdoContraido">
+                            </div>
+                            <div>
+                                <span>Antebraço Esquerdo</span>
+                                <input type="text" id="antebracoEsquerdo" v-model="antebracoEsquerdo" autofocus
+                                autocomplete="antebracoEsquerdo">
+                            </div>
+                            <div>
+                                <span>Coxa Medial Esquerda</span>
+                                <input type="text" id="coxaMedialEsquerda" v-model="coxaMedialEsquerda" autofocus
+                                autocomplete="coxaMedialEsquerda">
+                            </div>
+                            <div>
+                                <span>Coxa Distal Esquerda</span>
+                                <input type="text" id="coxaDistalEsquerda" v-model="coxaDistalEsquerda" autofocus
+                                autocomplete="coxaDistalEsquerda">
+                            </div>
+                            <div>
+                                <span>Perna Esquerda</span>
+                                <input type="text" id="pernaEsquerda" v-model="pernaEsquerda" autofocus
+                                autocomplete="pernaEsquerda">
+                            </div>
 
-                                    <button class='plus' type="button" @click="addExercise"><Icon name='material-symbols:add' /> Exercício</button>
-                                  </div>
-                                  <h3>
-                                      
-                                  </h3>
+                        </div>
+                </div>
+                        <br>
+                        <div v-if='ComposicaoCorporal'>
+                        <h3>
+                            Dobras Cutâneas
+                        </h3>
+                        <div class="inputs">
+                            <div>
+                                <span>Tórax</span>
+                                <input type="text" id="dtorax" v-model="dtorax" autofocus
+                                    autocomplete="dtorax">
+                            </div>
+                            <div>
+                                <span>Tríceps</span>
+                                <input type="text" id="tricipital" v-model="tricipital" autofocus
+                                    autocomplete="tricipital">
+                            </div>
+                            <div>
+                                <span>Sub-Escapular</span>
+                                <input type="text" id="subEscapular" v-model="subEscapular" autofocus
+                                    autocomplete="subEscapular">
+                            </div>
+                            <div>
+                                <span>Axilar média</span>
+                                <input type="text" id="axilarMedia" v-model="axilarMedia" autofocus
+                                    autocomplete="axilarMedia">
+                            </div>
+                            <div>
+                                <span>Abdômen</span>
+                                <input type="text" id="abdominal" v-model="abdominal" autofocus
+                                    autocomplete="abdominal">
+                            </div>
+                            <div>
+                                <span>Supra-Espinhal</span>
+                                <input type="text" id="supraEspinhal" v-model="supraEspinhal" autofocus
+                                    autocomplete="supraEspinhal">
+                            </div>
+                            <div>
+                                <span>Coxa</span>
+                                <input type="text" id="coxa" v-model="coxa" autofocus
+                                    autocomplete="coxa">
+                            </div>
+                            <div>
+                                <span>Perna</span>
+                                <input type="text" id="perna" v-model="perna" autofocus
+                                    autocomplete="perna">
+                            </div>
+
+                        </div>
+                        <h3>
+                            Diâmetro Ósseo
+                        </h3>
+                        <div class="inputs">
+                            <div>
+                                <span>Umero</span>
+                                <input type="text" id="umero" v-model="umero" autofocus
+                                    autocomplete="umero">
+                            </div>
+                            <div>
+                                <span>Punho</span>
+                                <input type="text" id="punho" v-model="punho" autofocus
+                                    autocomplete="punho">
+                            </div>
+                            <div>
+                                <span>Fêmur</span>
+                                <input type="text" id="femur" v-model="femur" autofocus
+                                    autocomplete="femur">
+                            </div>
+                            <div>
+                                <span>Tornozelo</span>
+                                <input type="text" id="tornozelo" v-model="tornozelo" autofocus
+                                    autocomplete="tornozelo">
+                            </div>
+
+                        </div>
+            </div>
+            <!-- Fim de ComposicaoCorporal -->
+
+            <div v-if='Bioimpedancia'>
+                        <h3>
+                            Bio-Impedância
+                        </h3>
+                        <div class="inputs">
+                            <div>
+                                <span>BMI</span>
+                                <input type="text" id="bmi" v-model="bmi" autofocus
+                                    autocomplete="bmi">
+                            </div>
+                            <div>
+                                <span>FAT</span>
+                                <input type="text" id="fat" v-model="fat" autofocus
+                                    autocomplete="fat">
+                            </div>
+                            <div>
+                                <span>MUSCLE</span>
+                                <input type="text" id="muscle" v-model="muscle" autofocus
+                                    autocomplete="muscle">
+                            </div>
+                            <div>
+                                <span>Basal Metabolism</span>
+                                <input type="text" id="rm" v-model="rm" autofocus
+                                    autocomplete="rm">
+                            </div>
+                            <div>
+                                <span>Body Age</span>
+                                <input type="text" id="bodyAge" v-model="bodyAge" autofocus
+                                    autocomplete="bodyAge">
+                            </div>
+                            <div>
+                                <span>Visceral Fat</span>
+                                <input type="text" id="visceralFat" v-model="visceralFat" autofocus
+                                    autocomplete="visceralFat">
+                            </div>
+
+                        </div>
+            </div>
+            
+            <!-- início de TestesFísicos -->
+            <div v-if='TestesFísicos'>
+                        <h3>
+                            Testes Físicos
+                        </h3>
+                        <div class="inputs">
+            
+                            <div>
+                                <span>Flexão de braço</span>
+                                <input type="text" id="flexaoBraco" v-model="flexaoBraco" autofocus
+                                    autocomplete="flexaoBraco">
+                            </div>
+                            <div>
+                                <span>Abdominal</span>
+                                <input type="text" id="flexaoAbdominal" v-model="flexaoAbdominal" autofocus
+                                    autocomplete="flexaoAbdominal">
+                            </div>
+
+                        </div>
+            </div>
+            <!-- Início de AvaliacaoPostural --> 
+            <div v-if='AvaliacaoPostural'>
+                        <h3>
+                            Postura
+                        </h3>
+                        <div class="inputs">
+            
+                            <div>
+                                <span>Observaçoes</span>
+                                <textarea type="text" id="posturaObs" v-model="posturaObs" autofocus></textarea>
+                                
+                            </div>
+
+                        </div>
+
+            </div>
+                        <br>
+                    </form>
                                   
 
                                 </div>
@@ -1899,11 +2374,6 @@ label {
     font-size: .85rem;
 }
 
-.conec .icon {
-    zoom: 1.6;
-    padding: 3px;
-    border-radius: 6px;
-}
 .conec:nth-child(1  ) .icon:hover {
     background: #00dc8240;
 }
@@ -2079,11 +2549,15 @@ label {
 }
 
 .blue {
-    padding: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+    width: 230px;
+    height: 120px;
     border-radius: 8px;
     cursor: pointer;
     background: #00d4ff;
-    color: #00dc82;
+    color: #000;
 }
 
 .blue:hover {
@@ -2226,9 +2700,9 @@ input:checked + .slider:before {
   margin: 15px;
   
 }
+
 .theme-switch-two h3{
-  width: 100px;
-  text-align: center;
+  text-align: left;
 }
 
 .theme-switch-two-ex {
@@ -2472,7 +2946,7 @@ input:checked + .slider:before {
 }
 .inputs {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
@@ -2556,9 +3030,6 @@ input {
     width:26    0px;
 }
 
-input:nth-child(2) {
-    width: 70px;
-}
 
 .cr-fix {
     position: sticky; /* Fixa a posição relativa ao elemento pai (.menu) */
@@ -2602,9 +3073,6 @@ textarea:active {
 
 }
 
-.active {
-  background-color: #00dc8230;
-}
 textarea:focus-visible {
     border: solid 2px #00dc82;
 }
@@ -2723,17 +3191,21 @@ input:focus-visible {
 input:active {
     border-color: #00dc8280;
 }
-
+input:disabled {
+  background-color: #fff;
+}
 input:hover {
-    background-color: #00dc8210;
+    background-color: var(--player-color);
+    color: #000;
 }
 
 
 input:focus {
     border: 0 none;
-    border-bottom: solid 1px #00dc82;
+    border: solid 2px #00dc82;
     outline: 0;
-    border-radius: 0;
+    border-radius: 4px;
+    color: var(--player-color);
 }
 
 img {
@@ -3568,6 +4040,7 @@ a {
 
 .head-name h3 {
     color: #00dc82;
+    text-transform: uppercase;
 }
 
 .status {
@@ -3697,13 +4170,29 @@ button:hover {
 .conec div button {
     margin: 0 5px;
     cursor: pointer;
-    padding: 9px 16px 5px 16px;
+    padding: 4px 16px 0px 16px;
 }
 
 
 .title {
-    margin:.3rem .2rem .5rem .2rem;
+    margin:.3rem .2rem 1.5rem .2rem;
+    color: #999;
+    cursor: pointer;
+    border-bottom: solid 2px transparent;
 }
+.title:hover {
+  cursor: pointer;
+  border-bottom: solid 2px #999;
+}
+.form-div {
+  height: 450px;
+  overflow-y: scroll;
+}
+.title.active {
+  border-bottom: solid 2px var(--player-color);
+  color: var(--player-color);
+}
+
 
 label {
     font-weight: bolder;
@@ -3721,10 +4210,11 @@ label {
 }
 
 .conec .icon {
-    zoom: 1.6;
-    padding: 3px;
+    zoom: 1;
+    padding-right: 3px;
     border-radius: 6px;
 }
+
 table tbody tr td:nth-child(2){
     width: 0px;
     padding: 12px 0;
