@@ -1239,7 +1239,7 @@ input:hover {
     background-color: #00dc8210;
 }
 input::placeholder {
-    color: #aaa;
+    color: #000;
 }
 .dark-mode input::placeholder {
     color: #aaa;
@@ -1249,12 +1249,11 @@ input::placeholder {
 input:focus {
     border: 0 none;
     border: solid 2px #00dc82;
-    color: #fff;
-    color: #888;
+    color: #000;
     outline: 0;
 }
 .dark-mode input:focus {
-    color: #ddd;
+    color: #fff;
 }
 
 img {
@@ -1287,6 +1286,7 @@ h4:nth-child(1) {
     text-align: left;
     height: 30px;
     font-size: 14px;
+    font-weight: bolder;
 }
 
 .dark-mode option {
@@ -1532,6 +1532,10 @@ input {
     padding: 5px 15px;
     font-size: 1rem;
     font-weight: bolder;
+    color: #000;
+}
+.dark-mode input {
+  color: #fff;
 }
 
 input[type="radio"] {
