@@ -535,31 +535,46 @@ async function handleSubmit() {
 
 async function deleteAvaliacao() {
   try {
-  const date = selectedTraining.data
-    const response = await fetch(`https://api.leandrocesar.com/usernw/${route.params.id}/atleta/${route.params.iddd}/avaliacao`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ date }) // Envia a data da avaliação que será deletada
-    })
-
-    const dataResponse = await response.json()
-
-    if (!response.ok) {
-      console.error('❌ Erro ao deletar avaliação:', dataResponse.message)
-      alert(dataResponse.message || 'Erro ao remover avaliação.')
+    if (!selectedTraining.value) {
+      console.error('⚠️ Nenhuma avaliação selecionada.')
       return
     }
 
-    console.log('✅ Avaliação removida com sucesso:', dataResponse)
-    alert('Avaliação removida com sucesso!')
+    console.log('📦 selectedTraining:', selectedTraining.value)
+
+    // Envia a data certa: se houver "data", usa ela; se não, usa "date"
+    const data = selectedTraining.value.data || selectedTraining.value.date
+
+    if (!data) {
+      console.error('❌ Nenhuma data encontrada na avaliação selecionada.')
+      return
+    }
+
+    const response = await fetch(
+      `https://api.leandrocesar.com/usernw/${route.params.id}/atleta/${route.params.iddd}/avaliacao`,
+      {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data }) // <- campo certo pro backend
+      }
+    )
+
+    const result = await response.json()
+    console.log('✅ Resultado da exclusão:', result)
+
+    if (response.ok) {
+      alert('Avaliação removida com sucesso!')
+      // opcional: recarregar ou atualizar lista de avaliações
+    } else {
+      alert(`Erro: ${result.message || 'Falha ao remover avaliação.'}`)
+    }
 
   } catch (err) {
-    console.error('⚠️ Erro na requisição:', err)
-    alert('Erro de conexão com o servidor.')
+    console.error('❌ Erro ao deletar avaliação:', err)
+    alert('Erro ao deletar avaliação.')
   }
 }
+
 
 async function submitAvaliacao() {
   try {
@@ -1790,7 +1805,7 @@ TestesFísicos.value = false;
 
                     </div>
 
-                    <div class='conec-in'>
+                    <div class='conec-in' v-if="selectedTraining.date">
 
                         <div v-if="addCloseTrainning" class="new-user" @click="newTrainning">
                             <Icon name='material-symbols:add-notes' /> Atualizar Avaliação
