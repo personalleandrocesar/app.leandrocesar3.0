@@ -20,6 +20,7 @@ function coachFloatCreate() {
 const menuFloat = ref(false);
 const menuFloatEx = ref(false);
 const user = item;
+const ava = item.avaliacoes.length;
 const train = item.avaliacoes
 const seriess = train
 
@@ -138,22 +139,27 @@ const percentualFat = computed(() => {
 })
 
 const dataNascimento = ref('');
+const dataAvaliacao = date; // data da avaliação
+
 const idad = computed(() => {
-  if (dataNascimento.value) {
-    return calcularIdade(dataNascimento.value);
+  if (dataNascimento.value && dataAvaliacao.value) {
+    return calcularIdade(dataNascimento.value, dataAvaliacao.value);
   }
   return '';
 });
 
-function calcularIdade(dataNascimento) {
-  const hoje = new Date();
+function calcularIdade(dataNascimento, dataReferencia) {
+  const referencia = dataReferencia ? new Date(dataReferencia) : new Date();
   const nascimento = new Date(dataNascimento);
-  let idad = hoje.getFullYear() - nascimento.getFullYear();
-  const mes = hoje.getMonth() - nascimento.getMonth();
-  if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
-    idad--;
+  
+  let idade = referencia.getFullYear() - nascimento.getFullYear();
+  const mes = referencia.getMonth() - nascimento.getMonth();
+  
+  if (mes < 0 || (mes === 0 && referencia.getDate() < nascimento.getDate())) {
+    idade--;
   }
-  return idad.toString();
+  
+  return idade.toString();
 }
 
 async function submitTreino() {
@@ -533,47 +539,78 @@ async function handleSubmit() {
   }
 }
 
+const notificDel = ref(false);
+
 async function deleteAvaliacao() {
   try {
-    if (!selectedTraining.value) {
-      console.error('⚠️ Nenhuma avaliação selecionada.')
-      return
+    const avaliacaoId = selectedTraining.value._id
+    const response = await fetch(`https://api.leandrocesar.com/usernw/${route.params.id}/atleta/${route.params.iddd}/avaliacao`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ avaliacaoId })
+    })
+
+    const result = await response.json()
+
+    if (response.ok) {
+      alert('✅ Avaliação deletada com sucesso!')
+      avaliacoes.value = avaliacoes.value.filter(av => av._id !== avaliacaoId)
+      selectedTraining.value = null
+    } else {
+      alert(result.message || 'Erro ao deletar avaliação')
     }
+  } catch (err) {
+    console.error('❌ Erro ao deletar avaliação:', err)
+  }
+}
 
-    console.log('📦 selectedTraining:', selectedTraining.value)
 
-    // Envia a data certa: se houver "data", usa ela; se não, usa "date"
-    const data = selectedTraining.value.data || selectedTraining.value.date
+const notificAtu = ref(false);
+const notificErr = ref(false);
 
-    if (!data) {
-      console.error('❌ Nenhuma data encontrada na avaliação selecionada.')
-      return
-    }
+async function submitAtualizacao() {
+  try {
+    if (!selectedTraining.value) return
+
+    // Pega a data para localizar a avaliação
+    const data = selectedTraining.value.date || selectedTraining.value.data.split('T')[0]
+
+    // Cria um objeto com todos os campos a atualizar, exceto date/data
+    const camposAtualizados = { ...selectedTraining.value }
+    delete camposAtualizados.date
+    delete camposAtualizados.data
 
     const response = await fetch(
       `https://api.leandrocesar.com/usernw/${route.params.id}/atleta/${route.params.iddd}/avaliacao`,
       {
-        method: 'DELETE',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data }) // <- campo certo pro backend
+        body: JSON.stringify({ data, ...camposAtualizados })
       }
     )
 
-    const result = await response.json()
-    console.log('✅ Resultado da exclusão:', result)
-
+const result = await response.json() // já pega o JSON direto
     if (response.ok) {
-      alert('Avaliação removida com sucesso!')
-      // opcional: recarregar ou atualizar lista de avaliações
+notificAtu.value = true;
+      setTimeout(() => {
+        notificAtu.value = false;
+      }, 3000)
     } else {
-      alert(`Erro: ${result.message || 'Falha ao remover avaliação.'}`)
+      notificErr.value = true
+    setTimeout(() => {
+        notificErr.value = false;
+      }, 3000)
     }
 
   } catch (err) {
-    console.error('❌ Erro ao deletar avaliação:', err)
-    alert('Erro ao deletar avaliação.')
+    console.error('Erro ao atualizar avaliação:', err)
+notificErr.value = true
+    setTimeout(() => {
+        notificErr.value = false;
+      }, 3000)
   }
 }
+
 
 
 async function submitAvaliacao() {
@@ -1037,7 +1074,7 @@ TestesFísicos.value = false;
                       <div class='bor'>
                               <div class="theme-switch-two">
 
-                                <div v-if='train' @click="coachFloat(training)" class='tr' v-for="(training, index) in [...train].reverse()" :key="index">
+                                <div v-if='ava' @click="coachFloat(training)" class='tr' v-for="(training, index) in [...train].reverse()" :key="index">
 
                                     <!-- <NuxtLink :to="`/coach/${route.params.id}/atleta/${route.params.iddd}/treino/${training.named }`"> -->
                                     <NuxtLink>
@@ -1649,7 +1686,7 @@ TestesFísicos.value = false;
                         <div class="inputs">
             
                             <div>
-                                <span>Observaçoes</span>
+                                <span>Observações</span>
                                 <textarea type="text" id="posturaObs" v-model="posturaObs" autofocus></textarea>
                                 
                             </div>
@@ -1807,7 +1844,7 @@ TestesFísicos.value = false;
 
                     <div class='conec-in' v-if="selectedTraining.date">
 
-                        <div v-if="addCloseTrainning" class="new-user" @click="newTrainning">
+                        <div v-if="addCloseTrainning" class="new-user" @click="submitAtualizacao()">
                             <Icon name='material-symbols:add-notes' /> Atualizar Avaliação
                         </div>
                         <div v-else='addCloseTrainning' class="new-user" @click="newTrainning">
@@ -2153,7 +2190,7 @@ TestesFísicos.value = false;
                         <div class="inputs">
             
                             <div>
-                                <span>Observaçoes</span>
+                                <span>Observações</span>
                                 <textarea type="text" id="posturaObs" v-model="selectedTraining.posturaObs" autofocus></textarea>
                                 
                             </div>
@@ -2352,7 +2389,40 @@ TestesFísicos.value = false;
     <div v-if='notific'>
             <div class="notific-float zoomOut" >
                 <div>
-                    <Icon name='material-symbols:check-circle-outline-rounded' /> Treino criado com sucesso!
+                    <Icon name='material-symbols:check-circle-outline-rounded' /> Avaliação criada com sucesso!
+                </div>
+                <div>
+                    <Icon name='material-symbols:close-rounded' @click='closeNotific' style="color: red; zoom:1.2"/>
+                </div>
+    
+            </div>
+    </div>
+    <div v-if='notificDel'>
+            <div class="notific-float zoomOut" >
+                <div>
+                    <Icon name='material-symbols:check-circle-outline-rounded' /> Avaliação deletada com sucesso!
+                </div>
+                <div>
+                    <Icon name='material-symbols:close-rounded' @click='closeNotific' style="color: red; zoom:1.2"/>
+                </div>
+    
+            </div>
+    </div>
+<div v-if='notificAtu'>
+            <div class="notific-float zoomOut" >
+                <div>
+                    <Icon name='material-symbols:check-circle-outline-rounded' /> Avaliação Atualizada com sucesso!
+                </div>
+                <div>
+                    <Icon name='material-symbols:close-rounded' @click='closeNotific' style="color: red; zoom:1.2"/>
+                </div>
+    
+            </div>
+    </div>
+<div v-if='notificErr'>
+            <div class="notific-float zoomOut" >
+                <div>
+                    <Icon name='tdesign:error-circle' style="color: red; zoom:1.2"/> Erro ao atualizar a avaliação!
                 </div>
                 <div>
                     <Icon name='material-symbols:close-rounded' @click='closeNotific' style="color: red; zoom:1.2"/>
@@ -3417,6 +3487,7 @@ input {
     padding: 5px 8px;
     color:#555;
     border: 0 none;
+border: solid 2px var(--player-color);
     margin: 5px 5px 0 0;
     border-radius: 3px;
 transition: all .4s linear;
@@ -3453,7 +3524,6 @@ textarea {
     font-weight: 600;
     border-radius: 8px;
     height: 120px;
-    background: transparent;
     font-size: 14px;
     color:#555;
 
@@ -3632,6 +3702,7 @@ select {
     padding: 5px 8px;
     color:#555;
     border: 0 none;
+border: solid 2px var(--player-color);
     margin: 5px 5px 0 0;
     border-radius: 3px;
     transition: all .4s linear;
