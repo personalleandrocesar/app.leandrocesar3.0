@@ -2,6 +2,9 @@
 import { ref, watch, computed, onMounted } from "vue";
 const route = useRoute();
 
+const { xpRelativo, xpClasse, missoesAtuais, proximoNivelS, rankAtual, nivelAtualS, proximoRank, xpMin, xpMax } = usePlayerRank()
+const { selectedColor, selectedClass, classColors, resetColorToDefault } = usePlayerColor()
+
 const Users = await useFetch(
     `https://api.leandrocesar.com/usersnw/${route.params.id}/team/${route.params.iddd}`,
 );
@@ -159,7 +162,13 @@ const photoOpen = ref(false);
 function openPhoto() {
     photoOpen.value = !photoOpen.value;
 }
+const data = new Date(user.creationUser);
+const formatada = data.toLocaleDateString('pt-BR'); 
 
+const columns = ref(true)
+function atualizar () {
+ columns.value = !columns.value
+}
 </script>
 
 
@@ -185,7 +194,7 @@ function openPhoto() {
                     </NuxtLink>
                 </div>
                 <div class="users-conf">
-                    <NuxtLink  class="filter">
+                    <NuxtLink @click='atualizar()' class="filter">
                         <Icon name='material-symbols:person-edit-outline' /> Atualizar
                     </NuxtLink>
                     <NuxtLink @click='notifConfirm()' class="filter" >
@@ -200,9 +209,9 @@ function openPhoto() {
   <div class="progress" :style="{ width: progress + '%' }"></div>
 </div>
 
-        <div class='line'>
-    <div class="line-columns">
-                
+<div class='line'>
+<div v-if='columns' class="line-columns">
+      <div class='bor-logo'>          
     <div class="logo">
     <!-- Foto do usuário ou pré-visualização -->
     <img @click="openPhoto" :src="user.foto || previewImage" alt="User Photo" />
@@ -225,10 +234,19 @@ function openPhoto() {
     <div class="head-name">
       <h3>{{ user.username }}</h3>
       <span><b>ID:</b> {{ user._id }}</span>
-      <h4 :class="user.status !== 0 ? 'status' : 'statusOff'">
-        {{ user.status === 0 ? "Inativo" : "Ativo" }}
-      </h4>
+      <div>
+        <h4>
+          RANK <span>{{ rankAtual }}</span>
+        </h4>
+        <h4 :class="user.status !== 0 ? 'status' : 'statusOff'">
+          {{ user.status === 0 ? "Inativo" : "Ativo" }}
+        </h4>
+      </div>
     </div>
+</div>
+<div>
+  <HudXp />
+</div>
   </div>
 
 
@@ -251,17 +269,15 @@ function openPhoto() {
 
       
                 
-                <div>
-                    <div class='bor'>
-                      
-                            <div class="theme-switch">
+          <div class='bor'>
+             <div class="theme-switch">
                                 <div>
                                     <h4>WhatsApp</h4>
                                     <h3>{{user.whatsapp.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3')}}</h3>
                                 </div>
                                 <div>
-                                    <h4>Data de nascimento</h4>
-                                    <h3>{{user.birthday.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3-$2-$1')}}</h3>
+                                    <h4>E-mail</h4>
+                                    <h3>{{user.email}}</h3>
                                 </div>
                                 <div>
                                     <h4>Objetivo</h4>
@@ -271,12 +287,181 @@ function openPhoto() {
                                     <h4>Serviço</h4>
                                     <h3>{{user.service}}</h3>
                                 </div>
+                            </div>                     
+                            <div class="theme-switch">
+                                <div>
+                                    <h4>Idade</h4>
+                                    <h3> 39 anos</h3>
+                                </div>
+                                <div>
+                                    <h4>Data de nascimento</h4>
+                                    <h3>{{user.birthday.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3-$2-$1')}}</h3>
+                                </div>
+                                <div>
+                                    <h4>Sexo</h4>
+                                    <h3>{{user.sex}}</h3>
+                                </div>
+                                <div>
+                                    <h4>Data de criação</h4>
+                                    <h3>{{formatada}}</h3>
+                                </div>
                             </div>
-                    </div>
+
+            <div class="theme-switch">
+                                <div>
+                                    <h4>Dias de treino</h4>
+                                    <h3>{{user.day}}</h3>
+                                </div>
+                                <div>
+                                    <h4>Tempos de treino</h4>
+                                    <h3>{{user.time}}</h3>
+                                </div>
+                                <div>
+                                    <h4>Dia de Pagamento</h4>
+                                    <h3>{{user.payDay}}</h3>
+                                </div>
+                                <div>
+                                    <h4>Termos</h4>
+                                    <h3 v-if='user.terms'>{{user.terms}}</h3>
+                                    <h3 v-else style='text-align:center'>--</h3>
+                                </div>
+             </div>
+          </div>
                 
         
                 
-                </div>
+                
+            </div>
+ 
+    <div v-else class="line-columns">
+      <div class='bor-logo'>          
+    <div class="logo">
+    <!-- Foto do usuário ou pré-visualização -->
+    <img @click="openPhoto" :src="user.foto || previewImage" alt="User Photo" />
+    <div v-if="photoOpen" class="nav-bar">
+            <div  class='logo-nav-bar'>
+                <img @click="openPhoto" :src="user.foto || previewImage">
+                <!-- <img @click="openPhoto" :src="inter.data.value?.foto"> -->
+            </div>
+        </div>
+
+    <!-- Ícone para abrir o seletor de arquivos -->
+    <label class="photo" for="file-upload" @click="openFloatingDiv">
+      <Icon name="uil:image-edit" />
+    </label>
+
+
+    <input id="file-upload" type="file" @change="handleFileChange" hidden />
+
+    <!-- Informações do usuário -->
+    <div class="head-name">
+      <h3>{{ user.username }}</h3>
+      <span><b>ID:</b> {{ user._id }}</span>
+      <div>
+        <h4>
+          RANK <span>{{ rankAtual }}</span>
+        </h4>  
+      <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.status' autofocus
+      autocomplete="flexaoBraco" placeholder='Ativo ou inativo?'>
+
+      </div>
+    </div>
+</div>
+  </div>
+
+
+  <!-- Div flutuante de pré-visualização -->
+  <div v-if="showFloatingDiv" class="float">
+  <div class="floating-div">
+        <div>
+            <h3>Pré-visualização</h3>
+            <img v-if="previewImage" :src="previewImage" alt="Preview Image" />
+            <div v-else class='alt-image'></div>
+        </div>
+        <div>
+            <button @click="uploadImage" :disabled="loading">
+                {{ loading ? "Enviando..." : "Upload" }}
+            </button>
+            <button @click="closeFloatingDiv">Cancelar</button>
+        </div>
+  </div>
+  </div>
+
+      
+                
+          <div class='bor'>
+             <div class="theme-switch">
+                                <div>
+                                    <h4>WhatsApp</h4>
+                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.whatsapp' autofocus
+                                autocomplete="flexaoBraco">
+                                </div>
+                                <div>
+                                    <h4>E-mail</h4>
+                                <input type="text" id="flexaoBraco" style='width: 200px;' v-model='user.email' autofocus
+                                autocomplete="flexaoBraco">
+
+
+                                </div>
+                                <div>
+                                    <h4>Objetivo</h4>
+                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.target' autofocus
+                                autocomplete="flexaoBraco">
+                                </div>
+                                <div>
+                                    <h4>Serviço</h4>
+                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.service' autofocus
+                                autocomplete="flexaoBraco">
+                                </div>
+                            </div>                     
+                            <div class="theme-switch">
+                                <div>
+                                    <h4>Idade</h4>
+                                <input type="text" id="flexaoBraco" style='width: 150px;' autofocus
+                                autocomplete="flexaoBraco">
+                                </div>
+                                <div>
+                                    <h4>Data de nascimento</h4>
+                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.birthday' autofocus
+                                autocomplete="flexaoBraco">
+                                </div>
+                                <div>
+                                    <h4>Sexo</h4>
+                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.sex' autofocus
+                                autocomplete="flexaoBraco">
+                                </div>
+                                <div>
+                                    <h4>Data de criação</h4>
+                                    <h3>{{formatada}}</h3>
+                                </div>
+                            </div>
+
+            <div class="theme-switch">
+                                <div>
+                                    <h4>Dias de treino</h4>
+                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.day' autofocus
+                                autocomplete="flexaoBraco">
+                                </div>
+                                <div>
+                                    <h4>Tempos de treino</h4>
+                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.time' autofocus
+                                autocomplete="flexaoBraco">
+                                </div>
+                                <div>
+                                    <h4>Dia de Pagamento</h4>
+                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.payDay' autofocus
+                                autocomplete="flexaoBraco">
+                                </div>
+                                <div>
+                                    <h4>Termos</h4>
+                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.terms' autofocus
+                                autocomplete="flexaoBraco">
+                                </div>
+             </div>
+          </div>
+                
+        
+                
                 
             </div>
           </div>
@@ -661,7 +846,6 @@ input[type="file"] {
   height: 20px;
 }
 
-notific-float div
 
 /* Oculta o checkbox padrão */
 .switch input {
@@ -719,13 +903,19 @@ input:checked + .slider:before {
 
 .line-columns {
     display: grid;
-    grid-template-columns: .6fr 1fr; /* Barra fixa e conteúdo */
-   
-        
+    grid-template-columns: .5fr 1fr; /* Barra fixa e conteúdo */
 }
 
 .bor {
     border-left: solid 1px #00dc8240;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    flex-direction: column;
+  width: 100%;
+}
+.bor-logo {
     padding: 10px;
     display: flex;
     justify-content: space-between;
@@ -759,7 +949,7 @@ input:checked + .slider:before {
   padding: 0.3rem .7rem;
   font-size: 1rem;
   border: 2px solid #ccc;
-  border-radius: 8px;
+  border-radius: 3px;
   background: #ddd;
   color: #333;
   cursor: pointer;
@@ -931,10 +1121,9 @@ input {
     text-align: left;
     width: 500px;
     font-weight: 600;
-    border-radius: 8px;
-    height: 40px;
+    border-radius: 3px;
     font-size: 14px;
-    padding: 5px 33px;
+    padding: 2px 5px;
     color:#555;
      
 }
@@ -1825,6 +2014,21 @@ a {
     width: 250px;    
 }
 
+.head-name div {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  width: 100%;
+}
+.head-name h4:nth-child(1){
+  border: solid 2px var(--player-color);
+  border-radius: 3px;
+  padding: 0 7px;
+}
+.head-name h4:nth-child(1) span {
+  color: var(--player-color);
+}
+
 .head-name span {
     font-size: .9rem;
     margin: 5px 0 7px 0;
@@ -1838,7 +2042,7 @@ a {
 .status {
     border: solid 2px #00dc8240;
     Background: #00e900;
-    border-radius: 8px;
+    border-radius: 3px;
     padding: 1px 20px;
     color: #fff;;
 }

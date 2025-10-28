@@ -443,8 +443,11 @@ function notifConfirm() {
     training.value.serie = [];
     selectedSeriesIndex.value = null;
 }
+
+
+const notificConDel = ref(false);
 function notifCancel() {
-    notificTree.value = false
+    notificConDel.value = !notificConDel.value
 }
 
 const removeAllSeries = () => {
@@ -553,9 +556,14 @@ async function deleteAvaliacao() {
     const result = await response.json()
 
     if (response.ok) {
-      alert('✅ Avaliação deletada com sucesso!')
-      avaliacoes.value = avaliacoes.value.filter(av => av._id !== avaliacaoId)
-      selectedTraining.value = null
+      notificDel.value = true
+      setTimeout(() => {
+        notificDel.value = false
+        reloadNuxtApp({
+          path: `/coach/${route.params.id}/atleta/${route.params.iddd}/avaliacoes`,
+          ttl: 3000,
+        })
+      }, 3000)
     } else {
       alert(result.message || 'Erro ao deletar avaliação')
     }
@@ -572,44 +580,48 @@ async function submitAtualizacao() {
   try {
     if (!selectedTraining.value) return
 
-    // Pega a data para localizar a avaliação
-    const data = selectedTraining.value.date || selectedTraining.value.data.split('T')[0]
+    // Pega o _id da avaliação
+    const avaliacaoId = selectedTraining.value._id
+    if (!avaliacaoId) {
+      console.error('❌ Avaliação sem _id — não é possível atualizar.')
+      return
+    }
 
-    // Cria um objeto com todos os campos a atualizar, exceto date/data
+    // Cria um objeto com todos os campos a atualizar, exceto _id, date e data
     const camposAtualizados = { ...selectedTraining.value }
+    delete camposAtualizados._id
     delete camposAtualizados.date
     delete camposAtualizados.data
 
+    // Faz a requisição PUT com o ID da avaliação na URL
     const response = await fetch(
-      `https://api.leandrocesar.com/usernw/${route.params.id}/atleta/${route.params.iddd}/avaliacao`,
+      `https://api.leandrocesar.com/usernw/${route.params.id}/atleta/${route.params.iddd}/avaliacao/${avaliacaoId}`,
       {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data, ...camposAtualizados })
+        body: JSON.stringify(camposAtualizados)
       }
     )
 
-const result = await response.json() // já pega o JSON direto
+    const result = await response.json()
+
     if (response.ok) {
-notificAtu.value = true;
-      setTimeout(() => {
-        notificAtu.value = false;
-      }, 3000)
+      console.log('✅ Avaliação atualizada com sucesso:', result)
+      notificAtu.value = true
+      setTimeout(() => { notificAtu.value = false }, 3000)
     } else {
+      console.error('❌ Erro ao atualizar avaliação:', result.message)
       notificErr.value = true
-    setTimeout(() => {
-        notificErr.value = false;
-      }, 3000)
+      setTimeout(() => { notificErr.value = false }, 3000)
     }
 
   } catch (err) {
-    console.error('Erro ao atualizar avaliação:', err)
-notificErr.value = true
-    setTimeout(() => {
-        notificErr.value = false;
-      }, 3000)
+    console.error('❌ Erro ao atualizar avaliação:', err)
+    notificErr.value = true
+    setTimeout(() => { notificErr.value = false }, 3000)
   }
 }
+
 
 
 
@@ -692,7 +704,7 @@ async function submitAvaliacao() {
         notific.value = false
         reloadNuxtApp({
           path: `/coach/${route.params.id}/atleta/${route.params.iddd}/avaliacoes`,
-          ttl: 5000,
+          ttl: 3000,
         })
       }, 3000)
     } else {
@@ -1335,7 +1347,7 @@ TestesFísicos.value = false;
                               <div>
                                     <form @submit.prevent="submitAvaliacao()">
                                         <div>
-                                            <button type="submit"><Icon name="material-symbols:add-notes" />Criar avaliação</button>
+                                            <button type="submit"><Icon name="material-symbols-light:add-notes-outline-rounded" />Criar avaliação</button>
                                         </div>
                                     </form>
                                     <div>
@@ -1415,7 +1427,6 @@ TestesFísicos.value = false;
                                         </option>
                                         <option value="feminino">Feminino</option>
                                         <option value="masculino">Masculino</option>
-                                        <option value="Outro">Outro</option>
                                     </select>
                             </div>
 
@@ -1845,13 +1856,13 @@ TestesFísicos.value = false;
                     <div class='conec-in' v-if="selectedTraining.date">
 
                         <div v-if="addCloseTrainning" class="new-user" @click="submitAtualizacao()">
-                            <Icon name='material-symbols:add-notes' /> Atualizar Avaliação
+                            <Icon name='material-symbols:source-notes-outline-rounded' /> Atualizar Avaliação
                         </div>
                         <div v-else='addCloseTrainning' class="new-user" @click="newTrainning">
                             <Icon name='material-symbols:cancel-rounded' /> Fechar
                         </div>
-                        <div class="new-user" @click="deleteAvaliacao()">
-                            <Icon name='material-symbols:add-notes' /> Deletar Avaliação
+                        <div class="new-user" @click="notifCancel()">
+                            <Icon name='charm:notes-cross' /> Deletar Avaliação
                         </div>
 
                     <div>
@@ -1882,7 +1893,7 @@ TestesFísicos.value = false;
                             <div>
                                 <span>Dia da Avaliação</span>
                                 <input type="date" id="name" v-model="selectedTraining.date" autofocus required
-                                    autocomplete="data">
+                                    autocomplete="data" disabled>
                             </div>
                             <div>
                                 <span>Nascimento</span>
@@ -1892,7 +1903,7 @@ TestesFísicos.value = false;
                             <div>
                                 <span>Idade</span>
                                 <input type="text" id="idade" v-model="selectedTraining.idade" autofocus
-                                    autocomplete="idade" disabled>
+                                    autocomplete="idade">
                             </div>
                             <div>
                                 <span>Massa</span>
@@ -1919,7 +1930,6 @@ TestesFísicos.value = false;
                                         </option>
                                         <option value="feminino">Feminino</option>
                                         <option value="masculino">Masculino</option>
-                                        <option value="Outro">Outro</option>
                                     </select>
                             </div>
 
@@ -2430,6 +2440,29 @@ TestesFísicos.value = false;
     
             </div>
     </div>
+<div @click.self='notifCancel' v-if='notificConDel' class="float">
+                <div class="notific-floatt zoomOut">
+                    <div>
+                        <Icon name='tdesign:error-circle' style="color: red; zoom:2.2" />
+                    </div>
+                    <div>
+                        <div>
+                            <h3>
+                                Deletar avaliação
+                            </h3>
+                            <p>
+                                Tem certeza que deseja deletar esta avaliação?
+                            </p>
+                        </div>
+                        <div>
+                            <button @click='deleteAvaliacao()' class="pill-can ex">Deletar</button>
+                            <button @click="notifCancel()" class="pill-can can">Cancelar</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+ 
     <div v-if='notificTwo' class='float'>
         <div class="notific-float-two zoomOut" >
             <div>
@@ -2864,8 +2897,11 @@ label {
 }
 
 .menu-float h4{
-  color: #fff;
+  color: #000;
   font-size: 1rem;
+}
+.dark-mode .menu-float h4 {
+  color: #fff;
 }
 .menu-float span {
   font-size: .9rem;
@@ -2900,6 +2936,7 @@ label {
       color: #fff;
     background: #0f172a;
 }
+
 
 .notific-float {
     background: #f1fef9;
@@ -2937,7 +2974,7 @@ label {
         -50%
     ); /* Centraliza ajustando a posição do elemento */
     z-index: 9999; /* Garante que esteja acima de todo o conteúdo */
-    color: #777;
+    color: #000;
     padding:20px; /* Espaço interno */
     border-radius: 10px; /* Cantos arredondados (opcional) */
     text-align: left; /* Alinha o texto centralizado */
@@ -2950,6 +2987,7 @@ label {
 }
 .dark-mode .notific-floatt {
     background-color: #0f172a;
+    color: #fff;
 }
 
 .notific-floatt div {
