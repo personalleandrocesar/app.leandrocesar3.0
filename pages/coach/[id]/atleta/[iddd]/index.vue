@@ -3,6 +3,7 @@ import { ref, watch, computed, onMounted } from "vue";
 const route = useRoute();
 
 const { xpRelativo, xpClasse, missoesAtuais, proximoNivelS, rankAtual, nivelAtualS, proximoRank, xpMin, xpMax } = usePlayerRank()
+
 const { selectedColor, selectedClass, classColors, resetColorToDefault } = usePlayerColor()
 
 const Users = await useFetch(
@@ -17,6 +18,40 @@ useHead({
   titleTemplate: `${firstName.value} ${user.lastName} - Cliente | Leandro Cesar - App`,
 });
 
+async function atualizarAtleta() {
+  try {
+    const response = await fetch(`https://api.leandrocesar.com/usersnw/${route.params.id}/team/${route.params.iddd}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: user.name,
+        username: user.username,
+        status: user.status,
+        xp: user.xp,
+        whatsapp: user.whatsapp,
+        email: user.email,
+        target: user.target,
+        service: user.service,
+        birthday: user.birthday,
+        sex: user.sex,
+        day: user.day,
+        time: user.time,
+        payDay: user.payDay,
+        terms: user.terms,
+
+      })
+    });
+notificFive.value = true;
+    setTimeout(() => {
+        notificFive.value = false;
+        reloadNuxtApp({ path: `/coach/${route.params.id}/atleta/${route.params.iddd}`, ttl: 1000 });
+    }, 1300);
+    const data = await response.json();
+    console.log('Atleta atualizado:', data);
+  } catch (error) {
+    console.error('Erro ao atualizar atleta:', error);
+  }
+}
 
 
 async function submitDelete() {
@@ -46,6 +81,7 @@ const athleteId = ref('');
 const error = ref(null);
 const notificTree = ref(false);
 const notificFour = ref(false);
+const notificFive = ref(false);
 
 function notifConfirm() { notificTree.value = true; }
 function notifCancel() { notificTree.value = false; }
@@ -177,12 +213,17 @@ function atualizar () {
     <div class="layout-no-sidebar">
         <!-- Barra fixa no topo -->
         <header class="topbar">
-        <h3 class='upper'>
-            <Icon name='cil:weightlifitng' /> {{ user.name.split(' ')[0] }} {{ user.lastName }}
+        <h3 v-if='columns' class='upper'>
+            <Icon name='cil:weightlifitng' /> {{ user.name }} 
         </h3>
+        <h3 v-else class='upper'>
+      <Icon name='cil:weightlifitng' />
+      <input type="text" id="flexaoBraco" style='width: 500px; margin-left: .5rem;' v-model='user.name' autofocus
+      autocomplete="flexaoBraco" placeholder='Nome Completo'>
+      </h3>
         </header>
             <div class="nav-users">
-                <div class="users-conf">
+                <div v-if='columns' class="users-conf">
                     <NuxtLink :to="`/coach/${route.params.id}/atleta/${route.params.iddd}`"  class="filter">
                         <Icon name='heroicons:user-circle' /> Geral
                     </NuxtLink>
@@ -193,12 +234,20 @@ function atualizar () {
                         <Icon name='bi:clipboard-pulse' /> Avaliações
                     </NuxtLink>
                 </div>
-                <div class="users-conf">
+                <div v-if='columns' class="users-conf">
                     <NuxtLink @click='atualizar()' class="filter">
-                        <Icon name='material-symbols:person-edit-outline' /> Atualizar
+                        <Icon name='material-symbols:person-edit-outline' /> Editar
                     </NuxtLink>
                     <NuxtLink @click='notifConfirm()' class="filter" >
                         <Icon name='material-symbols:person-cancel-outline-rounded' /> Deletar
+                    </NuxtLink>
+                </div>
+                <div v-else class="users-conf-two">
+                    <NuxtLink @click='atualizarAtleta()' class="filter">
+                        <Icon name='mdi:account-sync-outline' /> Atualizar
+                    </NuxtLink>
+                    <NuxtLink @click='atualizar()' class="filter">
+                        <Icon name='material-symbols:close-small-outline' /> Fechar
                     </NuxtLink>
                 </div>
             </div>
@@ -238,8 +287,8 @@ function atualizar () {
         <h4>
           RANK <span>{{ rankAtual }}</span>
         </h4>
-        <h4 :class="user.status !== 0 ? 'status' : 'statusOff'">
-          {{ user.status === 0 ? "Inativo" : "Ativo" }}
+        <h4 :class="user.status !== 'Bloqueado' ? 'status' : 'statusOff'">
+          {{ user.status === 'Bloqueado' ? "Bloqueado" : "Ativo" }}
         </h4>
       </div>
     </div>
@@ -270,6 +319,25 @@ function atualizar () {
       
                 
           <div class='bor'>
+                            <div class="theme-switch">
+                                <div>
+                                    <h4>Sexo</h4>
+                                    <h3>{{user.sex}}</h3>
+                                </div>
+                                <div>
+                                    <h4>Data de nascimento</h4>
+                                    <h3>{{user.birthday.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3-$2-$1')}}</h3>
+                                </div>
+                                <div>
+                                    <h4>Idade</h4>
+                                    <h3> 39 anos</h3>
+                                </div>
+                                <div>
+                                    <h4>Data de cadastro</h4>
+                                    <h3>{{formatada}}</h3>
+                                </div>
+                            </div>
+
              <div class="theme-switch">
                                 <div>
                                     <h4>WhatsApp</h4>
@@ -288,25 +356,6 @@ function atualizar () {
                                     <h3>{{user.service}}</h3>
                                 </div>
                             </div>                     
-                            <div class="theme-switch">
-                                <div>
-                                    <h4>Idade</h4>
-                                    <h3> 39 anos</h3>
-                                </div>
-                                <div>
-                                    <h4>Data de nascimento</h4>
-                                    <h3>{{user.birthday.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3-$2-$1')}}</h3>
-                                </div>
-                                <div>
-                                    <h4>Sexo</h4>
-                                    <h3>{{user.sex}}</h3>
-                                </div>
-                                <div>
-                                    <h4>Data de criação</h4>
-                                    <h3>{{formatada}}</h3>
-                                </div>
-                            </div>
-
             <div class="theme-switch">
                                 <div>
                                     <h4>Dias de treino</h4>
@@ -355,18 +404,28 @@ function atualizar () {
 
     <!-- Informações do usuário -->
     <div class="head-name">
-      <h3>{{ user.username }}</h3>
+      <input type="text" id="flexaoBraco" style='width: 240px;' v-model='user.username' autofocus
+      autocomplete="flexaoBraco" placeholder='UserName'>
       <span><b>ID:</b> {{ user._id }}</span>
       <div>
-        <h4>
+        <h4 style='width: 100px;'>
           RANK <span>{{ rankAtual }}</span>
         </h4>  
-      <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.status' autofocus
-      autocomplete="flexaoBraco" placeholder='Ativo ou inativo?'>
-
-      </div>
+                                      <select name="sex" id="sex" style='width: 130px;' class="select" placeholder='' required v-model="user.status">
+                                <option disabled value="">Escolha uma das opções</option>
+                                <option value="Ativo">Ativo</option>
+                                <option value="Bloqueado">Bloqueado</option>
+                            </select>      </div>
+      
     </div>
+
 </div>
+<div>
+      <input type="text" id="flexaoBraco" style='width: 200px;' v-model='user.xp' autofocus
+      autocomplete="flexaoBraco" placeholder='Xp do usuário?'>
+
+      
+    </div>
   </div>
 
 
@@ -390,6 +449,31 @@ function atualizar () {
       
                 
           <div class='bor'>
+                            <div class="theme-switch">
+
+                                <div>
+                                    <h4>Sexo</h4>
+                                <select name="sex" id="sex" style='width: 160px;' class="select" placeholder='' required v-model="user.sex">
+                                <option disabled value="">Escolha uma das opções</option>
+                                <option value="Feminino">Feminino</option>
+                                <option value="Masculino">Masculino</option>
+                            </select>
+                                </div>
+                                <div>
+                                    <h4>Data de nascimento</h4>
+                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.birthday' autofocus
+                                autocomplete="flexaoBraco">
+                   </div>
+              <div>
+                                    <h4>Idade</h4>
+                                    <h3>39 anos</h3>
+                                </div>
+                                <div>
+                                    <h4>Data de cadastro</h4>
+                                    <h3>{{formatada}}</h3>
+                                </div>
+                            </div>
+
              <div class="theme-switch">
                                 <div>
                                     <h4>WhatsApp</h4>
@@ -414,28 +498,6 @@ function atualizar () {
                                 autocomplete="flexaoBraco">
                                 </div>
                             </div>                     
-                            <div class="theme-switch">
-                                <div>
-                                    <h4>Idade</h4>
-                                <input type="text" id="flexaoBraco" style='width: 150px;' autofocus
-                                autocomplete="flexaoBraco">
-                                </div>
-                                <div>
-                                    <h4>Data de nascimento</h4>
-                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.birthday' autofocus
-                                autocomplete="flexaoBraco">
-                                </div>
-                                <div>
-                                    <h4>Sexo</h4>
-                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.sex' autofocus
-                                autocomplete="flexaoBraco">
-                                </div>
-                                <div>
-                                    <h4>Data de criação</h4>
-                                    <h3>{{formatada}}</h3>
-                                </div>
-                            </div>
-
             <div class="theme-switch">
                                 <div>
                                     <h4>Dias de treino</h4>
@@ -454,8 +516,11 @@ function atualizar () {
                                 </div>
                                 <div>
                                     <h4>Termos</h4>
-                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.terms' autofocus
-                                autocomplete="flexaoBraco">
+                                <select name="sex" id="sex" style='width: 130px;' class="select" placeholder='' required v-model="user.terms">
+                                <option disabled value="">Escolha uma das opções</option>
+                                <option value="Assinado">Assinado</option>
+                                <option value="Não Assinado">Não assinado</option>
+                            </select>
                                 </div>
              </div>
           </div>
@@ -544,6 +609,22 @@ function atualizar () {
                     <div>
                         <h3>
                         Usuário deletado com sucesso!
+                        </h3>
+                    </div>
+                    
+                </div>
+    
+            </div>
+    </div>
+<div v-if='notificFive' class="float">
+            <div class="notific-float-two zoomOut" >
+                <div>
+                    <Icon name='line-md:circle-to-confirm-circle-transition' style="color: green; zoom:2.2"/>
+                </div>
+                <div>
+                    <div>
+                        <h3>
+                        Dados atualizado com sucesso!
                         </h3>
                     </div>
                     
@@ -1123,9 +1204,9 @@ input {
     font-weight: 600;
     border-radius: 3px;
     font-size: 14px;
-    padding: 2px 5px;
+    padding: 0px 5px;
     color:#555;
-     
+    transition: all .4s linear; 
 }
 textarea {
     border: solid 2px #00dc82;
@@ -1236,7 +1317,8 @@ input:active {
 }
 
 input:hover {
-    background-color: #00dc8210;
+    background-color: #00dc82;
+    color:#000;
 }
 
 
@@ -1255,50 +1337,7 @@ h4 {
 }
 
 
-.select {
-    border: 0;
-    color: inherit;
-    background-color: transparent;
-    border: solid 2px #00dc82;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 80px;
-    text-align: left;
-    height: 30px;
-    font-size: 14px;
-}
-select::selection {
-    border: solid 2px #00dc82;
-    background: #00dc8240;
-}
 
-.select:focus {
-    border: 0 none;
-    border: solid 2px #fff;
-    outline: 0;
-}
-
-.dark-mode .select:focus {
-    border-color: #00dc8290 ;
-}
-
-.select:focus-visible {
-    background-color: #00dc8210;
-    border: solid 2px #00dc82;
-}
-
-.select:active {
-    background-color: #00dc8210;
-}
-
-.dark-mode select:active {
-    background: #111827;
-    border: solid 2px #00dc82;
-}
-
-.select:hover {
-    background-color: #00dc8210;
-}
 
 .login {
     border: solid 2px #00dc82;
@@ -1708,6 +1747,15 @@ input[type="radio"] {
     border-radius: 6px;
 }
 
+.users-conf-two {
+  color: #777;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+    padding: 7px;
+    border-radius: 6px;
+
+}
 
 .filter {
     padding: 8px 12px;
@@ -2017,8 +2065,8 @@ a {
 .head-name div {
   display: flex;
   flex-direction: row;
-  gap: 15px;
   width: 100%;
+  gap:5px;
 }
 .head-name h4:nth-child(1){
   border: solid 2px var(--player-color);
@@ -2088,4 +2136,54 @@ td, th {
 tr {
     border: none; /* Remove as bordas das linhas */
 }
+select {
+    text-align: left;
+    background-color: #fff;
+    width:192px;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 0px 5px;
+    color:#777;
+border: solid 2px var(--player-color);
+    border-radius: 3px;
+    transition: all .4s linear;
+}
+
+select:hover {
+  background-color: var(--player-color);
+    color: #000;
+}
+
+select::selection {
+    border: solid 1px #00dc82;
+    background: #00dc8240;
+}
+
+select:focus {
+    border: solid 2px #00dc82;
+}
+
+.dark-mode .select:focus {
+    border-color: #00dc82 ;
+}
+
+.select:focus-visible {
+    background-color: #fff;
+    border: solid 2px #00dc82;
+}
+
+.select:active {
+    background-color: #fff;
+}
+
+.dark-mode select:active {
+    background: #fff;
+    border: solid 2px #00dc82;
+}
+
+.select:hover {
+    background-color: var(player-color);
+}
+
+
 </style>

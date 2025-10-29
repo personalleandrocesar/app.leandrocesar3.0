@@ -1,6 +1,21 @@
 import { ref, computed } from 'vue'
 
-const xpAtual = ref(0)
+export const useTeamUser = async (userId, teamId) => {
+  const { data } = await useFetch(
+    `https://api.leandrocesar.com/usersnw/${userId}/team/${teamId}`
+  )
+
+  // Assim que o fetch terminar, você pode pegar o xp
+  const xpAtual = ref(0)
+
+  watchEffect(() => {
+    if (data.value) {
+      xpAtual.value = data.value.xp || 0
+    }
+  })
+
+  return { xpAtual }
+}
 
 const rankData = [
   { 
@@ -237,7 +252,6 @@ const missoesAtuais = computed(() => {
 
 export function usePlayerRank() {
     return {
-        xpAtual,
         setXP: (val: number) => (xpAtual.value = val),
         rankAtual,       // "B", "A", "S"
         nivelAtualS,     // 1, 2, 3... ou null
@@ -248,6 +262,6 @@ export function usePlayerRank() {
         xpMin,
         xpMax,
         rankData, 
-        missoesAtuais
+        missoesAtuais,
     }
 }
