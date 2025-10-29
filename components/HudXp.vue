@@ -1,8 +1,20 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { usePlayerRank } from '@/composables/usePlayerRank'
+const route= useRoute()
+const {
+  xpAtual,
+  rankAtual,
+  proximoRank,
+  nivelAtualS,
+  proximoNivelS,
+  xpClasse,
+  xpRelativo,
+  xpMin,
+  xpMax,
+  missoesAtuais
+} = await usePlayerRank(route.params.id, route.params.iddd)
 
-const { xpAtual, nivelAtualS, xpRelativo, xpClasse, rankAtual, proximoRank, xpMin, xpMax } = usePlayerRank()
 
 const xpVisual = ref(0)
 const mostrarEstrela = ref(false)

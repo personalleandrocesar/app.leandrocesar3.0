@@ -2,7 +2,18 @@
 import { ref, watch, computed, onMounted } from "vue";
 const route = useRoute();
 
-const { xpRelativo, xpClasse, missoesAtuais, proximoNivelS, rankAtual, nivelAtualS, proximoRank, xpMin, xpMax } = usePlayerRank()
+const {
+  xpAtual,
+  rankAtual,
+  proximoRank,
+  nivelAtualS,
+  proximoNivelS,
+  xpClasse,
+  xpRelativo,
+  xpMin,
+  xpMax,
+  missoesAtuais
+} = await usePlayerRank(route.params.id, route.params.iddd)
 
 const { selectedColor, selectedClass, classColors, resetColorToDefault } = usePlayerColor()
 

@@ -1,11 +1,12 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watchEffect } from 'vue'
 
-export const useTeamUser = async (userId, teamId) => {
+export const usePlayerRank = async (userId, teamId) => {
+  // 1️⃣ Buscar o XP do usuário
   const { data } = await useFetch(
     `https://api.leandrocesar.com/usersnw/${userId}/team/${teamId}`
   )
 
-  // Assim que o fetch terminar, você pode pegar o xp
+  // 2️⃣ XP reativo
   const xpAtual = ref(0)
 
   watchEffect(() => {
@@ -14,8 +15,7 @@ export const useTeamUser = async (userId, teamId) => {
     }
   })
 
-  return { xpAtual }
-}
+  // 3️⃣ Dados fixos de ranks
 
 const rankData = [
   { 
@@ -190,78 +190,72 @@ const rankData = [
   },
 ]
 
-
-
-const rankAtual = computed(() => {
+  // 4️⃣ Cálculos baseados no XP
+  const rankAtual = computed(() => {
     return rankData.find(r => xpAtual.value >= r.min && xpAtual.value <= r.max)?.nome || 'E'
-})
+  })
 
-const proximoRank = computed(() => {
+  const proximoRank = computed(() => {
     const r = rankData.find(r => xpAtual.value >= r.min && xpAtual.value <= r.max)
     if (!r) return 'MAX'
-
     const index = rankData.indexOf(r)
     return rankData[index + 1]?.nome || 'MAX'
-})
+  })
 
-const xpClasse = computed(() => {
+  const xpClasse = computed(() => {
     const r = rankData.find(r => xpAtual.value >= r.min && xpAtual.value <= r.max)
     return r ? r.max - r.min + 1 : 1000
-})
+  })
 
-const xpRelativo = computed(() => {
+  const xpRelativo = computed(() => {
     const r = rankData.find(r => xpAtual.value >= r.min && xpAtual.value <= r.max)
     return r ? xpAtual.value - r.min : 0
-})
+  })
 
-const xpMin = computed(() => {
+  const xpMin = computed(() => {
     const r = rankData.find(r => xpAtual.value >= r.min && xpAtual.value <= r.max)
     return r?.min ?? 0
-})
+  })
 
-const xpMax = computed(() => {
+  const xpMax = computed(() => {
     const r = rankData.find(r => xpAtual.value >= r.min && xpAtual.value <= r.max)
     return r?.max ?? 1000
-})
+  })
 
-// nível atual se estiver em S
-const nivelAtualS = computed(() => {
+  const nivelAtualS = computed(() => {
     const sRank = rankData.find(r =>
-        r.nome === 'S' && r.nivel !== undefined &&
-        xpAtual.value >= r.min && xpAtual.value <= r.max
+      r.nome === 'S' && r.nivel !== undefined &&
+      xpAtual.value >= r.min && xpAtual.value <= r.max
     )
     return sRank?.nivel ?? null
-})
+  })
 
-// próximo nível se o próximo rank também for S
-const proximoNivelS = computed(() => {
+  const proximoNivelS = computed(() => {
     const r = rankData.find(r => xpAtual.value >= r.min && xpAtual.value <= r.max)
     if (!r) return null
-
     const index = rankData.indexOf(r)
     const next = rankData[index + 1]
     return next?.nivel ?? null
-})
+  })
 
-const missoesAtuais = computed(() => {
-  const r = rankData.find(r => xpAtual.value >= r.min && xpAtual.value <= r.max)
-  // 🔥 só retorna missões que NÃO estão completas
-  return r?.missoes.filter(m => !m.completa) || []
-})
+  const missoesAtuais = computed(() => {
+    const r = rankData.find(r => xpAtual.value >= r.min && xpAtual.value <= r.max)
+    return r?.missoes.filter(m => !m.completa) || []
+  })
 
-
-export function usePlayerRank() {
-    return {
-        setXP: (val: number) => (xpAtual.value = val),
-        rankAtual,       // "B", "A", "S"
-        nivelAtualS,     // 1, 2, 3... ou null
-        proximoRank,     // "A", "S", "MAX"
-        proximoNivelS,   // 1, 2, 3... ou null
-        xpClasse,
-        xpRelativo,
-        xpMin,
-        xpMax,
-        rankData, 
-        missoesAtuais,
-    }
+  // 5️⃣ Retornar tudo que o componente precisa
+  return {
+    xpAtual,
+    rankAtual,
+    proximoRank,
+    xpClasse,
+    xpRelativo,
+    xpMin,
+    xpMax,
+    nivelAtualS,
+    proximoNivelS,
+    missoesAtuais,
+    rankData
+  }
 }
+
