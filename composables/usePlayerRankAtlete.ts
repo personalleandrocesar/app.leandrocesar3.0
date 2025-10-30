@@ -1,13 +1,13 @@
 import { ref, computed, watchEffect } from 'vue'
 import { useCoachId } from '@/composables/useCoachId'
 
-export const usePlayerRank = async (teamId) => {
-  const coachId = useCoachId()
-  if (!coachId) return {}
+export const usePlayerRankAtlete = async (coachId, teamId) => {
+  // se o coachId não vier, tenta buscar via useCoachId
+  const idCoach = coachId || useCoachId()
+  if (!idCoach) return {}
 
-  const { data } = useFetch(`https://api.leandrocesar.com/usersnw/${coachId}/team/${teamId}`)
-  
-  // 2️⃣ XP reativo
+  const { data } = useFetch(`https://api.leandrocesar.com/usersnw/${coachId.value}/team/${teamId}`)
+
   const xpAtual = ref(0)
 
   watchEffect(() => {
@@ -15,7 +15,6 @@ export const usePlayerRank = async (teamId) => {
       xpAtual.value = data.value.xp || 0
     }
   })
-
   // 3️⃣ Dados fixos de ranks
 
 const rankData = [

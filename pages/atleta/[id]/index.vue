@@ -16,7 +16,7 @@ function vibrarHUD() {
 
 
 const cookieTreinador = useCookie('coachId');
-console.log(cookieTreinador.value)
+const idCoach = cookieTreinador.value
 
 const {
   xpAtual,
@@ -29,7 +29,7 @@ const {
   xpMin,
   xpMax,
   missoesAtuais
-} = await usePlayerRankAtlete(cookieTreinador.value, route.params.id)
+} = await usePlayerRankAtlete(idCoach, route.params.id)
 
 
 
@@ -1280,23 +1280,23 @@ onMounted(async () => {
        </div>
        <div class="medida braco-direita-contraido">
          <label>Braço contraído:</label>
-         <span id="valorOmbro"> {{ultimaAvaliacao.bracoDireitoRelaxado}} cm</span>
+         <span id="valorOmbro"> {{ultimaAvaliacao.bracoDireitoContraido}} cm</span>
        </div>
        <div class="medida antebraco-direita">
          <label>Antebraço:</label>
-         <span id="valorOmbro"> {{ultimaAvaliacao.bracoDireitoRelaxado}} cm</span>
+         <span id="valorOmbro"> {{ultimaAvaliacao.antebracoDireito}} cm</span>
        </div>
        <div class="medida coxa-medial-direita">
          <label>Coxa medial:</label>
-         <span id="valorOmbro"> {{ultimaAvaliacao.bracoDireitoRelaxado}} cm</span>
+         <span id="valorOmbro"> {{ultimaAvaliacao.coxaMedialDireita}} cm</span>
        </div>
        <div class="medida coxa-distal-direita">
          <label>Coxa distal:</label>
-         <span id="valorOmbro"> {{ultimaAvaliacao.bracoDireitoRelaxado}} cm</span>
+         <span id="valorOmbro"> {{ultimaAvaliacao.coxaDistalDireita}} cm</span>
        </div>
        <div class="medida perna-direita">
          <label>Perna:</label>
-         <span id="valorOmbro"> {{ultimaAvaliacao.bracoDireitoRelaxado}} cm</span>
+         <span id="valorOmbro"> {{ultimaAvaliacao.pernaDireita}} cm</span>
        </div>
      </div>      
      <!-- Medidas Antropometria Três -->
