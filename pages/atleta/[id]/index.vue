@@ -2,6 +2,7 @@
 import { ref, computed, watch, nextTick, onMounted } from "vue";
 import { usePlayerColor } from '@/composables/usePlayerColor'
 import { usePlayerRank } from '@/composables/usePlayerRank'
+import { usePlayerRankAtlete } from '@/composables/usePlayerRankAtlete'
 const rota = useRoute();
 const route = useRoute();
 
@@ -28,7 +29,7 @@ const {
   xpMin,
   xpMax,
   missoesAtuais
-} = await usePlayerRank(cookieTreinador.value, route.params.id)
+} = await usePlayerRankAtlete(cookieTreinador.value, route.params.id)
 
 
 

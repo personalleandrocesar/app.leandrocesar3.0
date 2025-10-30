@@ -1,13 +1,12 @@
 import { ref, computed, watchEffect } from 'vue'
+import { useCoachId } from '@/composables/useCoachId'
 
-export const usePlayerRank = async (userId, teamId) => {
-  // 1️⃣ Buscar o XP do usuário
+export const usePlayerRank = async (teamId) => {
+  const coachId = useCoachId()
+  if (!coachId) return {}
+
+  const { data } = useFetch(`https://api.leandrocesar.com/usersnw/${coachId}/team/${teamId}`)
   
-  const cookieTreinador = useCookie('coachId');
-  const { data } = await useFetch(
-    `https://api.leandrocesar.com/usersnw/${userId}/team/${teamId}`
-  )
-
   // 2️⃣ XP reativo
   const xpAtual = ref(0)
 
@@ -259,5 +258,6 @@ const rankData = [
     missoesAtuais,
     rankData
   }
+
 }
 
