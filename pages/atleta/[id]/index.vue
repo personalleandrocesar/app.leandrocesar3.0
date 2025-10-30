@@ -26,9 +26,6 @@ const {
   missoesAtuais
 } = await usePlayerRank(cookieTreinador.value, route.params.id)
 
-watchEffect(() => {
-  console.log("XP Atual mudou:", xpAtual.value)
-})
 
 
 
@@ -967,7 +964,7 @@ onMounted(async () => {
       </div>
 
       <div>
-        <HudXp />
+        <HudXpAtleta />
       </div>
 
       <!-- Início -->
@@ -1652,7 +1649,7 @@ onMounted(async () => {
         </div>
 
         <div>
-          <HudXp />
+          <HudXpAtleta />
         </div>
         <div class="float-quite">
 
