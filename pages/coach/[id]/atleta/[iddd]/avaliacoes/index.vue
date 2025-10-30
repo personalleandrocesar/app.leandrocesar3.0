@@ -3,6 +3,20 @@ import { ref, watch, computed, nextTick, onMounted } from "vue";
 const route = useRoute();
 
 const { selectedColor, selectedClass, classColors, resetColorToDefault } = usePlayerColor()
+const {
+  xpAtual,
+  rankAtual,
+  proximoRank,
+  nivelAtualS,
+  proximoNivelS,
+  xpClasse,
+  xpRelativo,
+  xpMin,
+  xpMax,
+  missoesAtuais
+} = await usePlayerRank(route.params.id, route.params.iddd)
+
+
 const Users = await useFetch(
     `https://api.leandrocesar.com/usersnw/${route.params.id}/team/${route.params.iddd}`,
 );
@@ -1853,7 +1867,7 @@ TestesFísicos.value = false;
 
                     </div>
 
-                    <div class='conec-in' v-if="selectedTraining.date">
+                    <div class='conec-in' v-if="selectedTraining.date || selectedTraining._id">
 
                         <div v-if="addCloseTrainning" class="new-user" @click="submitAtualizacao()">
                             <Icon name='material-symbols:source-notes-outline-rounded' /> Atualizar Avaliação

@@ -3,6 +3,7 @@ import { ref, computed, watch, nextTick, onMounted } from "vue";
 import { usePlayerColor } from '@/composables/usePlayerColor'
 import { usePlayerRank } from '@/composables/usePlayerRank'
 const rota = useRoute();
+const route = useRoute();
 
 function vibrarHUD() {
   if (navigator.vibrate) {
@@ -12,7 +13,23 @@ function vibrarHUD() {
   }
 }
 
-const { xpRelativo, xpClasse, missoesAtuais, proximoNivelS, rankAtual, nivelAtualS, proximoRank, xpMin, xpMax } = usePlayerRank()
+
+const cookieTreinador = useCookie('coachId');
+console.log(cookieTreinador.value)
+
+const {
+  xpAtual,
+  rankAtual,
+  proximoRank,
+  nivelAtualS,
+  proximoNivelS,
+  xpClasse,
+  xpRelativo,
+  xpMin,
+  xpMax,
+  missoesAtuais
+} = await usePlayerRank(cookieTreinador.value, route.params.id)
+
 
 
 
@@ -20,7 +37,6 @@ const mostrarHUD = ref(false)
 const { selectedColor, selectedClass, classColors, resetColorToDefault } = usePlayerColor()
 
 
-const cookieTreinador = useCookie('coachId');
 
 const usuarios = await useFetch(
   `https://api.leandrocesar.com/usersnw/${cookieTreinador.value}/team/${rota.params.id}`
@@ -136,7 +152,6 @@ const enviarImagem = async () => {
 function alternarFoto() {
   fotoAberta.value = !fotoAberta.value;
 }
-const route = useRoute()
 
 const reg = route.params.id
 const logon = useCookie('logon')
@@ -681,7 +696,6 @@ function closeTreino() {
   topPersonDiv.value = true
 }
 const exerciseImg = ref(false);
-
 function openExercise() {
   exerciseImg.value = !exerciseImg.value;
 }
