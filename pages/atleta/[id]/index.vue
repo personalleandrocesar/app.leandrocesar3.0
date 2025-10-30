@@ -1,8 +1,5 @@
  <script setup>
 import { ref, computed, watch, nextTick, onMounted } from "vue";
-import { usePlayerColor } from '@/composables/usePlayerColor'
-import { usePlayerRank } from '@/composables/usePlayerRank'
-import { usePlayerRankAtlete } from '@/composables/usePlayerRankAtlete'
 const rota = useRoute();
 const route = useRoute();
 
@@ -16,8 +13,6 @@ function vibrarHUD() {
 
 
 const cookieTreinador = useCookie('coachId');
-const idCoach = cookieTreinador.value
-
 const {
   xpAtual,
   rankAtual,
@@ -29,7 +24,11 @@ const {
   xpMin,
   xpMax,
   missoesAtuais
-} = await usePlayerRankAtlete(idCoach, route.params.id)
+} = await usePlayerRank(cookieTreinador.value, route.params.id)
+
+watchEffect(() => {
+  console.log("XP Atual mudou:", xpAtual.value)
+})
 
 
 

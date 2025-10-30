@@ -1,21 +1,19 @@
 import { ref, computed, watchEffect } from 'vue'
+import { until } from '@vueuse/core'
 
 export const usePlayerRank = async (userId, teamId) => {
   // 1️⃣ Buscar o XP do usuário
   
   const cookieTreinador = useCookie('coachId');
-  const { data } = await useFetch(
+  const { data, pending } = await useFetch(
     `https://api.leandrocesar.com/usersnw/${userId}/team/${teamId}`
   )
 
-  // 2️⃣ XP reativo
-  const xpAtual = ref(0)
+  await until(pending).toBe(false)
 
-  watchEffect(() => {
-    if (data.value) {
-      xpAtual.value = data.value.xp || 0
-    }
-  })
+  // 2️⃣ XP reativo
+  const xpAtual = ref(data.value?.xp || 0)
+
 
   // 3️⃣ Dados fixos de ranks
 

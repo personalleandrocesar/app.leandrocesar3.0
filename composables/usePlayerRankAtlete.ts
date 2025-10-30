@@ -1,10 +1,9 @@
 import { ref, computed, watchEffect } from 'vue'
-import { useCoachId } from '@/composables/useCoachId'
 
 export const usePlayerRankAtlete = async (coachId, teamId) => {
   // se o coachId não vier, tenta buscar via useCoachId
   const idCoach = coachId || useCoachId()
-  if (!idCoach) return {}
+  if (!coachId || !teamId) return {}
 
   const { data } = useFetch(`https://api.leandrocesar.com/usersnw/${coachId.value}/team/${teamId}`)
 
