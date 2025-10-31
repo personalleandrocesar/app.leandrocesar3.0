@@ -457,7 +457,8 @@ const comparacaoAvaliacao = computed(() => {
   return resultado
 })
 
-treinus.value = dataTreino.data.value?.reverse() || [];
+const dadosTreino = dataTreino.data.value || []
+treinus.value = [...dadosTreino].reverse()
 
 const index = Number(setTreino.value) || 0; // fallback 0 caso não seja número
 console.log(index)
@@ -1024,7 +1025,7 @@ onMounted(async () => {
 
           <div class="squared">
               <div
-                v-for="(treino, index) in [...treinus].reverse()"
+                v-for="(treino, index) in treinus"
                 :key="index"
               >
                 <div
