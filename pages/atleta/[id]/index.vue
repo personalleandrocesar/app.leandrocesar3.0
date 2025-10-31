@@ -1533,6 +1533,12 @@ onMounted(async () => {
            </div>
      
            <!-- Botões de navegação -->
+           
+  </div>
+
+
+ </div>
+
            <div class="button">
              <span @click="prevExercise">
                <Icon name="mdi:chevron-left" /> ANTERIOR
@@ -1542,12 +1548,6 @@ onMounted(async () => {
                <Icon name="mdi:chevron-right" />
              </span>
            </div>
-           
-  </div>
-
-
- </div>
-
 </div>
 
 <br><br><br>
@@ -3335,7 +3335,7 @@ ul {
         -webkit-backdrop-filter: blur(5px);
         backdrop-filter: blur(5px);
         overflow-x: auto;
-        border-radius: 18px;
+        border-radius: 8px;
         display: flex
     ;
         flex-direction: row;
@@ -3356,18 +3356,20 @@ ul {
 
 .exercise-square {
   width: max-content;
-  height: 55px;
   overflow-x: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   margin: 0px 2px 0 2px;
-  border-radius: 8px;
-  background-color: var(--player-color)40;
+  border-radius: 4px;
   backdrop-filter: blur(35px);
   font-size: .8rem;
   border: 1px solid var(--player-color); 
+  padding: 4px 0;
+}
+.exercise-square:nth-child(1) h4 {
+  padding: 1px 2px;
 }
 
 .exercise-square input {
@@ -3409,8 +3411,8 @@ ul {
 }
 
 .exercise-square .icon {
-    zoom: 1.1;
-    margin-bottom: 2px
+    zoom: .7;
+    margin-bottom: .5px
 }
 
 .title{
@@ -3423,8 +3425,11 @@ ul {
 .button {
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
+  justify-content: space-around;
   align-items: center;
+  position: fixed;
+  bottom: 4rem;
+  width: 100%;
   z-index: 120;
 }
 .cron {
@@ -3468,7 +3473,7 @@ ul {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: 8px;
   padding-right: 25px;
   font-weight: bolder;
   border: 1px solid var(--player-color); 
@@ -3482,7 +3487,7 @@ ul {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: 8px;
   padding-left: 28px;
   border: 1px solid var(--player-color); 
 }
