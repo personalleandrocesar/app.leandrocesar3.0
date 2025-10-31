@@ -1024,7 +1024,7 @@ onMounted(async () => {
 
           <div class="squared">
               <div
-                v-for="(treino, index) in treinus"
+                v-for="(treino, index) in [...treinus].reverse()"
                 :key="index"
               >
                 <div
@@ -1899,6 +1899,9 @@ onMounted(async () => {
 
 
 <style scoped>
+* {
+  user-select: none;
+}
 .float-xp-section {
   width: 100%;
   max-width: 400px;
