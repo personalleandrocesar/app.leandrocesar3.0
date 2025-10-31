@@ -52,6 +52,11 @@ watchEffect(() => {
   }
 })
 
+function nomeCurto(nome) {
+  if (!nome) return ''
+  return nome.split(' ').slice(0, 2).join(' ')
+}
+
 const pessoa = usuarios.data.value;
 console.log(pessoa.birthday)
 const primeiroNome = computed(() => pessoa.name.split(" ")[0]);
@@ -1703,7 +1708,7 @@ onMounted(async () => {
   <!-- Notificações -->
 
   <!-- Treino do dia -->
-  <div class="float-notifications" v-if="notificationTreinoDoDia">
+  <div @click.self='notTreinoOut()' class="float-notifications" v-if="notificationTreinoDoDia">
     <div class='hud-notifications zoomOut'>
       <div class="notify">
         <Icon name="streamline:travel-hotel-dumbell-sports-weights-dumbbell-sport-fitness" />
@@ -1891,7 +1896,7 @@ onMounted(async () => {
             <div class="rank-info">
               <div class="rank-xp">
               
-                <div class="rank-name">{{ membro.name }}</div>
+                <div class="rank-name">{{ nomeCurto(membro.name) }}</div>
                 <div class="rank-rank">Rank {{ membro.rank }} - {{ membro.xp }} XP </div>
 
               </div>
@@ -3193,7 +3198,7 @@ input[type="file"] {
 .rank-number {
   font-size: 1.2rem;
   font-weight: bold;
-  width: 45px;
+  width: 65px;
   color: #ffdc00;
   text-shadow: 0 0 5px #ffdc00;
 }
