@@ -1,5 +1,5 @@
  <script setup>
-import { ref, computed, watch, nextTick, onMounted } from "vue";
+import { ref, computed, watch, nextTick, watchEffect, onMounted } from "vue";
 const rota = useRoute();
 const route = useRoute();
 
@@ -38,6 +38,19 @@ const { selectedColor, selectedClass, classColors, resetColorToDefault } = usePl
 const usuarios = await useFetch(
   `https://api.leandrocesar.com/usersnw/${cookieTreinador.value}/team/${rota.params.id}`
 );
+
+const { data: team } = await useFetch(
+  `https://api.leandrocesar.com/usersnw/${cookieTreinador.value}/team`
+)
+
+const teamSortedByXp = ref([])
+
+watchEffect(() => {
+  if (team.value && Array.isArray(team.value)) {
+    // cria cópia nova e ordena pelo XP (maior primeiro)
+    teamSortedByXp.value = [...team.value].sort((a, b) => (b.xp || 0) - (a.xp || 0))
+  }
+})
 
 const pessoa = usuarios.data.value;
 console.log(pessoa.birthday)
@@ -1874,17 +1887,16 @@ onMounted(async () => {
       </div>
       <div class="ranking-box">
         <div class="ranking-list">
-          <div class="ranking-item" v-for="(client, index) in topClients" :key="client.name">
+          <div class="ranking-item" v-for="(membro, i) in teamSortedByXp" :key="membro.xp">
             <div class="rank-info">
-              <img :src="client.avatar" class="rank-avatar" alt="Avatar" />
               <div class="rank-xp">
               
-                <div class="rank-name">{{ client.name }}</div>
-                <div class="rank-rank">Rank {{ client.rank }} - {{ client.xp }} XP </div>
+                <div class="rank-name">{{ membro.name }}</div>
+                <div class="rank-rank">Rank {{ membro.rank }} - {{ membro.xp }} XP </div>
 
               </div>
             </div>
-            <div class="rank-number">{{ index + 1 }} º</div>
+            <div class="rank-number">{{ i + 1 }} º</div>
           </div>
         </div>
       </div>
@@ -2976,7 +2988,7 @@ input[type="file"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 16px;
   margin-bottom: 1.5rem;
 }
 
@@ -3134,7 +3146,7 @@ input[type="file"] {
   box-shadow: 0 0 20px var(--player-color);
   font-family: 'Orbitron-Regular', sans-serif;
 }
-.dark-mode hud-ranking {
+.dark-mode .hud-ranking {
   background-color: #0f141e;
   color: #ffffff;
 } 
