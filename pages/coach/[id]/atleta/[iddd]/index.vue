@@ -22,6 +22,7 @@ const Users = await useFetch(
 );
 const item = Users.data.value;
 const user = item;
+const creationUserInput = ref();
 const name = user.name;
 const firstName = computed(() => name.split(" ")[0]);
 
@@ -31,6 +32,10 @@ useHead({
 
 async function atualizarAtleta() {
   try {
+    // 🔹 Se o campo não existir, cria com base no input
+      // exemplo: vindo de um input ou gerado automaticamente
+      const inputDate = creationUserInput?.value || new Date();
+      user.creationUser = new Date(inputDate).toISOString();
     const response = await fetch(`https://api.leandrocesar.com/usersnw/${route.params.id}/team/${route.params.iddd}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -49,7 +54,7 @@ async function atualizarAtleta() {
         time: user.time,
         payDay: user.payDay,
         terms: user.terms,
-
+        creationUser: user.creationUser // 🔹 Adiciona aqui
       })
     });
 notificFive.value = true;
@@ -298,9 +303,21 @@ function atualizar () {
         <h4>
           RANK <span>{{ rankAtual }}</span>
         </h4>
-        <h4 :class="user.status !== 'Bloqueado' ? 'status' : 'statusOff'">
-          {{ user.status === 'Bloqueado' ? "Bloqueado" : "Ativo" }}
-        </h4>
+        <h4
+  :class="{
+    status: user.status === 'Ativo',
+    statusOff: user.status === 'Bloqueado',
+    statusInativo: user.status === 'Inativo'
+  }"
+>
+  {{ 
+    user.status === 'Bloqueado' 
+      ? 'Bloqueado' 
+      : user.status === 'Inativo' 
+        ? 'Inativo' 
+        : 'Ativo' 
+  }}
+</h4>
       </div>
     </div>
 </div>
@@ -345,7 +362,8 @@ function atualizar () {
                                 </div>
                                 <div>
                                     <h4>Data de cadastro</h4>
-                                    <h3>{{formatada}}</h3>
+                                    <h3 v-if='user.creationUser'>{{formatada}}</h3>
+                                    <h3 v-else>--/--</h3>
                                 </div>
                             </div>
 
@@ -425,6 +443,7 @@ function atualizar () {
                                       <select name="sex" id="sex" style='width: 130px;' class="select" placeholder='' required v-model="user.status">
                                 <option disabled value="">Escolha uma das opções</option>
                                 <option value="Ativo">Ativo</option>
+                                <option value="Inativo">Inativo</option>
                                 <option value="Bloqueado">Bloqueado</option>
                             </select>      </div>
       
@@ -472,7 +491,7 @@ function atualizar () {
                                 </div>
                                 <div>
                                     <h4>Data de nascimento</h4>
-                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.birthday' autofocus
+                                <input type="date" id="flexaoBraco" style='width: 150px;' v-model='user.birthday' autofocus
                                 autocomplete="flexaoBraco">
                    </div>
               <div>
@@ -481,7 +500,9 @@ function atualizar () {
                                 </div>
                                 <div>
                                     <h4>Data de cadastro</h4>
-                                    <h3>{{formatada}}</h3>
+                                    <h3 v-if='user.creationUser'>{{formatada}}</h3>
+                                <input v-else type="datetime-local" id="flexaoBraco" style='width: 150px;' v-model="creationUserInput" autofocus
+                                autocomplete="flexaoBraco">
                                 </div>
                             </div>
 
@@ -500,13 +521,25 @@ function atualizar () {
                                 </div>
                                 <div>
                                     <h4>Objetivo</h4>
-                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.target' autofocus
-                                autocomplete="flexaoBraco">
+                                <select name="sex" id="sex" style='width: 150px;' class="select" placeholder='' required v-model="user.target">
+                                  <option disabled value="">Escolha uma das opções</option>
+                                  <option value="Hipertrofia">Hipertrofia</option>
+                                  <option value="Emagrecimento">Emagrecimento</option>
+                                  <option value="Resistencia">Resistência</option>
+                                  <option value="Definicao">Definição</option>
+                                  <option value="Saude">Saúde</option>
+                                </select>
                                 </div>
                                 <div>
                                     <h4>Serviço</h4>
-                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.service' autofocus
-                                autocomplete="flexaoBraco">
+                                <select name="sex" id="sex" style='width: 150px;' class="select" placeholder='' required v-model="user.service">
+                                  <option disabled value="">Escolha uma das opções</option>
+                                  <option value="Personal">Personal</option>
+                                  <option value="Consultoria">Consultoria</option>
+                                  <option value="Avaliacao">Avaliação Física</option>
+                                  <option value="ConsultoriaAvaliacao">Consultoria + Avaliação</option>
+                                  <option value="Kravmaga">Krav-maga</option>
+                                </select>
                                 </div>
                             </div>                     
             <div class="theme-switch">
@@ -2103,14 +2136,31 @@ a {
     Background: #00e900;
     border-radius: 3px;
     padding: 1px 20px;
-    color: #fff;;
+    color: #000;
+    width: 120px;
+    text-align: center;
+    display: block;
 }
 .statusOff {
     border: solid 2px #00dc8240;
     Background: #e70000;
-    border-radius: 8px;
+    border-radius: 3px;
     padding: 1px 20px;
     color: #fff;
+width: 120px;
+    text-align: center;
+    display: block;
+}
+
+.statusInativo {
+    border: solid 2px #00dc8240;
+    Background: #ffec00;
+    border-radius: 3px;
+    padding: 1px 20px;
+    color: #000;
+width: 120px;
+    text-align: center;
+    display: block;
 }
 
 .table {

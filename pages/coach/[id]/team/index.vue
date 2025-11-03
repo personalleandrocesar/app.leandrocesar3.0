@@ -536,11 +536,21 @@ loadTeamImages();
                         {{ item.birthday.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3-$2-$1') }}
                       </td>
                       <td class="none">
-                        <span 
-                          :class="['status-badge', item.status !== 0 ? 'active' : 'inactive']"
-                        >
-                          {{ item.status === 0 ? "Inativo" : "Ativo" }}
-                        </span>
+                          <span
+  :class="{
+    status: item.status === 'Ativo',
+    statusOff: item.status === 'Bloqueado',
+    statusInativo: item.status === 'Inativo'
+  }"
+>
+  {{ 
+    item.status === 'Bloqueado' 
+      ? 'Bloqueado' 
+      : item.status === 'Inativo' 
+        ? 'Inativo' 
+        : 'Ativo' 
+  }}
+</span>
                       </td>
                     </tr>
                 </tbody>
@@ -2075,5 +2085,37 @@ th {
 tr {
     padding: 0px; /* Adiciona espaçamento interno para uma melhor aparência */
     border: none; /* Remove as bordas das linhas */
+}
+
+.status {
+    border: solid 2px #00dc8240;
+    Background: #00e900;
+    border-radius: 3px;
+    padding: 1px 20px;
+    color: #000;
+    width: 120px;
+    text-align: center;
+    display: block;
+}
+.statusOff {
+    border: solid 2px #00dc8240;
+    Background: #e70000;
+    border-radius: 3px;
+    padding: 1px 20px;
+    color: #fff;
+width: 120px;
+    text-align: center;
+    display: block;
+}
+
+.statusInativo {
+    border: solid 2px #00dc8240;
+    Background: #ffec00;
+    border-radius: 3px;
+    padding: 1px 20px;
+    color: #000;
+width: 120px;
+    text-align: center;
+    display: block;
 }
 </style>

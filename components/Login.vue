@@ -5,6 +5,7 @@ const senha = ref('');
 const client = useFetch('https://api.leandrocesar.com/usersnw');
 
 const dontUser = ref(false);
+const userBlocked = ref(false);
 
 const coachIdCookie = useCookie('coachId'); // Criação do cookie para armazenar o ID do coach
 
@@ -23,6 +24,33 @@ const enterClient = () => {
       member => member.username === user.value && member.password === senha.value
     );
 
+  // 🔒 Verifica se o usuário principal está bloqueado
+  const blockedUser = userData.find(
+    u =>
+      u.username === user.value &&
+      u.password === senha.value &&
+      u.status === 'Bloqueado'
+  );
+
+  // 🔒 Verifica se o membro de time está bloqueado
+  const blockedTeamMember = userData
+    .flatMap(u => u.team || [])
+    .find(
+      member =>
+        member.username === user.value &&
+        member.password === senha.value &&
+        member.status === 'Bloqueado'
+    );
+
+  if (blockedUser || blockedTeamMember) {
+    console.log("Usuário bloqueado!");
+    userBlocked.value = true;
+    setTimeout(() => {
+      userBlocked.value = false;
+    }, 2000);
+    return;
+  }
+
   if (userExists) {
     console.log("Usuário principal encontrado e não é coach!");
     const foundUser = userData.find(
@@ -34,7 +62,9 @@ const enterClient = () => {
   } else if (teamMember) {
     console.log("Atleta encontrado no time!");
     // Encontra o coach associado ao atleta no time
-    const coach = userData.find(u => u.team && u.team.some(t => t._id === teamMember._id));
+    const coach = userData.find(
+      u => u.team && u.team.some(t => t._id === teamMember._id)
+    );
     if (coach) {
       coachIdCookie.value = coach._id; // Configura o cookie com o ID do coach
     }
@@ -44,7 +74,7 @@ const enterClient = () => {
     dontUser.value = true;
     setTimeout(() => {
       dontUser.value = false;
-    }, 2000); // Define um timeout para limpar a mensagem após 5 segundos
+    }, 2000);
   }
 };
 
@@ -167,6 +197,21 @@ function close () {
                 </div>
             </div>
     
+ <div v-if='userBlocked' class="float">
+                <div class="notific-float zoomOut">
+                    <div>
+                        <Icon name='material-symbols:x-circle-outline-rounded' style="color: red; zoom:2.2" />
+                    </div>
+                    <div>
+                        <div>
+                            <h3 style='text-align: center;'>
+                                Usuário temporariamente suspenso!
+                            </h3>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
     <div class="head-name">
       <div class="name">
    <Nav/>       
