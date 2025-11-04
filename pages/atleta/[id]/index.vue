@@ -911,7 +911,6 @@ function checkImageExists(url) {
 onMounted(async () => {
   imageExists.value = await checkImageExists(url)
 })
-
 const tableImc = ref(false);
 function tableFloatIMC() {
 tableImc.value = !tableImc.value;
@@ -921,6 +920,7 @@ const tableFat = ref(false);
 function tableFloatFat() {
 tableFat.value = !tableFat.value;
 }
+
 </script>
 <template>
 
@@ -1234,7 +1234,7 @@ tableFat.value = !tableFat.value;
          <label>Quadril:</label>
          <span id="valorOmbro"> {{ultimaAvaliacao.quadril}} cm</span>
        </div>
-	<div class="medida imc-table">
+	<div class="medida imc">
 	 <Icon name='bi:speedometer2' /> 
 	 <Icon class='info-imc' @click='tableFloatIMC()' name='material-symbols:info-outline-rounded' /> 
          <label>IMC</label>
@@ -1715,7 +1715,193 @@ tableFat.value = !tableFat.value;
       </div>
     </div>
   </div>
-  <div class="float-notifications" v-if="tableFat" @click.self="tableFloatFat()">
+  
+  <!-- Logout -->
+  <div class="float-notifications" v-if="notificationLogOut" @click.self="logOut()">
+    <div class='hud-notifications zoomOut'>
+      <div class="notify">
+        <Icon name="gravity-ui:exclamation-shape" />
+        <p>
+          Notificação
+        </p>
+      </div>
+      <div class="notify-text">
+        <p>
+          Deseja realmente sair?
+        </p>
+      </div>
+      <div class="notify-buttons">
+        <button @click="navigateTo('/')">Sim</button>
+        <button @click="logOut()">Não</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Configurações -->
+
+  <div class="float-aparency" v-if="Configuration" @click.self="menuConfiguration()">
+    <div class='hud-aparency zoomOut'>
+      <div id="nav-container" class='nav-aparency'>
+
+        <div>
+          <div class="nav-bottom"></div>
+        </div>
+        <!-- <div>
+          <NuxtLink @click="menuConfiguration()" class="button-client">
+            <Icon name="material-symbols:cancel-outline" />
+          </NuxtLink>
+        </div> -->
+      </div>
+
+      <div class="aparency">
+          <Icon name="icon-park-twotone:config" />
+          <p>
+            Configurações
+          </p>
+      </div>
+      <div  class="aparency-text">
+        Localização atual
+      </div>
+      <FullLocation style='text-align:left;' />
+    </div>
+
+  </div>
+
+
+  <!-- Aparencia -->
+
+  <div class="float-aparency" v-if="Aparency" @click.self="menuAparency()">
+    <div class='hud-aparency zoomOut'>
+      <div id="nav-container" class='nav-aparency'>
+
+        <div>
+          <div class="nav-bottom"></div>
+        </div>
+        <!-- <div>
+          <NuxtLink @click="menuAparency()" class="button-client">
+            <Icon name="material-symbols:cancel-outline" />
+          </NuxtLink>
+        </div> -->
+      </div>
+
+      <div class="aparency">
+        <Icon name="solar:palette-round-line-duotone" />
+        <p>
+          Aparência
+        </p>
+      </div>
+      <div class="aparency-text">
+        <div>
+          <span>
+            Tema Base
+          </span>
+          <p>
+            Escolha o tema padrão do Nx_WOD
+          </p>
+        </div>
+
+      </div>
+      <div class="theme-switch">
+        <input type="radio" id="system" value="system" v-model="$colorMode.preference" class="radio-input" />
+        <label for="system" class="pill">
+          <Icon name='mi:computer' /> System
+        </label>
+
+        <input type="radio" id="light" value="light" v-model="$colorMode.preference" class="radio-input" />
+        <label for="light" class="pill">
+          <Icon name='material-symbols:light-mode-outline-rounded' /> Light
+        </label>
+
+        <input type="radio" id="dark" value="dark" v-model="$colorMode.preference" class="radio-input" />
+        <label for="dark" class="pill">
+          <Icon name='material-symbols:dark-mode-outline-rounded' />Dark
+        </label>
+      </div>
+      <br>
+      <div class="aparency-text">
+        <div>
+          <span>
+            Cor de destaque
+          </span>
+          <p>
+            Escolha o a cor de destaque de todo o app.
+          </p>
+        </div>
+
+      </div>
+      <div class="theme-switch">
+        <input
+        class="col"
+      id="playerColor"
+      type="color"
+      v-model="selectedColor"
+      list="presetColors"
+    />
+
+    <datalist id="presetColors">
+      <option value="#8d00ab">Guerreiro</option>
+      <option value="#b800ff">Mago</option>
+      <option value="#2ecc71">Curandeiro</option>
+      <option value="#e74c3c">Assassino</option>
+      <option value="#ff1900">Gladiador</option>
+      <option value="#f39c12">Caçador de Elite</option>
+    </datalist>
+        <span @click="resetColorToDefault"><Icon name="material-symbols:restart-alt-rounded" style='margin-right: 0px;'/>Resetar</span>
+      </div>
+      <div>
+  </div>
+    </div>
+
+
+  </div>
+
+
+  <!-- Ranking -->
+
+  <div class="float-ranking" v-if="Ranking" @click.self="menuRanking()">
+    <div class='hud-ranking zoomOut'>
+      <div id="nav-container" class='nav-aparency'>
+
+        <div>
+          <div class="nav-bottom"></div>
+        </div>
+        <!-- <div>
+          <NuxtLink @click="menuRanking()" class="button-client">
+            <Icon name="material-symbols:cancel-outline" />
+          </NuxtLink>
+        </div> -->
+      </div>
+
+      <div class="aparency">
+        <Icon name="solar:ranking-line-duotone" />
+        <p>
+          Ranking
+        </p>
+      </div>
+      <div class="ranking-box">
+        <div class="ranking-list">
+          <div class="ranking-item" v-for="(membro, i) in teamSortedByXp" :key="membro.xp">
+            <div class="rank-info">
+              <div class="rank-xp">
+              
+                <div class="rank-name">{{ nomeCurto(membro.name) }}</div>
+                <div class="rank-rank">Rank {{ membro.rank }} - {{ membro.xp }} XP </div>
+
+              </div>
+            </div>
+            <div class="rank-number">{{ i + 1 }} º</div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+
+
+  </div>
+
+  <!-- Fim das Notificações -->
+
+<div class="float-notifications" v-if="tableFat" @click.self="tableFloatFat()">
     <div class='hud-notification-imc zoomOut'>
       <div class="notify">
         <Icon name="material-symbols:percent-rounded" />
@@ -1897,193 +2083,8 @@ tableFat.value = !tableFat.value;
                             </tr>
                         </table>
                        </div>
-  </div>
-  <!-- Logout -->
-  <div class="float-notifications" v-if="notificationLogOut" @click.self="logOut()">
-    <div class='hud-notifications zoomOut'>
-      <div class="notify">
-        <Icon name="gravity-ui:exclamation-shape" />
-        <p>
-          Notificação
-        </p>
-      </div>
-      <div class="notify-text">
-        <p>
-          Deseja realmente sair?
-        </p>
-      </div>
-      <div class="notify-buttons">
-        <button @click="navigateTo('/')">Sim</button>
-        <button @click="logOut()">Não</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Configurações -->
-
-  <div class="float-aparency" v-if="Configuration" @click.self="menuConfiguration()">
-    <div class='hud-aparency zoomOut'>
-      <div id="nav-container" class='nav-aparency'>
-
-        <div>
-          <div class="nav-bottom"></div>
-        </div>
-        <!-- <div>
-          <NuxtLink @click="menuConfiguration()" class="button-client">
-            <Icon name="material-symbols:cancel-outline" />
-          </NuxtLink>
-        </div> -->
-      </div>
-
-      <div class="aparency">
-          <Icon name="icon-park-twotone:config" />
-          <p>
-            Configurações
-          </p>
-      </div>
-      <div  class="aparency-text">
-        Localização atual
-      </div>
-      <FullLocation style='text-align:left;' />
-    </div>
-
-  </div>
-
-
-  <!-- Aparencia -->
-
-  <div class="float-aparency" v-if="Aparency" @click.self="menuAparency()">
-    <div class='hud-aparency zoomOut'>
-      <div id="nav-container" class='nav-aparency'>
-
-        <div>
-          <div class="nav-bottom"></div>
-        </div>
-        <!-- <div>
-          <NuxtLink @click="menuAparency()" class="button-client">
-            <Icon name="material-symbols:cancel-outline" />
-          </NuxtLink>
-        </div> -->
-      </div>
-
-      <div class="aparency">
-        <Icon name="solar:palette-round-line-duotone" />
-        <p>
-          Aparência
-        </p>
-      </div>
-      <div class="aparency-text">
-        <div>
-          <span>
-            Tema Base
-          </span>
-          <p>
-            Escolha o tema padrão do Nx_WOD
-          </p>
-        </div>
-
-      </div>
-      <div class="theme-switch">
-        <input type="radio" id="system" value="system" v-model="$colorMode.preference" class="radio-input" />
-        <label for="system" class="pill">
-          <Icon name='mi:computer' /> System
-        </label>
-
-        <input type="radio" id="light" value="light" v-model="$colorMode.preference" class="radio-input" />
-        <label for="light" class="pill">
-          <Icon name='material-symbols:light-mode-outline-rounded' /> Light
-        </label>
-
-        <input type="radio" id="dark" value="dark" v-model="$colorMode.preference" class="radio-input" />
-        <label for="dark" class="pill">
-          <Icon name='material-symbols:dark-mode-outline-rounded' />Dark
-        </label>
-      </div>
-      <br>
-      <div class="aparency-text">
-        <div>
-          <span>
-            Cor de destaque
-          </span>
-          <p>
-            Escolha o a cor de destaque de todo o app.
-          </p>
-        </div>
-
-      </div>
-      <div class="theme-switch">
-        <input
-        class="col"
-      id="playerColor"
-      type="color"
-      v-model="selectedColor"
-      list="presetColors"
-    />
-
-    <datalist id="presetColors">
-      <option value="#8d00ab">Guerreiro</option>
-      <option value="#b800ff">Mago</option>
-      <option value="#2ecc71">Curandeiro</option>
-      <option value="#e74c3c">Assassino</option>
-      <option value="#ff1900">Gladiador</option>
-      <option value="#f39c12">Caçador de Elite</option>
-    </datalist>
-        <span @click="resetColorToDefault"><Icon name="material-symbols:restart-alt-rounded" style='margin-right: 0px;'/>Resetar</span>
-      </div>
-      <div>
-  </div>
-    </div>
-
-
-  </div>
-
-
-  <!-- Ranking -->
-
-  <div class="float-ranking" v-if="Ranking" @click.self="menuRanking()">
-    <div class='hud-ranking zoomOut'>
-      <div id="nav-container" class='nav-aparency'>
-
-        <div>
-          <div class="nav-bottom"></div>
-        </div>
-        <!-- <div>
-          <NuxtLink @click="menuRanking()" class="button-client">
-            <Icon name="material-symbols:cancel-outline" />
-          </NuxtLink>
-        </div> -->
-      </div>
-
-      <div class="aparency">
-        <Icon name="solar:ranking-line-duotone" />
-        <p>
-          Ranking
-        </p>
-      </div>
-      <div class="ranking-box">
-        <div class="ranking-list">
-          <div class="ranking-item" v-for="(membro, i) in teamSortedByXp" :key="membro.xp">
-            <div class="rank-info">
-              <div class="rank-xp">
-              
-                <div class="rank-name">{{ nomeCurto(membro.name) }}</div>
-                <div class="rank-rank">Rank {{ membro.rank }} - {{ membro.xp }} XP </div>
-
-              </div>
-            </div>
-            <div class="rank-number">{{ i + 1 }} º</div>
-          </div>
-        </div>
-      </div>
-      
-      </div>
-    </div>
-
-
-  </div>
-
-  <!-- Fim das Notificações -->
-    
+  </div>  
+  </div>  
 </template>
 
 
@@ -3053,7 +3054,7 @@ hr {
   color: var(--player-color);
       padding: 0.25rem 0.3rem;
       gap: 0 .25rem;
-    margin-top: -1rem;
+    margin-top: -.5rem;
   border-radius: 10px;
   font-weight: bold;
   cursor: pointer;
@@ -3112,26 +3113,7 @@ input[type="file"] {
   overflow-y: auto;
 
 }
-.hud-notification-imc {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1002;
-  border: 2px solid var(--player-color);
-  padding: 2rem .5rem;
-  border-radius: 5px;
-  margin: 0 0 50px 0;
-  width: 90%;
-  background-color: #ffffff;
-  color: #ffffff;
-  color: var(--player-color);
-  box-shadow: 0 0 20px var(--player-color);
-  font-family: 'Orbitron-Regular', sans-serif;
-}
-.dark-mode .hud-notification-imc {
-  background-color: #0f141e;
-}
+
 .hud-notifications {
   position: fixed;
   top: 50%;
@@ -4235,28 +4217,12 @@ border-radius: 8px;
   align-items:center;
   position: absolute;
 }
-.imc-table {
-  display: flex;
-  flex-direction: column;
-  top:76%;
-  width: 70px;
-  height: 70px;
-  left: 8%;
-  justify-content: center;
-  align-items:center;
-  position: absolute;
-}
-table {
-  font-size: .8rem;
-}
-
 .info-imc {
   position: absolute;
   top: -12px;
   color: #00caff;
   left: 65px;
   zoom:1;
-  font-size: .8em;
 }
 .p-gordura {
   display: flex;
@@ -4486,21 +4452,24 @@ table {
 .antro-number span.active {
   background-color: var(--player-color)
 }
-
-.main-div-tree-info {
-    margin: 0px auto 0px auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.hud-notification-imc {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1002;
+  border: 2px solid var(--player-color);
+  padding: 2rem .5rem;
+  border-radius: 5px;
+  margin: 0 0 50px 0;
+  width: 90%;
+  background-color: #ffffff;
+  color: #ffffff;
+  color: var(--player-color);
+  box-shadow: 0 0 20px var(--player-color);
+  font-family: 'Orbitron-Regular', sans-serif;
 }
-  table {
-    margin: 0;
-}
-
-th,
-td {
-    margin: 0 3px;
-    padding: 0 7px;
-    text-align: center;
+.dark-mode .hud-notification-imc {
+  background-color: #0f141e;
 }
 </style>
