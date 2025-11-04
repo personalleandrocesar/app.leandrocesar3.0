@@ -10,6 +10,10 @@ const userBlocked = ref(false);
 const coachIdCookie = useCookie('coachId'); // Criação do cookie para armazenar o ID do coach
 
 const enterClient = () => {
+ // 👉 Faz o teclado sumir no celular
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur()
+  }
   const userData = client.data.value;
 
   // Verifica se o usuário principal existe e não é coach
