@@ -4480,7 +4480,7 @@ border-radius: 8px;
 table {
   border-collapse: no-collapse;
   font-family: Arial, sans-serif;
-  font-size: 13px;
+  font-size: 11.5px;
   margin: 0px 0;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
