@@ -1906,7 +1906,7 @@ tableFat.value = !tableFat.value;
       <div class="notify">
         <Icon name="material-symbols:percent-rounded" />
         <p>
-          Classificação
+          Gordura
         </p>
       </div>
       <div class='main-div-tree-info'>
@@ -1991,7 +1991,7 @@ tableFat.value = !tableFat.value;
       <div class="notify">
         <Icon name="bi:speedometer2" />
         <p>
-          Classificação do IMC
+          IMC
         </p>
       </div>
       <div class='main-div-tree-info'>
@@ -2006,7 +2006,7 @@ tableFat.value = !tableFat.value;
                                     IMC (kgm²)
                                 </th>
                                 <th>
-                                    Risco de <br> Co-morbidades
+                                    Risco de doenças
                                 </th>
                             </tr>
                             <tr>
@@ -4471,5 +4471,61 @@ border-radius: 8px;
 }
 .dark-mode .hud-notification-imc {
   background-color: #0f141e;
+}
+.main-div-tree-info {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+table {
+  border-collapse: no-collapse;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  margin: 0px 0;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Cabeçalho */
+table thead {
+  background-color: #00dc8270;
+  color: white;
+  text-align: left;
+}
+
+table th {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: bold;
+}
+
+table th:nth-child(1){
+  width: 180px;
+}
+table th:nth-child(2){
+  width: 100px;
+}
+table th:nth-child(3){
+  width: 100px;
+}
+
+/* Linhas do corpo */
+table tbody tr {
+  border-bottom: 1px solid #00dc8240;
+  transition: background-color 0.3s ease;
+}
+table tbody tr:nth-child(2n) {
+    background-color: #00dc8220;
+  border-bottom: 1px solid #00dc8240;
+  transition: background-color 0.3s ease;
+}
+
+table tbody tr:hover {
+  background-color: #00dc8250;
+  cursor: pointer;
+}
+
+table td {
+  vertical-align: middle;
 }
 </style>
