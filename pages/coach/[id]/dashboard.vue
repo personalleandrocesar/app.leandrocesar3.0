@@ -8,7 +8,9 @@ useHead({
 </script>
 
 <template>
- <div></div>>
+ <div>
+  <MyChart/>
+ </div>>
 </template>
 
 

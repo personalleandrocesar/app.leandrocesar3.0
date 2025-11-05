@@ -7,7 +7,20 @@ useHead({
 </script>
 
 <template>
-  
+<div>
+        <!-- Barra fixa no topo -->
+        <header class="topbar">
+            <div>
+                <h3 class='upper'>
+                <Icon name='material-symbols:dashboard-outline-rounded' />
+                Home
+                </h3>
+            </div>
+        </header>    
+        </div>
+        <div>
+        <MyChart/>  
+        </div>
 </template>
 
 

@@ -12,15 +12,24 @@
     </div>
     <div class="info">
       <h3>{{ tipoInvestimento }}</h3>
-      <p>R$ {{ valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}</p>
+      <p>{{ valor }} Clientes</p>
     </div>
   </div>
+
 </template>
 
 <script setup>
-const percent = 78
-const valor = 1750
-const tipoInvestimento = 'Pós-Fixado'
+const { selectedColor, selectedClass, classColors, resetColorToDefault } = usePlayerColor()
+
+const cookieTreinador = useCookie('coachId');
+const { data: team } = await useFetch(
+  `https://api.leandrocesar.com/usersnw/${cookieTreinador.value}/team`
+)
+console.log (team.value)
+const total = team.value.length
+const percent = 100
+const valor = total
+const tipoInvestimento = 'Total de clientes'
 </script>
 
 <style scoped>
@@ -35,8 +44,8 @@ const tipoInvestimento = 'Pós-Fixado'
 }
 
 .circle {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -45,8 +54,8 @@ const tipoInvestimento = 'Pós-Fixado'
 }
 
 .inner-circle {
-  width: 44px;
-  height: 44px;
+  width: 64px;
+  height: 64px;
   background-color: #1c1c1c;
   border-radius: 50%;
   display: flex;
