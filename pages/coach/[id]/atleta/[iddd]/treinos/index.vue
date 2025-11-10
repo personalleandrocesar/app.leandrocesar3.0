@@ -1836,6 +1836,8 @@ li:hover img {
   padding: .5rem;
   width: 1000px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  resize: both;         /* Pode redimensionar horizontal e verticalmente */
+  overflow: auto;       /* Obrigatório para funcionar */
 }
 
 .series-column h4 {
@@ -3598,6 +3600,7 @@ table {
 /* Container da tabela */
 .table-container {
     height: 280px;
+    max-height: auto;
     overflow-y:auto;
     margin: 0px;
     padding: 10px 0;

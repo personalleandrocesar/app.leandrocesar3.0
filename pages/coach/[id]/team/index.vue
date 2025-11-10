@@ -586,10 +586,9 @@ loadTeamImages();
                             <span>Gênero?</span>
                             <select name="sex" id="sex" class="select" placeholder='' required v-model="sex" autocomplete="sexo">
                                 <option disabled value="">Selecione uma opção</option>
-                                <option value="feminino">Feminino</option>
-                                <option value="masculino">Masculino</option>
-                                <option value="Outro">Outro</option>
-                            </select>
+                                <option value="Feminino">Feminino</option>
+                                <option value="Masculino">Masculino</option>
+                          </select>
                         </div>
 
 

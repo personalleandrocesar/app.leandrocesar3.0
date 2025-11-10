@@ -466,7 +466,7 @@ function logout () {
                             </NuxtLink>
                             <NuxtLink :to="`/coach/${route.params.id}`" class="menu-button">
                                 <div>
-                                  <Icon name="material-symbols:dashboard-outline-rounded" />
+                                  <Icon name="jam:pie-chart-alt" />
                                   <p>Home</p>
                                 </div>
                             </NuxtLink>
@@ -808,7 +808,7 @@ function logout () {
                         </div>
                     </NuxtLink>
                     <NuxtLink :to="`/coach/${route.params.id}`" class="menu-button">
-                      <Icon name="material-symbols:dashboard-outline-rounded" />
+                      <Icon name="jam:pie-chart-alt" />
                     </NuxtLink>
 
                     <NuxtLink :to="`/coach/${route.params.id}/team`" class="menu-button">
