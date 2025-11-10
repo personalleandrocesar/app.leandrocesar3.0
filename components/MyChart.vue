@@ -24,7 +24,7 @@
     <div
       class="circle-two"
       :style="{
-              background: `conic-gradient(blue 0% ${percentAtivos}%, ${background} ${percentAtivos}% 100%)`
+              background: `conic-gradient(${colors.active} 0% ${percentAtivos}%, ${background} ${percentAtivos}% 100%)`
       }"
     >
       <div class="inner-circle-two">
@@ -32,7 +32,7 @@
       </div>
     </div>
     <div class="info">
-      <h3 :style="{color:` ${blue}`}"> Clientes Ativos</h3>
+      <h3 :style="{color:` ${colors.active}`}"> Clientes Ativos</h3>
       <p>{{ ativosCount }} Clientes</p>
     </div>
   </div>
@@ -41,7 +41,7 @@
     <div
       class="circle-two"
       :style="{
-              background: `conic-gradient(${yellow} 0% ${percentInativos}%, ${background} ${percentInativos}% 100%)`
+              background: `conic-gradient(${colors.inactive} 0% ${percentInativos}%, ${background} ${percentInativos}% 100%)`
       }"
     >
       <div class="inner-circle-two">
@@ -49,7 +49,7 @@
       </div>
     </div>
     <div class="info">
-      <h3 :style="{color:`${yellow}`}">Clientes Inativos</h3>
+      <h3 :style="{color:`${colors.inactive}`}">Clientes Inativos</h3>
       <p>{{ inativosCount }} Clientes</p>
     </div>
   </div>
@@ -59,7 +59,7 @@
     <div
       class="circle-two"
       :style="{
-              background: `conic-gradient(red 0% ${percentBloqueados}%, ${background} ${percentBloqueados}% 100%)`
+              background: `conic-gradient(${colors.blocked} 0% ${percentBloqueados}%, ${background} ${percentBloqueados}% 100%)`
       }"
     >
       <div class="inner-circle-two">
@@ -67,19 +67,19 @@
       </div>
     </div>
     <div class="info">
-      <h3 :style="{color: `${red}`}">Clientes bloqueados</h3>
+      <h3 :style="{color: `${colors.blocked}`}">Clientes bloqueados</h3>
       <p>{{ bloqueadosCount }} Clientes</p>
     </div>
   </div>
   </div>
-<!-- 3º template = Personal-->
+<!-- 3º template = Personal -->
   <div class='template'>
   <!-- Total de Personais -->
 <div class="card">
     <div
       class="circle-two"
       :style="{
-        background: `conic-gradient(var(--player-color) 0% ${percentPersonal}%, #444 ${percentPersonal}% 100%)`
+              background: `conic-gradient(${colors.personal} 0% ${percentPersonal}%, #444 ${percentPersonal}% 100%)`
       }"
     >
       <div class="inner-circle-two">
@@ -87,12 +87,12 @@
       </div>
     </div>
     <div class="info">
-      <h3>{{ textPersonal }}</h3>
+      <h3 :style="{color: `${colors.personal}`}" >{{ personalText }}</h3>
       <p>{{ personalCount }} Clientes</p>
     </div>
   </div>
   
-  <!-- Clientes totais Ativos -->
+  <!-- Personais Ativos -->
 <div class="card-tree">
     <div
       class="circle-tree"
@@ -105,7 +105,7 @@
       </div>
     </div>
     <div class="info-tree">
-      <h3 :style="{color:` ${blue}`}"> Clientes Ativos</h3>
+      <h3 :style="{color:` ${blue}`}"> Personais Ativos</h3>
       <p>{{ ativosCount }} Clientes</p>
     </div>
   </div>
@@ -122,7 +122,7 @@
       </div>
     </div>
     <div class="info-tree">
-      <h3 :style="{color:`${yellow}`}">Clientes Inativos</h3>
+      <h3 :style="{color:`${yellow}`}">Personais Inativos</h3>
       <p>{{ inativosCount }} Clientes</p>
     </div>
   </div>
@@ -140,7 +140,7 @@
       </div>
     </div>
     <div class="info-tree">
-      <h3 :style="{color: `${red}`}">Clientes bloqueados</h3>
+      <h3 :style="{color: `${red}`}">Personais bloqueados</h3>
       <p>{{ bloqueadosCount }} Clientes</p>
     </div>
   </div>
@@ -161,8 +161,29 @@
       </div>
     </div>
     <div class="info">
-      <h3>{{ textConsultoria }}</h3>
+      <h3>{{ consultoriaText }}</h3>
       <p>{{ consultoriaCount }} Clientes</p>
+    </div>
+  </div>
+  </div>
+
+<!-- 4º template -->
+  <div class='template'>
+<!-- consultoria -->
+<div class="card">
+    <div
+      class="circle-two"
+      :style="{
+        background: `conic-gradient(var(--player-color) 0% ${percentAvaliacao}%, #444 ${percentAvaliacao}% 100%)`
+      }"
+    >
+      <div class="inner-circle-two">
+        <span>{{ percentAvaliacao }}%</span>
+      </div>
+    </div>
+    <div class="info">
+      <h3>{{ avalicaoText }}</h3>
+      <p>{{ avaliacaoCount }} Clientes</p>
     </div>
   </div>
   </div>
@@ -171,67 +192,72 @@
 <script setup>
 const { selectedColor, selectedClass, classColors, resetColorToDefault } = usePlayerColor()
 
-const cookieTreinador = useCookie('coachId');
+const cookieTreinador = useCookie('coachId')
 const { data: team } = await useFetch(
   `https://api.leandrocesar.com/usersnw/${cookieTreinador.value}/team`
 )
 const percent = 100;
 
 const colorMode = useColorMode()
-const background = computed (() => {
 
-if (colorMode.value === "dark") {
-  return '#444';
-} else {
-  return '#ccc';
+// 🎨 Cores
+const colors = {
+  active: 'blue',
+  inactive: '#ffd100',
+  blocked: 'red',
+  personal: 'var(--player-color)'
 }
-})
-const blue= 'blue'
-// Computed que conta quantos serviços existem no total
-const totalServices = computed(() => team.value.length)
-const ativosCount = computed(()=> 
-  team.value.filter(item => item.status?.includes('Ativo')).length 
+
+// 🌗 Fundo dinâmico com base no modo de cor
+const background = computed(() => (colorMode.value === 'dark' ? '#444' : '#ccc'))
+
+// 📊 Total de serviços
+const totalServices = computed(() => team.value?.length || 0)
+
+// 🔢 Função genérica para contar status
+const countByStatus = (status) => computed(() =>
+  team.value?.filter(item => item.status?.includes(status)).length || 0
 )
-const percentAtivos = computed (()=> {
-if(ativosCount === 0) return 0
-return ((ativosCount.value / totalServices.value) * 100).toFixed(1)
-})
-const yellow = '#ffd100'
-const inativosCount = computed(() => 
-  team.value.filter(item => item.status?.includes('Inativo')).length
+
+// 🔢 Função genérica para calcular percentual
+const percentOf = (countRef) => computed(() =>
+  totalServices.value === 0 ? 0 : ((countRef.value / totalServices.value) * 100).toFixed(1)
 )
-const percentInativos = computed (()=> {
-if(inativosCount === 0) return ffd100
-return ((inativosCount.value / totalServices.value) * 100).toFixed(1)
-})
-const red = 'red'
-const bloqueadosCount = computed (()=> 
-  team.value.filter(item=> item.status?.includes('Bloqueado')).length
+
+// 🔹 Status principais
+const ativosCount = countByStatus('Ativo')
+const inativosCount = countByStatus('Inativo')
+const bloqueadosCount = countByStatus('Bloqueado')
+
+const percentAtivos = percentOf(ativosCount)
+const percentInativos = percentOf(inativosCount)
+const percentBloqueados = percentOf(bloqueadosCount)
+
+// 🧍 Categorias de serviço
+const serviceCount = (keyword) => computed(() =>
+  team.value?.filter(item =>
+    item.service?.toLowerCase().includes(keyword.toLowerCase())
+  ).length || 0
 )
-const percentBloqueados = computed (()=> {
-if (bloqueadosCount === 0) return 0
-return ((bloqueadosCount.value / totalServices.value) * 100).toFixed(1)
-})
-// Computed que conta quantos têm "personal" no nome
-const textPersonal = 'Clientes de personal'
-const personalCount = computed(() =>
-  team.value.filter(item => item.service?.includes('Personal')).length
+
+const percentService = (countRef) => percentOf(countRef)
+
+const personalText = 'Clientes de Personal'
+const consultoriaText = 'Clientes de Consultoria'
+const avalicaoText = 'Clientes de Avaliação'
+
+const personalCount = serviceCount('Personal')
+const consultoriaCount = serviceCount('Consultoria')
+const avaliacaoCount = serviceCount('Avaliacao')
+
+const percentPersonal = percentService(personalCount)
+const percentConsultoria = percentService(consultoriaCount)
+const percentAvaliacao = percentService(avaliacaoCount)
+
+const personalAtivos = computed (()=>
+team.value?.filter(item => item.status?.includes('Ativo')).length & team.value?.filter(item => item.service?.includes('Personal')).length
 )
-// Percentual de personal sobre o total
-const percentPersonal = computed(() => {
-if (totalServices.value === 0) return 0
-return ((personalCount.value / totalServices.value) * 100).toFixed(1) // ex: 40.0
-})
-const textConsultoria = 'Clinetes de Consultoria'
-// Computed que conta quantos têm "consultoria" no nome
-const consultoriaCount = computed(() =>
-  team.value.filter(item => item.service?.toLowerCase().includes('consultoria')).length
-)
-// Computed de consultoria sobre o total
-const percentConsultoria = computed(()=> {
-if (totalServices === 0) return 0
-return ((consultoriaCount.value / totalServices.value) * 100).toFixed(1)
-})
+console.log(personalAtivos.value)
 </script>
 
 <style scoped>
@@ -245,7 +271,7 @@ return ((consultoriaCount.value / totalServices.value) * 100).toFixed(1)
   align-items: center;
   flex-direction: row;
   border-radius: 12px;
-  padding: 20px;
+  padding: 15px 20px;
   color: white;
   font-family: sans-serif;
   width: fit-content;
@@ -311,7 +337,7 @@ return ((consultoriaCount.value / totalServices.value) * 100).toFixed(1)
   align-items: center;
   flex-direction: row;
   border-radius: 12px;
-  padding: 5px;
+  padding: 5px 10px;
   color: white;
   font-family: sans-serif;
   width: fit-content;
