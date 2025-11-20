@@ -11,7 +11,7 @@ const userBlocked = ref(false);
 const coachIdCookie = useCookie('coachId'); // Criação do cookie para armazenar o ID do coach
 
 // --- PIN state ---
-const usingPin = ref(false); // inicia mostrando PIN (você pode trocar)
+const usingPin = ref(false); // se houver PIN salvo, será true ao montar
 const pinDigits = ref([]);
 const maxPinLength = 6;
 const isSubmittingPin = ref(false);
@@ -27,7 +27,10 @@ function getStorage() {
 }
 function getStoredPinObj() {
   try {
-    const raw = getStorage().getItem(PIN_STORAGE_KEY);
+    // checagem em ambos para compatibilidade
+    const ls = localStorage.getItem(PIN_STORAGE_KEY);
+    const ss = sessionStorage.getItem(PIN_STORAGE_KEY);
+    const raw = ls || ss;
     if (!raw) return null;
     return JSON.parse(raw);
   } catch {
@@ -36,8 +39,12 @@ function getStoredPinObj() {
 }
 function setStoredPinObj(obj) {
   try {
-    if (!obj) getStorage().removeItem(PIN_STORAGE_KEY);
-    else getStorage().setItem(PIN_STORAGE_KEY, JSON.stringify(obj));
+    if (!obj) {
+      localStorage.removeItem(PIN_STORAGE_KEY);
+      sessionStorage.removeItem(PIN_STORAGE_KEY);
+    } else {
+      getStorage().setItem(PIN_STORAGE_KEY, JSON.stringify(obj));
+    }
   } catch {}
 }
 
@@ -50,103 +57,108 @@ async function hashStringHex(input) {
   return arr.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-/* ---------- suas funções de login por usuário/senha (mantive e integrei) ---------- */
-const enterClient = () => {
-  // 👉 Faz o teclado sumir no celular
-  if (document.activeElement instanceof HTMLElement) {
-    document.activeElement.blur()
-  }
+/* ---------- fluxo atualizado: checar usuário antes de mostrar senha ---------- */
+const divUser = ref(true);
+const divSenha = ref(false);
+const tempFoundUser = ref(null); // guarda usuário encontrado (ou membro de time)
+const authenticatedPending = ref(null); // guarda usuário autenticado (após senha correta) para criar PIN + navegar
+
+// função que verifica apenas o username (chamada no AVANÇAR)
+function checkUsername() {
   const userData = client.data.value || [];
+  tempFoundUser.value = null;
 
-  // Verifica se o usuário principal existe e não é coach
-  const userExists = userData.some(
-    u => u.username === user.value && u.password === senha.value && !u.coach
-  );
-
-  // Verifica se o usuário existe em algum `team`
-  const teamMember = userData
-    .flatMap(u => u.team || []) // Garante que lidamos com times definidos ou ausentes
-    .find(
-      member => member.username === user.value && member.password === senha.value
-    );
-
-  // 🔒 Verifica se o usuário principal está bloqueado
-  const blockedUser = userData.find(
-    u =>
-      u.username === user.value &&
-      u.password === senha.value &&
-      u.status === 'Bloqueado'
-  );
-
-  // 🔒 Verifica se o membro de time está bloqueado
-  const blockedTeamMember = userData
-    .flatMap(u => u.team || [])
-    .find(
-      member =>
-        member.username === user.value &&
-        member.password === senha.value &&
-        member.status === 'Bloqueado'
-    );
-
-  if (blockedUser || blockedTeamMember) {
-    console.log("Usuário bloqueado!");
-    userBlocked.value = true;
-    setTimeout(() => {
-      userBlocked.value = false;
-    }, 2000);
+  // procura usuário principal
+  const found = userData.find(u => u.username === user.value);
+  if (found) {
+    tempFoundUser.value = found;
+    divUser.value = false;
+    divSenha.value = true;
+    dontUser.value = false;
     return;
   }
 
-  if (userExists) {
-    console.log("Usuário principal encontrado e não é coach!");
-    const foundUser = userData.find(
-      u => u.username === user.value && !u.coach
-    );
-    // Configura o cookie com o ID do coach
-    coachIdCookie.value = foundUser._id;
-    return navigateTo(`/atleta/${foundUser._id}`);
-  } else if (teamMember) {
-    console.log("Atleta encontrado no time!");
-    // Encontra o coach associado ao atleta no time
-    const coach = userData.find(
-      u => u.team && u.team.some(t => t._id === teamMember._id)
-    );
-    if (coach) {
-      coachIdCookie.value = coach._id; // Configura o cookie com o ID do coach
-    }
-    return navigateTo(`/atleta/${teamMember._id}`);
-  } else {
-    console.log("Usuário não encontrado ou senha incorreta!");
-    dontUser.value = true;
-    setTimeout(() => {
-      dontUser.value = false;
-    }, 2000);
+  // procura membro de time
+  const teamMember = userData.flatMap(u => u.team || []).find(m => m.username === user.value);
+  if (teamMember) {
+    // armazenamos o membro e gravamos também o coachId pra referência
+    const coach = userData.find(u => u.team && u.team.some(t => t._id === teamMember._id));
+    tempFoundUser.value = { ...teamMember, _coachId: coach?._id };
+    divUser.value = false;
+    divSenha.value = true;
+    dontUser.value = false;
+    return;
   }
-};
 
-const divUser = ref(true);
-const divSenha = ref(false);
-function enterDivSenha() {
-divUser.value = false
-divSenha.value = true
+  // não encontrou o usuário
+  dontUser.value = true;
+  setTimeout(() => (dontUser.value = false), 2000);
 }
 
+/* ---------- login por usuário/senha (após aparecer o campo senha) ----------
+   Ao validar senha com sucesso: NÃO navegamos imediatamente. Em vez disso
+   abrimos modal para criar PIN (conforme você pediu). Após criar PIN (ou pular),
+   navegamos para rota correspondente.
+*/
+async function submitPassword() {
+  // esconde teclado
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
+
+  const userData = client.data.value || [];
+
+  // primeiro checa se é usuário principal com mesma senha
+  const foundUser = userData.find(u => u.username === user.value && u.password === senha.value);
+
+  // ou membro de time com mesma senha
+  const teamMember = userData.flatMap(u => u.team || []).find(m => m.username === user.value && m.password === senha.value);
+
+  // bloqueios
+  const blockedUser = userData.find(u => u.username === user.value && u.password === senha.value && u.status === 'Bloqueado');
+  const blockedTeamMember = userData.flatMap(u => u.team || []).find(m => m.username === user.value && m.password === senha.value && m.status === 'Bloqueado');
+
+  if (blockedUser || blockedTeamMember) {
+    userBlocked.value = true;
+    setTimeout(() => (userBlocked.value = false), 2000);
+    return;
+  }
+
+  if (foundUser) {
+    // armazenamos o usuário autenticado para poder criar PIN antes de navegar
+    authenticatedPending.value = { user: foundUser, isTeam: false };
+    openSetPin(); // abre modal de criar PIN
+    return;
+  } else if (teamMember) {
+    const coach = userData.find(u => u.team && u.team.some(t => t._id === teamMember._id));
+    authenticatedPending.value = { user: teamMember, isTeam: true, coachId: coach?._id };
+    openSetPin();
+    return;
+  } else {
+    // senha incorreta ou usuário/senha não batem
+    dontUser.value = true;
+    setTimeout(() => (dontUser.value = false), 2000);
+  }
+}
+
+/* ---------- suas funções antigas mantidas (mas algumas chamadas atualizadas) ---------- */
 const trigger = () => {
-  enterClient();
+  // antes chamava enterClient() diretamente, agora o fluxo é submitPassword()
+  submitPassword();
 };
 
 const id = ref('');
-const dontPerson = ref('')
+const dontPerson = ref('');
 const enterPersonal = () => {
+  // mantive a lógica existente para coach/login personal (funcionará como antes)
   const userData = client.data.value || [];
   const userExists = userData.some(u => u.username === user.value && u.password === senha.value);
   const idExists = userData.find(u => u.username === user.value && u.password === senha.value);
 
   if (userExists) {
-    console.log("Usuário encontrado!");
+    coachIdCookie.value = idExists._id;
     return navigateTo(`/coach/${idExists._id}`);
   } else {
-    console.log("Usuário não encontrado ou senha incorreta!");
     dontUser.value = true;
     setTimeout(() => {
       dontUser.value = false;
@@ -155,167 +167,188 @@ const enterPersonal = () => {
 };
 
 const trig = () => {
-  enterPersonal()
-}
+  enterPersonal();
+};
 
 /* ---------- PIN interaction functions ---------- */
 function pressDigit(d) {
-  if (pinDigits.value.length >= maxPinLength) return
-  pinDigits.value.push(d)
-  pinError.value = ''
+  if (pinDigits.value.length >= maxPinLength) return;
+  pinDigits.value.push(d);
+  pinError.value = '';
   if (pinDigits.value.length === maxPinLength) {
-    submitPin()
+    submitPin();
   }
 }
 function backspace() {
-  pinDigits.value.pop()
+  pinDigits.value.pop();
 }
 
 async function submitPin() {
-  isSubmittingPin.value = true
-  pinError.value = ''
-  const entered = pinDigits.value.join('')
+  isSubmittingPin.value = true;
+  pinError.value = '';
+  const entered = pinDigits.value.join('');
   try {
-    const obj = getStoredPinObj()
+    const obj = getStoredPinObj();
     if (!obj || !obj.hash || !obj.userId) {
-      pinError.value = 'Nenhum PIN cadastrado neste dispositivo.'
-      triggerShake()
-      return
+      pinError.value = 'Nenhum PIN cadastrado neste dispositivo.';
+      triggerShake();
+      return;
     }
-    const h = await hashStringHex(entered)
+    const h = await hashStringHex(entered);
     if (h === obj.hash) {
       // Encontrar o usuário pelo userId no client.data e redirecionar conforme tipo
       const userData = client.data.value || [];
       const found = userData.find(u => u._id === obj.userId) ||
-                    // também buscar em times (caso o PIN esteja associado a um membro de time)
-                    userData.flatMap(u => u.team || []).find(t => t._id === obj.userId)
+                    userData.flatMap(u => u.team || []).find(t => t._id === obj.userId);
       if (found) {
-        // Se for membro de time, redireciona para atleta, senão para atleta/coach conforme coach flag
+        // Se for membro de time, setar cookie do coach e redirecionar para atleta, senão para coach/atleta conforme flag
         if (found._id && !found.coach) {
-          // se for atleta (ou membro), vamos para rota atleta
-          return navigateTo(`/atleta/${found._id}`)
+          // procura coach para esse membro (se existir)
+          const coach = userData.find(u => u.team && u.team.some(t => t._id === found._id));
+          if (coach) coachIdCookie.value = coach._id;
+          return navigateTo(`/atleta/${found._id}`);
         } else if (found._id && found.coach) {
-          return navigateTo(`/coach/${found._id}`)
+          coachIdCookie.value = found._id;
+          return navigateTo(`/coach/${found._id}`);
         } else {
-          // fallback
-          return navigateTo(`/atleta/${obj.userId}`)
+          return navigateTo(`/atleta/${obj.userId}`);
         }
       } else {
-        // fallback: redireciona para /app ou exibe erro
-        return navigateTo(`/atleta/${obj.userId}`)
+        // fallback
+        return navigateTo(`/atleta/${obj.userId}`);
       }
     } else {
-      pinError.value = 'PIN incorreto'
-      triggerShake()
+      pinError.value = 'PIN incorreto';
+      triggerShake();
     }
   } catch (e) {
-    pinError.value = 'Erro ao validar PIN'
-    triggerShake()
+    pinError.value = 'Erro ao validar PIN';
+    triggerShake();
   } finally {
-    isSubmittingPin.value = false
-    pinDigits.value = []
+    isSubmittingPin.value = false;
+    pinDigits.value = [];
   }
 }
 
 function triggerShake() {
-  shake.value = true
-  setTimeout(()=> (shake.value = false), 600)
+  shake.value = true;
+  setTimeout(()=> (shake.value = false), 600);
 }
 
 /* ---------- criar / remover PIN (após autenticação via senha) ---------- */
-const showSetPinModal = ref(false)
-const newPin = ref('')
-const confirmPin = ref('')
-const setPinError = ref('')
-const setPinLoading = ref(false)
-const hasPinStored = ref(false)
+const showSetPinModal = ref(false);
+const newPin = ref('');
+const confirmPin = ref('');
+const setPinError = ref('');
+const setPinLoading = ref(false);
+const hasPinStored = ref(false);
 
-async function openSetPin() {
-  // neste exemplo simples, assumimos que o usuário já se autenticou por senha antes de criar PIN
-  // se quiser, exija reautenticação - aqui abrimos modal
-  newPin.value = ''
-  confirmPin.value = ''
-  setPinError.value = ''
-  showSetPinModal.value = true
+function openSetPin() {
+  // neste fluxo abrimos modal quando o usuário já foi autenticado por senha
+  newPin.value = '';
+  confirmPin.value = '';
+  setPinError.value = '';
+  showSetPinModal.value = true;
 }
 
 function closeSetPin() {
-  showSetPinModal.value = false
+  showSetPinModal.value = false;
+  // caso o usuário tenha pulado e demo authenticatedPending ainda exista, podemos navegar sem PIN (função skipCreatePin)
 }
 
 async function handleSetPin() {
-  setPinError.value = ''
+  setPinError.value = '';
   if (!/^\d+$/.test(newPin.value) || newPin.value.length < 4) {
-    setPinError.value = 'PIN deve ter ao menos 4 dígitos numéricos.'
-    return
+    setPinError.value = 'PIN deve ter ao menos 4 dígitos numéricos.';
+    return;
   }
   if (newPin.value !== confirmPin.value) {
-    setPinError.value = 'PINs não coincidem.'
-    return
+    setPinError.value = 'PINs não coincidem.';
+    return;
   }
-  // aqui vamos tentar associar o PIN ao usuário atualmente logado (com base no campo `user` ou `senha`)
-  // melhor prática: criar PIN somente após autenticação real. No exemplo, tentamos encontrar o usuário atual
-  setPinLoading.value = true
-  try {
-    const userData = client.data.value || [];
-    // procurar usuário com credenciais atuais
-    const foundUser = userData.find(u => u.username === user.value && u.password === senha.value)
-    // se não achar, tentamos encontrar membro de time com as mesmas credenciais
-    const foundTeamMember = userData.flatMap(u => u.team || []).find(m => m.username === user.value && m.password === senha.value)
+  if (!authenticatedPending.value) {
+    setPinError.value = 'Erro: nenhum usuário autenticado.';
+    return;
+  }
 
-    const targetId = foundUser ? foundUser._id : (foundTeamMember ? foundTeamMember._id : null)
-    if (!targetId) {
-      setPinError.value = 'Autentique-se com usuário/senha antes de criar o PIN (use os campos acima).'
-      setPinLoading.value = false
-      return
+  setPinLoading.value = true;
+  try {
+    const h = await hashStringHex(newPin.value);
+    const targetId = authenticatedPending.value.user._id;
+    setStoredPinObj({ hash: h, userId: targetId });
+
+    // grava cookie do coach se houver (para membros de time)
+    if (authenticatedPending.value.isTeam && authenticatedPending.value.coachId) {
+      coachIdCookie.value = authenticatedPending.value.coachId;
+    } else if (authenticatedPending.value.user && authenticatedPending.value.user.coach) {
+      coachIdCookie.value = authenticatedPending.value.user._id;
     }
 
-    const h = await hashStringHex(newPin.value)
-    setStoredPinObj({ hash: h, userId: targetId })
-    showSetPinModal.value = false
-    hasPinStored.value = true
-    alert('PIN salvo neste dispositivo.')
+    hasPinStored.value = true;
+    showSetPinModal.value = false;
+
+    // navega após salvar PIN
+    const isCoach = authenticatedPending.value.user.coach === true;
+    if (isCoach) {
+      return navigateTo(`/coach/${targetId}`);
+    } else {
+      return navigateTo(`/atleta/${targetId}`);
+    }
   } catch (err) {
-    setPinError.value = 'Falha ao salvar PIN.'
+    setPinError.value = 'Falha ao salvar PIN.';
   } finally {
-    setPinLoading.value = false
-    newPin.value = ''
-    confirmPin.value = ''
+    setPinLoading.value = false;
+    newPin.value = '';
+    confirmPin.value = '';
   }
 }
 
+// caso o usuário opte por pular criar PIN após autenticação por senha
+function skipCreatePin() {
+  if (!authenticatedPending.value) return;
+  const targetId = authenticatedPending.value.user._id;
+  if (authenticatedPending.value.isTeam && authenticatedPending.value.coachId) {
+    coachIdCookie.value = authenticatedPending.value.coachId;
+  } else if (authenticatedPending.value.user && authenticatedPending.value.user.coach) {
+    coachIdCookie.value = authenticatedPending.value.user._id;
+  }
+  const isCoach = authenticatedPending.value.user.coach === true;
+  if (isCoach) return navigateTo(`/coach/${targetId}`);
+  return navigateTo(`/atleta/${targetId}`);
+}
+
 async function handleRemovePin() {
-  const ok = confirm('Remover PIN deste dispositivo?')
-  if (!ok) return
-  setStoredPinObj(null)
-  alert('PIN removido.')
-  hasPinStored.value = false
+  const ok = confirm('Remover PIN deste dispositivo?');
+  if (!ok) return;
+  setStoredPinObj(null);
+  alert('PIN removido.');
+  hasPinStored.value = false;
+  usingPin.value = false;
 }
 
 /* detecta se existe PIN armazenado ao montar */
 onMounted(() => {
-  // tenta detectar storage em local/session (checamos ambos para compat)
   try {
-    const ls = localStorage.getItem(PIN_STORAGE_KEY)
-    const ss = sessionStorage.getItem(PIN_STORAGE_KEY)
-    hasPinStored.value = !!(ls || ss)
+    const ls = localStorage.getItem(PIN_STORAGE_KEY);
+    const ss = sessionStorage.getItem(PIN_STORAGE_KEY);
+    hasPinStored.value = !!(ls || ss);
+    if (hasPinStored.value) usingPin.value = true;
   } catch {
-    hasPinStored.value = false
+    hasPinStored.value = false;
   }
-})
+});
 
 watch(rememberDevice, () => {
-  // atualizar indicação de PIN (se mudar a opção, a checagem de onde está armazenado muda)
   try {
-    const raw = getStorage().getItem(PIN_STORAGE_KEY)
-    hasPinStored.value = !!raw
+    const raw = getStoredPinObj();
+    hasPinStored.value = !!raw;
   } catch {
-    hasPinStored.value = false
+    hasPinStored.value = false;
   }
-})
+});
 
-/* ---------- helper para exibir dots do PIN ---------- */
-const pinDots = computed(() => new Array(maxPinLength).fill(0).map((_, i) => i < pinDigits.value.length))
+/* helper para exibir dots do PIN */
+const pinDots = computed(() => new Array(maxPinLength).fill(0).map((_, i) => i < pinDigits.value.length));
 
 /* ---------- restante do seu código de UI / tema / toggles mantidos ---------- */
 const photoOpen = ref(false);
@@ -382,7 +415,6 @@ function formCoach () {
 function close () {
   divLogin.value = true
 }
-
 </script>
 
 <template>
@@ -422,7 +454,7 @@ function close () {
       <div class="name">
         <Nav/>
       </div>
-      <div class="link">
+      <div v-if='!hasPinStored' class="link">
         <NuxtLink @click="buttonFeed" :class="{ aActive: linkClient }">
           Atletas
         </NuxtLink>
@@ -432,24 +464,30 @@ function close () {
       </div>
     </div>
 
-    <!-- Aqui: toggle entre PIN e formulário normal -->
-    <div v-if='usingPin' style="display:flex; justify-content:center; gap:12px; margin-bottom:12px;">
-      <button @click="usingPin = true" :class="{ aActive: usingPin }" class="login">PIN</button>
-      <button @click="usingPin = false" :class="{ aActive: !usingPin }" class="login">Senha</button>
+    <!-- Aqui: toggle entre PIN e formulário normal 
+    <div class="mode-switch" v-if="hasPinStored" style="justify-content:center; margin-bottom:12px;">
+      <button class="tab" :class="{ active: usingPin }" @click="usingPin = true">PIN</button>
+      <button class="tab" :class="{ active: !usingPin }" @click="usingPin = false">Senha</button>
     </div>
+    -->
 
     <!-- PIN area -->
-    <div v-if="usingPin" class="login-pin" style="display:flex; flex-direction:column; align-items:center;">
-      <div class="pin-display" :class="{'shake': shake}">
-        <span v-for="(on, idx) in pinDots" :key="idx" :class="['dot', on ? 'filled' : '']"></span>
+    <div v-if="usingPin" class="login-card login-pin">
+      <div class="user-block">
+        <img  class="avatar" :src="authenticatedPending.foto" alt="avatar" />
+        <p class="user-name">Insira seu PIN</p>
       </div>
 
-      <p v-if="hasPinStored" class="hint">Insira seu PIN ({{ maxPinLength }} dígitos)</p>
-      <p v-else class="hint">Nenhum PIN cadastrado neste dispositivo.<br> Crie um PIN após autenticar com usuário/senha.</p>
+      <div class="pin-display" :class="{'shake': shake}">
+        <div class="dots">
+          <span v-for="(on, idx) in pinDots" :key="idx" :class="['dot', on ? 'filled' : '']"></span>
+        </div>
+      </div>
+
 
       <p v-if="pinError" class="error">{{ pinError }}</p>
 
-      <div class="keypad" style="max-width:320px; margin-top:8px;">
+      <div class="keypad" style="max-width:360px; margin:0 auto;">
         <button v-for="d in ['1','2','3','4','5','6','7','8','9']"
                 :key="d"
                 class="key"
@@ -471,50 +509,57 @@ function close () {
         </button>
       </div>
 
-      <div style="margin-top:10px; display:flex; gap:8px; align-items:center; justify-content:center; flex-wrap:wrap;">
-        <label style="color:var(--muted); display:flex; align-items:center; gap:8px;">
+      <div class="pin-actions">
+        <!--
+        <label class="remember">
           <input type="checkbox" v-model="rememberDevice" /> Lembrar neste dispositivo
         </label>
-        <button class="login" @click="openSetPin">Criar / Alterar PIN</button>
-        <button class="login" @click="handleRemovePin">Remover PIN</button>
+        -->
+        <!-- criação de PIN agora só no modal após autenticação por senha -->
+        <button v-if="hasPinStored" class="secondary-btn" @click="handleRemovePin">Remover PIN</button>
       </div>
     </div>
 
     <!-- Cliente (formulário original) -->
-    <div v-else-if='atletaShow' class="inputs">
+    <div v-else-if='atletaShow' class="login-card inputs">
       <div v-if='divUser'>
-        <input type="email" @keyup.enter="enterDivSenha()" name="" id="username" placeholder="Usuário" autofocus
+        <input class="password-input" type="email" @keyup.enter="checkUsername" id="username" placeholder="Usuário" autofocus
           v-model="user" required autocomplete="username">
       </div>
       <div v-if='divUser'>
-        <NuxtLink class='login' @click="enterDivSenha()">
+        <button class="login-btn" @click="checkUsername">
           AVANÇAR
           <Icon name="ic:round-keyboard-arrow-right" />
-        </NuxtLink>
+        </button>
       </div>
-      <h3 v-if='divSenha'> {{user}} </h3>
-      <div v-if='divSenha' class="senha">
-        <input v-bind:type="pass" @keyup.enter="trigger" name="" id="password" placeholder="Senha"
+
+      <h3 v-if='divSenha'>{{ tempFoundUser ? (tempFoundUser.username || tempFoundUser.email) : user }}</h3>
+
+      <div v-if='divSenha' class="senha" style="width:100%;">
+        <input class="password-input" :type="pass" @keyup.enter="submitPassword" id="password" placeholder="Senha"
           v-model="senha" autocomplete="off">
         <Icon @click="swText" v-if="passView" name="mdi:eye" id="password-icon" />
         <Icon @click="swPass" v-else name="mdi:eye-off" id="password-icon" />
       </div>
-        <label v-if='divSenha' style="color:var(--muted); display:flex; align-items:center; gap:2px;">
-          <input type="checkbox" v-model="rememberDevice" /> Crie um PIN após autenticar senha. 
-        </label>
-      <div v-if='divSenha'>
-        <NuxtLink class='login' @click="enterClient">
+
+      <label v-if='divSenha' style="color:var(--muted); display:flex; align-items:center; gap:8px; margin-top:8px;">
+        <input type="checkbox" v-model="rememberDevice" /> Criar PIN neste dispositivo após autenticar.
+      </label>
+
+      <div v-if='divSenha' class="actions-row">
+        <button class="login-btn" @click="submitPassword">
           LOGIN
           <Icon name="solar:login-3-outline" />
-        </NuxtLink>
+        </button>
       </div>
-      <div class="lost">
+
+      <div class="lost" style="margin-top:12px;">
         <a href="https://api.whatsapp.com/send?phone=5521936184024%20&text=Ol%C3%A1%20professor!%20Esqueci%20o%20meu%20email%20e%20minha%20senha!"
           target="_blank">
           <h5>Esqueci minha senha</h5>
         </a>
       </div>
-      <div class="lost">
+      <div class="lost" style="margin-top:6px;">
         <a>
           <h5>
             Não tem cadastro? Clique
@@ -524,31 +569,31 @@ function close () {
       </div>
     </div>
 
-    <!-- Personal -->
-    <div v-else-if='coachShow' class="inputs">
+    <!-- Personal (coach) -->
+    <div v-else-if='coachShow' class="login-card inputs">
       <div>
-        <input type="email" @keyup.enter="trigger" name="" id="username" placeholder="Usuário" autofocus
+        <input class="password-input" type="email" @keyup.enter="trigger" id="username" placeholder="Usuário"
           v-model="user" required autocomplete="username">
       </div>
-      <div class="senha">
-        <input v-bind:type="pass" @keyup.enter="trig" name="" id="password" placeholder="Senha"
+      <div class="senha" style="width:100%;">
+        <input class="password-input" :type="pass" @keyup.enter="trig" id="password" placeholder="Senha"
           v-model="senha" autocomplete="off">
         <Icon @click="swText" v-if="passView" name="mdi:eye" id="password-icon" />
         <Icon @click="swPass" v-else name="mdi:eye-off" id="password-icon" />
       </div>
-      <div>
-        <NuxtLink class='login' @click="enterPersonal">
+      <div class="actions-row">
+        <button class="login-btn" @click="enterPersonal">
           LOGIN
           <Icon name="solar:login-3-outline" />
-        </NuxtLink>
+        </button>
       </div>
-      <div class="lost">
+      <div class="lost" style="margin-top:12px;">
         <a href="https://api.whatsapp.com/send?phone=5521936184024%20&text=Ol%C3%A1%20professor!%20Esqueci%20o%20meu%20email%20e%20minha%20senha!"
           target="_blank">
           <h5>Esqueci minha senha</h5>
         </a>
       </div>
-      <div class="lost">
+      <div class="lost" style="margin-top:6px;">
         <a>
           <h5>
             Não tem cadastro? Clique
@@ -594,11 +639,11 @@ function close () {
 
   </div>
 
-  <!-- modal de criar PIN -->
+  <!-- modal de criar PIN (aparece APENAS após senha válida) -->
   <div v-if="showSetPinModal" class="modal-backdrop" @click.self="closeSetPin">
     <div class="modal">
       <h3>Criar / Alterar PIN</h3>
-      <p class="muted">PIN numérico — mínimo 6 dígitos. O PIN ficará armazenado localmente (hash) e associado ao seu usuário.</p>
+      <p class="muted">PIN numérico — mínimo 4 dígitos. O PIN ficará armazenado localmente.</p>
 
       <input v-model="newPin" inputmode="numeric" pattern="[0-9]*" placeholder="Novo PIN" />
       <input v-model="confirmPin" inputmode="numeric" pattern="[0-9]*" placeholder="Confirmar PIN" />
@@ -606,17 +651,22 @@ function close () {
       <p v-if="setPinError" class="error">{{ setPinError }}</p>
 
       <div class="modal-actions">
-        <button class="login" @click="handleSetPin" :disabled="setPinLoading">
+        <button class="login-btn" @click="handleSetPin" :disabled="setPinLoading">
           <span v-if="setPinLoading" class="spinner"></span>
           Salvar PIN
         </button>
-        <button class="login" @click="closeSetPin">Cancelar</button>
+        <button class="secondary-btn" @click="skipCreatePin">Pular</button>
+        <button class="secondary-btn" @click="closeSetPin">Cancelar</button>
       </div>
     </div>
   </div>
 
 </template>
+
 <style scoped>
+/* (SEU CSS original foi mantido — não alterei, apenas mantive para o componente) */
+/* ... todo o CSS que você já tinha segue intacto abaixo (igual ao seu arquivo) ... */
+
 a {
   text-decoration: none;
   transition: all .3s linear;
@@ -1169,3 +1219,4 @@ h4:nth-child(1) {
 }
 
 </style>
+
