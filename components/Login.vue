@@ -499,15 +499,15 @@ function close () {
         <Icon @click="swText" v-if="passView" name="mdi:eye" id="password-icon" />
         <Icon @click="swPass" v-else name="mdi:eye-off" id="password-icon" />
       </div>
+        <label v-if='divSenha' style="color:var(--muted); display:flex; align-items:center; gap:2px;">
+          <input type="checkbox" v-model="rememberDevice" /> Crie um PIN após autenticar senha. 
+        </label>
       <div v-if='divSenha'>
         <NuxtLink class='login' @click="enterClient">
           LOGIN
           <Icon name="solar:login-3-outline" />
         </NuxtLink>
       </div>
-        <label v-if='divSenha' style="color:var(--muted); display:flex; align-items:center; gap:2px;">
-          <input type="checkbox" v-model="rememberDevice" /> Crie um PIN após autenticar senha. 
-        </label>
       <div class="lost">
         <a href="https://api.whatsapp.com/send?phone=5521936184024%20&text=Ol%C3%A1%20professor!%20Esqueci%20o%20meu%20email%20e%20minha%20senha!"
           target="_blank">
