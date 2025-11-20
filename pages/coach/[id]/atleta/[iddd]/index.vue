@@ -1,2250 +1,406 @@
-<script setup>
-import { ref, watch, computed, onMounted } from "vue";
-const route = useRoute();
+<script setup lang="ts">
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import useAuth from '~/composables/useAuth'
 
-const {
-  xpAtual,
-  rankAtual,
-  proximoRank,
-  nivelAtualS,
-  proximoNivelS,
-  xpClasse,
-  xpRelativo,
-  xpMin,
-  xpMax,
-  missoesAtuais
-} = await usePlayerRank(route.params.id, route.params.iddd)
+const router = useRouter()
+const { login } = useAuth()
 
-const { selectedColor, selectedClass, classColors, resetColorToDefault } = usePlayerColor()
+/* ---------- usuário mock --------- */
+const user = ref({
+  name: 'Leandro Costa',
+  email: 'leandro@example.com',
+  avatarUrl: '/avatar-default.png'
+})
 
-const Users = await useFetch(
-    `https://api.leandrocesar.com/usersnw/${route.params.id}/team/${route.params.iddd}`,
-);
-const item = Users.data.value;
-const user = item;
-const creationUserInput = ref();
-const name = user.name;
-const firstName = computed(() => name.split(" ")[0]);
+/* ---------- senha tradicional -------- */
+const password = ref('')
+const loading = ref(false)
+const error = ref('')
 
-useHead({
-  titleTemplate: `${firstName.value} ${user.lastName} - Cliente | Leandro Cesar - App`,
-});
-
-async function atualizarAtleta() {
+async function handlePasswordLogin() {
+  error.value = ''
+  if (!password.value) return
+  loading.value = true
   try {
-    // 🔹 Se o campo não existir, cria com base no input
-      // exemplo: vindo de um input ou gerado automaticamente
-      const inputDate = creationUserInput?.value || new Date();
-      user.creationUser = new Date(inputDate).toISOString();
-    const response = await fetch(`https://api.leandrocesar.com/usersnw/${route.params.id}/team/${route.params.iddd}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: user.name,
-        username: user.username,
-        status: user.status,
-        xp: user.xp,
-        whatsapp: user.whatsapp,
-        email: user.email,
-        target: user.target,
-        service: user.service,
-        birthday: user.birthday,
-        sex: user.sex,
-        day: user.day,
-        time: user.time,
-        payDay: user.payDay,
-        terms: user.terms,
-        creationUser: user.creationUser // 🔹 Adiciona aqui
-      })
-    });
-notificFive.value = true;
-    setTimeout(() => {
-        notificFive.value = false;
-        reloadNuxtApp({ path: `/coach/${route.params.id}/atleta/${route.params.iddd}`, ttl: 1000 });
-    }, 1300);
-    const data = await response.json();
-    console.log('Atleta atualizado:', data);
-  } catch (error) {
-    console.error('Erro ao atualizar atleta:', error);
-  }
-}
-
-
-async function submitDelete() {
-  try {
-    const { data, error: fetchError } = await useFetch(`https://api.leandrocesar.com/usersnw/${route.params.id}/team/${route.params.iddd}`, {
-      method: 'DELETE',
-    });
-    if (fetchError.value) {
-      error.value = fetchError.value.message || 'Erro ao tentar deletar o atleta.';
-      return;
-    }
-    notificFour.value = true;
-    console.log('Atleta removido com sucesso.');
-    setTimeout(() => {
-        notificTree.value = false;
-        notificFour.value = false;
-        reloadNuxtApp({ path: `/coach/${route.params.id}/team`, ttl: 1000 });
-    }, 1500);
-  } catch (err) {
-    error.value = 'Erro ao conectar ao servidor.';
-    console.error(err);
-  }
-}
-
-const userId = ref('');
-const athleteId = ref('');
-const error = ref(null);
-const notificTree = ref(false);
-const notificFour = ref(false);
-const notificFive = ref(false);
-
-function notifConfirm() { notificTree.value = true; }
-function notifCancel() { notificTree.value = false; }
-
-const showFloatingDiv = ref(false);
-const previewImage = ref(null);
-const file = ref(null);
-const loading = ref(false);
-
-const fetchUserData = async () => {
-  const formats = ['jpeg', 'jpg', 'png'];
-  let latestImage = null;
-
-  // Tenta buscar imagens e verificar qual delas é a mais recente
-  for (const format of formats) {
-    try {
-      const response = await fetch(`https://api.leandrocesar.com/uploads/${user.username}.${format}`);
-      if (response.ok) {
-        // Obtenha o cabeçalho 'Last-Modified' para comparar as datas
-        const lastModified = response.headers.get('Last-Modified');
-        
-        if (lastModified) {
-          if (!latestImage || new Date(lastModified) > new Date(latestImage.lastModified)) {
-            latestImage = { url: `https://api.leandrocesar.com/uploads/${user.username}.${format}`, lastModified };
-          }
-        } else {
-          // Caso o servidor não envie o cabeçalho Last-Modified, use a primeira imagem que encontrar
-          latestImage = { url: `https://api.leandrocesar.com/uploads/${user.username}.${format}` };
-        }
-      }
-    } catch (err) {
-      console.error(`Erro ao buscar dados do usuário no formato ${format}:`, err);
-    }
-  }
-
-  // Atualiza a foto do usuário com a imagem mais recente
-  if (latestImage) {
-    user.foto = latestImage.url;
-    console.log('Imagem atualizada:', latestImage.url);
-  }
-};
-
-
-onMounted(fetchUserData);
-
-const openFloatingDiv = () => { showFloatingDiv.value = true; };
-const closeFloatingDiv = () => {
-  showFloatingDiv.value = false;
-  previewImage.value = null;
-  file.value = null;
-};
-
-const handleFileChange = (event) => {
-  file.value = event.target.files[0];
-  if (file.value) {
-    previewImage.value = URL.createObjectURL(file.value);
-    showFloatingDiv.value = true;
-  }
-};
-
-const uploadImage = async () => {
-  if (!file.value) return alert("Por favor, selecione um arquivo.");
-
-  const formData = new FormData();
-  formData.append('image', file.value, `${user.username}.${file.value.name.split('.').pop()}`);
-
-  try {
-    loading.value = true;
-    const response = await fetch('https://api.leandrocesar.com/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (response.ok) {
-      alert("Upload realizado com sucesso!");
-      // Após o upload, chama a função para pegar a imagem mais recente
-      await fetchUserData();
-      closeFloatingDiv();
-      
-    } else {
-      alert("Erro no upload.");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Erro ao conectar com o servidor.");
+    await login({ email: user.value.email, password: password.value })
+    // redireciona após login
+    router.push('/app')
+  } catch (err: any) {
+    error.value = err?.message ?? 'Falha ao autenticar'
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
+/* ---------- PIN flow (UI) ---------- */
+const usingPin = ref(true) // mostrar teclado PIN por padrão
+const pinDigits = ref<string[]>([]) // digits entered
+const maxPinLength = 4
+const isSubmittingPin = ref(false)
+const pinError = ref('')
+const shake = ref(false)
 
-const imageExists = ref(false);
-const checkImageExists = async () => {
-  const formats = ['jpeg', 'jpg', 'png', 'webp'];
-  for (const format of formats) {
-    try {
-      const response = await fetch(`https://api.leandrocesar.com/uploads/${user.username}.${format}`, { method: 'HEAD' });
-      if (response.ok) {
-        imageExists.value = true;
-        console.log('ok a imagem existe!')
-        return;
-      }
-    } catch (error) {
-      console.log(`Erro ao verificar a imagem no formato ${format}:`, error);
+/* persistence options */
+const rememberDevice = ref(true) // quando true usa localStorage, senão sessionStorage
+
+/* helper: hash string com Web Crypto (SHA-256) */
+async function hashStringHex(input: string) {
+  const enc = new TextEncoder()
+  const data = enc.encode(input)
+  const hash = await crypto.subtle.digest('SHA-256', data)
+  const arr = Array.from(new Uint8Array(hash))
+  return arr.map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+/* storage helpers */
+const PIN_STORAGE_KEY = 'vault.pinHash'
+
+function getStorage() {
+  return rememberDevice.value ? localStorage : sessionStorage
+}
+async function getStoredPinHash() {
+  try {
+    return getStorage().getItem(PIN_STORAGE_KEY)
+  } catch {
+    return null
+  }
+}
+async function setStoredPinHash(hash: string | null) {
+  try {
+    if (!hash) {
+      getStorage().removeItem(PIN_STORAGE_KEY)
+    } else {
+      getStorage().setItem(PIN_STORAGE_KEY, hash)
     }
+  } catch {}
+}
+
+/* tecla pressionada */
+function pressDigit(d: string) {
+  if (pinDigits.value.length >= maxPinLength) return
+  pinDigits.value.push(d)
+  pinError.value = ''
+  if (pinDigits.value.length === maxPinLength) {
+    submitPin()
   }
-  imageExists.value = false;
-};
-
-await checkImageExists();
-
-
-const photoOpen = ref(false);
-function openPhoto() {
-    photoOpen.value = !photoOpen.value;
 }
-const data = new Date(user.creationUser);
-const formatada = data.toLocaleDateString('pt-BR'); 
-
-const columns = ref(true)
-function atualizar () {
- columns.value = !columns.value
+function backspace() {
+  pinDigits.value.pop()
 }
+
+/* verificar PIN localmente: compara hash do PIN digitado com o hash armazenado */
+async function submitPin() {
+  isSubmittingPin.value = true
+  pinError.value = ''
+  const entered = pinDigits.value.join('')
+  try {
+    const storedHash = await getStoredPinHash()
+    if (!storedHash) {
+      pinError.value = 'Nenhum PIN cadastrado neste dispositivo.'
+      triggerShake()
+      return
+    }
+    const h = await hashStringHex(entered)
+    if (h === storedHash) {
+      // sucesso - aqui você pode chamar sua API para obter token real. No demo, só redireciona.
+      // Exemplo: await login({ email: user.email, pin: entered })  (no demo, não usado)
+      router.push('/app')
+    } else {
+      pinError.value = 'PIN incorreto'
+      triggerShake()
+    }
+  } catch (e) {
+    pinError.value = 'Erro ao validar PIN'
+    triggerShake()
+  } finally {
+    isSubmittingPin.value = false
+    pinDigits.value = []
+  }
+}
+function triggerShake() {
+  shake.value = true
+  setTimeout(()=> (shake.value = false), 600)
+}
+
+/* ---------- criar / remover PIN (após autenticação via senha) ---------- */
+const showSetPinModal = ref(false)
+const newPin = ref('')
+const confirmPin = ref('')
+const setPinError = ref('')
+const setPinLoading = ref(false)
+
+async function openSetPin() {
+  // modal para criar PIN (em produção exigir reautenticação)
+  newPin.value = ''
+  confirmPin.value = ''
+  setPinError.value = ''
+  showSetPinModal.value = true
+}
+
+function closeSetPin() {
+  showSetPinModal.value = false
+}
+
+async function handleSetPin() {
+  setPinError.value = ''
+  if (!/^\d+$/.test(newPin.value) || newPin.value.length < 4) {
+    setPinError.value = 'PIN deve ter ao menos 4 dígitos numéricos.'
+    return
+  }
+  if (newPin.value !== confirmPin.value) {
+    setPinError.value = 'PINs não coincidem.'
+    return
+  }
+  setPinLoading.value = true
+  try {
+    const h = await hashStringHex(newPin.value)
+    await setStoredPinHash(h)
+    showSetPinModal.value = false
+    // opcional: informar ao usuário
+    alert('PIN salvo neste dispositivo.')
+  } catch (err) {
+    setPinError.value = 'Falha ao salvar PIN.'
+  } finally {
+    setPinLoading.value = false
+  }
+}
+
+async function handleRemovePin() {
+  const ok = confirm('Remover PIN deste dispositivo?')
+  if (!ok) return
+  await setStoredPinHash(null)
+  alert('PIN removido.')
+}
+
+/* --------- auto-detect if PIN present (to show hint) ---------- */
+const hasPinStored = ref(false)
+async function refreshHasPin() {
+  hasPinStored.value = !!(await getStoredPinHash())
+}
+onMounted(refreshHasPin)
+watch(rememberDevice, refreshHasPin)
+
+/* small helper: show masked dots */
+const pinDots = computed(() => {
+  return new Array(maxPinLength).fill(0).map((_, i) => i < pinDigits.value.length)
+})
+
 </script>
 
-
 <template>
-    <!-- <UploadImage /> -->
-    <div class="layout-no-sidebar">
-        <!-- Barra fixa no topo -->
-        <header class="topbar">
-        <h3 v-if='columns' class='upper'>
-            <Icon name='cil:weightlifitng' /> {{ user.name }} 
-        </h3>
-        <h3 v-else class='upper'>
-      <Icon name='cil:weightlifitng' />
-      <input type="text" id="flexaoBraco" style='width: 500px; margin-left: .5rem;' v-model='user.name' autofocus
-      autocomplete="flexaoBraco" placeholder='Nome Completo'>
-      </h3>
-        </header>
-            <div class="nav-users">
-                <div v-if='columns' class="users-conf">
-                    <NuxtLink :to="`/coach/${route.params.id}/atleta/${route.params.iddd}`"  class="filter">
-                        <Icon name='heroicons:user-circle' /> Geral
-                    </NuxtLink>
-                    <NuxtLink :to="`/coach/${route.params.id}/atleta/${route.params.iddd}/treinos`"  class="filter">
-                        <Icon name='solar:dumbbell-large-minimalistic-broken' /> Treinos
-                    </NuxtLink>
-                    <NuxtLink :to="`/coach/${route.params.id}/atleta/${route.params.iddd}/avaliacoes`" class="filter" >
-                        <Icon name='bi:clipboard-pulse' /> Avaliações
-                    </NuxtLink>
-                </div>
-                <div v-if='columns' class="users-conf">
-                    <NuxtLink @click='atualizar()' class="filter">
-                        <Icon name='material-symbols:person-edit-outline' /> Editar
-                    </NuxtLink>
-                    <NuxtLink @click='notifConfirm()' class="filter" >
-                        <Icon name='material-symbols:person-cancel-outline-rounded' /> Deletar
-                    </NuxtLink>
-                </div>
-                <div v-else class="users-conf-two">
-                    <NuxtLink @click='atualizarAtleta()' class="filter">
-                        <Icon name='mdi:account-sync-outline' /> Atualizar
-                    </NuxtLink>
-                    <NuxtLink @click='atualizar()' class="filter">
-                        <Icon name='material-symbols:close-small-outline' /> Fechar
-                    </NuxtLink>
-                </div>
-            </div>
-      <div class="content">
-          <!-- Conteúdo com scroll -->
-           <!-- Dentro do seu template, adicione uma barra de progresso -->
-<div v-if="loading" class="progress-bar">
-  <div class="progress" :style="{ width: progress + '%' }"></div>
-</div>
+  <div class="login-screen" role="main">
+    <div class="wallpaper" aria-hidden="true"></div>
 
-<div class='line'>
-<div v-if='columns' class="line-columns">
-      <div class='bor-logo'>          
-    <div class="logo">
-    <!-- Foto do usuário ou pré-visualização -->
-    <img @click="openPhoto" :src="user.foto || previewImage" alt="User Photo" />
-    <div v-if="photoOpen" class="nav-bar">
-            <div  class='logo-nav-bar'>
-                <img @click="openPhoto" :src="user.foto || previewImage">
-                <!-- <img @click="openPhoto" :src="inter.data.value?.foto"> -->
-            </div>
+    <div class="center-wrap">
+      <div class="login-card" role="form">
+        <div class="user-block">
+          <img :src="user.avatarUrl" alt="" class="avatar" />
+          <h1 class="user-name">{{ user.name }}</h1>
+          <p class="user-email">{{ user.email }}</p>
         </div>
 
-    <!-- Ícone para abrir o seletor de arquivos -->
-    <label class="photo" for="file-upload" @click="openFloatingDiv">
-      <Icon name="uil:image-edit" />
-    </label>
+        <!-- toggle entre PIN e senha -->
+        <div class="mode-switch">
+          <button :class="['tab', usingPin ? 'active' : '']" @click="usingPin = true">PIN</button>
+          <button :class="['tab', !usingPin ? 'active' : '']" @click="usingPin = false">Senha</button>
+        </div>
 
+        <!-- PIN view -->
+        <div v-if="usingPin" class="pin-area">
+          <div :class="['pin-display', shake ? 'shake' : '']" aria-hidden="false">
+            <div class="dots">
+              <span v-for="(on, idx) in pinDots" :key="idx" :class="['dot', on ? 'filled' : '']"></span>
+            </div>
+          </div>
 
-    <input id="file-upload" type="file" @change="handleFileChange" hidden />
+          <p class="hint" v-if="hasPinStored">Insira seu PIN ({{ maxPinLength }} dígitos)</p>
+          <p class="hint" v-else>Sem PIN cadastrado. Crie um PIN após autenticar por senha.</p>
 
-    <!-- Informações do usuário -->
-    <div class="head-name">
-      <h3>{{ user.username }}</h3>
-      <span><b>ID:</b> {{ user._id }}</span>
-      <div>
-        <h4>
-          RANK <span>{{ rankAtual }}</span>
-        </h4>
-        <h4
-  :class="{
-    status: user.status === 'Ativo',
-    statusOff: user.status === 'Bloqueado',
-    statusInativo: user.status === 'Inativo'
-  }"
->
-  {{ 
-    user.status === 'Bloqueado' 
-      ? 'Bloqueado' 
-      : user.status === 'Inativo' 
-        ? 'Inativo' 
-        : 'Ativo' 
-  }}
-</h4>
+          <p v-if="pinError" class="error" role="alert">{{ pinError }}</p>
+
+          <!-- keypad -->
+          <div class="keypad" aria-hidden="false">
+            <button v-for="d in ['1','2','3','4','5','6','7','8','9']"
+                    :key="d"
+                    class="key"
+                    @click="pressDigit(d)"
+                    :disabled="isSubmittingPin"
+                    aria-label="Tecla {{d}}">
+              <span class="num">{{ d }}</span>
+            </button>
+
+            <button class="key ghost" @click="backspace" :disabled="isSubmittingPin" aria-label="Apagar">
+              ⌫
+            </button>
+
+            <button class="key" @click="pressDigit('0')" :disabled="isSubmittingPin" aria-label="Tecla zero">
+              <span class="num">0</span>
+            </button>
+
+            <button class="key action" @click="submitPin" :disabled="isSubmittingPin" aria-label="Entrar por PIN">
+              <span v-if="isSubmittingPin" class="spinner"></span>
+              <span v-else>OK</span>
+            </button>
+          </div>
+
+          <div class="pin-actions">
+            <label class="remember">
+              <input type="checkbox" v-model="rememberDevice" />
+              Lembrar neste dispositivo
+            </label>
+            <button class="ghost" @click="openSetPin">Criar / Alterar PIN</button>
+            <button class="ghost" @click="handleRemovePin">Remover PIN</button>
+          </div>
+        </div>
+
+        <!-- Password view -->
+        <div v-else class="password-area">
+          <input v-model="password" type="password" placeholder="Digite sua senha" @keyup.enter="handlePasswordLogin"
+                 :disabled="loading" class="password-input" />
+          <div class="actions-row">
+            <button class="login-btn" @click="handlePasswordLogin" :disabled="loading || !password">
+              <span v-if="loading" class="spinner"></span>
+              Entrar
+            </button>
+            <button class="secondary-btn" @click="openSetPin">Criar PIN</button>
+          </div>
+          <p v-if="error" class="error" role="alert">{{ error }}</p>
+        </div>
+      </div>
+
+      <div class="footer-controls" aria-hidden="false">
+        <div class="left-actions">
+          <button class="ghost">Acessibilidade</button>
+        </div>
+        <div class="right-actions">
+          <div class="status">
+            <span class="dot" title="Conectado"></span>
+            <span class="text">Wi-Fi</span>
+          </div>
+          <button class="ghost">Sair</button>
+        </div>
       </div>
     </div>
-</div>
-<div>
-  <HudXp />
-</div>
-  </div>
 
+    <!-- modal de criar PIN -->
+    <div v-if="showSetPinModal" class="modal-backdrop" @click.self="closeSetPin">
+      <div class="modal">
+        <h3>Criar / Alterar PIN</h3>
+        <p class="muted">PIN numérico — mínimo 4 dígitos. O PIN ficará armazenado localmente (hash).</p>
 
-  <!-- Div flutuante de pré-visualização -->
-  <div v-if="showFloatingDiv" class="float">
-  <div class="floating-div">
-        <div>
-            <h3>Pré-visualização</h3>
-            <img v-if="previewImage" :src="previewImage" alt="Preview Image" />
-            <div v-else class='alt-image'></div>
+        <input v-model="newPin" inputmode="numeric" pattern="[0-9]*" placeholder="Novo PIN" />
+        <input v-model="confirmPin" inputmode="numeric" pattern="[0-9]*" placeholder="Confirmar PIN" />
+
+        <p v-if="setPinError" class="error">{{ setPinError }}</p>
+
+        <div class="modal-actions">
+          <button class="login-btn" @click="handleSetPin" :disabled="setPinLoading">
+            <span v-if="setPinLoading" class="spinner"></span>
+            Salvar PIN
+          </button>
+          <button class="secondary-btn" @click="closeSetPin">Cancelar</button>
         </div>
-        <div>
-            <button @click="uploadImage" :disabled="loading">
-                {{ loading ? "Enviando..." : "Upload" }}
-            </button>
-            <button @click="closeFloatingDiv">Cancelar</button>
-        </div>
-  </div>
-  </div>
-
-      
-                
-          <div class='bor'>
-                            <div class="theme-switch">
-                                <div>
-                                    <h4>Sexo</h4>
-                                    <h3>{{user.sex}}</h3>
-                                </div>
-                                <div>
-                                    <h4>Data de nascimento</h4>
-                                    <h3>{{user.birthday.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3-$2-$1')}}</h3>
-                                </div>
-                                <div>
-                                    <h4>Idade</h4>
-                                    <h3> 39 anos</h3>
-                                </div>
-                                <div>
-                                    <h4>Data de cadastro</h4>
-                                    <h3 v-if='user.creationUser'>{{formatada}}</h3>
-                                    <h3 v-else>--/--</h3>
-                                </div>
-                            </div>
-
-             <div class="theme-switch">
-                                <div>
-                                    <h4>WhatsApp</h4>
-                                    <h3>{{user.whatsapp.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3')}}</h3>
-                                </div>
-                                <div>
-                                    <h4>E-mail</h4>
-                                    <h3>{{user.email}}</h3>
-                                </div>
-                                <div>
-                                    <h4>Objetivo</h4>
-                                    <h3>{{user.target}}</h3>
-                                </div>
-                                <div>
-                                    <h4>Serviço</h4>
-                                    <h3>{{user.service}}</h3>
-                                </div>
-                            </div>                     
-            <div class="theme-switch">
-                                <div>
-                                    <h4>Dias de treino</h4>
-                                    <h3>{{user.day}}</h3>
-                                </div>
-                                <div>
-                                    <h4>Tempos de treino</h4>
-                                    <h3>{{user.time}}</h3>
-                                </div>
-                                <div>
-                                    <h4>Dia de Pagamento</h4>
-                                    <h3>{{user.payDay}}</h3>
-                                </div>
-                                <div>
-                                    <h4>Termos</h4>
-                                    <h3 v-if='user.terms'>{{user.terms}}</h3>
-                                    <h3 v-else style='text-align:center'>--</h3>
-                                </div>
-             </div>
-          </div>
-                
-        
-                
-                
-            </div>
- 
-    <div v-else class="line-columns">
-      <div class='bor-logo'>          
-    <div class="logo">
-    <!-- Foto do usuário ou pré-visualização -->
-    <img @click="openPhoto" :src="user.foto || previewImage" alt="User Photo" />
-    <div v-if="photoOpen" class="nav-bar">
-            <div  class='logo-nav-bar'>
-                <img @click="openPhoto" :src="user.foto || previewImage">
-                <!-- <img @click="openPhoto" :src="inter.data.value?.foto"> -->
-            </div>
-        </div>
-
-    <!-- Ícone para abrir o seletor de arquivos -->
-    <label class="photo" for="file-upload" @click="openFloatingDiv">
-      <Icon name="uil:image-edit" />
-    </label>
-
-
-    <input id="file-upload" type="file" @change="handleFileChange" hidden />
-
-    <!-- Informações do usuário -->
-    <div class="head-name">
-      <input type="text" id="flexaoBraco" style='width: 240px;' v-model='user.username' autofocus
-      autocomplete="flexaoBraco" placeholder='UserName'>
-      <span><b>ID:</b> {{ user._id }}</span>
-      <div>
-        <h4 style='width: 100px;'>
-          RANK <span>{{ rankAtual }}</span>
-        </h4>  
-                                      <select name="sex" id="sex" style='width: 130px;' class="select" placeholder='' required v-model="user.status">
-                                <option disabled value="">Escolha uma das opções</option>
-                                <option value="Ativo">Ativo</option>
-                                <option value="Inativo">Inativo</option>
-                                <option value="Bloqueado">Bloqueado</option>
-                            </select>      </div>
-      
-    </div>
-
-</div>
-<div>
-      <input type="text" id="flexaoBraco" style='width: 200px;' v-model='user.xp' autofocus
-      autocomplete="flexaoBraco" placeholder='Xp do usuário?'>
-
-      
+      </div>
     </div>
   </div>
-
-
-  <!-- Div flutuante de pré-visualização -->
-  <div v-if="showFloatingDiv" class="float">
-  <div class="floating-div">
-        <div>
-            <h3>Pré-visualização</h3>
-            <img v-if="previewImage" :src="previewImage" alt="Preview Image" />
-            <div v-else class='alt-image'></div>
-        </div>
-        <div>
-            <button @click="uploadImage" :disabled="loading">
-                {{ loading ? "Enviando..." : "Upload" }}
-            </button>
-            <button @click="closeFloatingDiv">Cancelar</button>
-        </div>
-  </div>
-  </div>
-
-      
-                
-          <div class='bor'>
-                            <div class="theme-switch">
-
-                                <div>
-                                    <h4>Sexo</h4>
-                                <select name="sex" id="sex" style='width: 160px;' class="select" placeholder='' required v-model="user.sex">
-                                <option disabled value="">Escolha uma das opções</option>
-                                <option value="Feminino">Feminino</option>
-                                <option value="Masculino">Masculino</option>
-                            </select>
-                                </div>
-                                <div>
-                                    <h4>Data de nascimento</h4>
-                                <input type="date" id="flexaoBraco" style='width: 150px;' v-model='user.birthday' autofocus
-                                autocomplete="flexaoBraco">
-                   </div>
-              <div>
-                                    <h4>Idade</h4>
-                                    <h3>39 anos</h3>
-                                </div>
-                                <div>
-                                    <h4>Data de cadastro</h4>
-                                    <h3 v-if='user.creationUser'>{{formatada}}</h3>
-                                <input v-else type="datetime-local" id="flexaoBraco" style='width: 150px;' v-model="creationUserInput" autofocus
-                                autocomplete="flexaoBraco">
-                                </div>
-                            </div>
-
-             <div class="theme-switch">
-                                <div>
-                                    <h4>WhatsApp</h4>
-                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.whatsapp' autofocus
-                                autocomplete="flexaoBraco">
-                                </div>
-                                <div>
-                                    <h4>E-mail</h4>
-                                <input type="text" id="flexaoBraco" style='width: 200px;' v-model='user.email' autofocus
-                                autocomplete="flexaoBraco">
-
-
-                                </div>
-                                <div>
-                                    <h4>Objetivo</h4>
-                                <select name="sex" id="sex" style='width: 150px;' class="select" placeholder='' required v-model="user.target">
-                                  <option disabled value="">Escolha uma das opções</option>
-                                  <option value="Hipertrofia">Hipertrofia</option>
-                                  <option value="Emagrecimento">Emagrecimento</option>
-                                  <option value="Resistencia">Resistência</option>
-                                  <option value="Definicao">Definição</option>
-                                  <option value="Saude">Saúde</option>
-                                </select>
-                                </div>
-                                <div>
-                                    <h4>Serviço</h4>
-                                <select name="sex" id="sex" style='width: 150px;' class="select" placeholder='' required v-model="user.service">
-                                  <option disabled value="">Escolha uma das opções</option>
-                                  <option value="Personal">Personal</option>
-                                  <option value="Consultoria">Consultoria</option>
-                                  <option value="Avaliacao">Avaliação Física</option>
-                                  <option value="ConsultoriaAvaliacao">Consultoria + Avaliação</option>
-                                  <option value="Kravmaga">Krav-maga</option>
-                                </select>
-                                </div>
-                            </div>                     
-            <div class="theme-switch">
-                                <div>
-                                    <h4>Dias de treino</h4>
-                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.day' autofocus
-                                autocomplete="flexaoBraco">
-                                </div>
-                                <div>
-                                    <h4>Tempos de treino</h4>
-                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.time' autofocus
-                                autocomplete="flexaoBraco">
-                                </div>
-                                <div>
-                                    <h4>Dia de Pagamento</h4>
-                                <input type="text" id="flexaoBraco" style='width: 150px;' v-model='user.payDay' autofocus
-                                autocomplete="flexaoBraco">
-                                </div>
-                                <div>
-                                    <h4>Termos</h4>
-                                <select name="sex" id="sex" style='width: 130px;' class="select" placeholder='' required v-model="user.terms">
-                                <option disabled value="">Escolha uma das opções</option>
-                                <option value="Assinado">Assinado</option>
-                                <option value="Não Assinado">Não assinado</option>
-                            </select>
-                                </div>
-             </div>
-          </div>
-                
-        
-                
-                
-            </div>
-          </div>
-        </div>
-      <div class="content">
-          <div class='line'>
-          <div class="line-columns">
-          
-                <div>
-                <div>
-                
-                </div>
-                    <h3>Atualizações da conta </h3>
-                    <p>Receba atualizações sobre o Next_Wod.</p>
-                </div>
-                
-                <div>
-                    <div class='bor'>
-                            <div class="theme-switch">
-        
-                            <div>
-                                <h3>Resumo semanal</h3>
-                                <p>Receba um resumo semanal de notícias.</p>
-                            </div>
-                                <label class="switch">
-                                    <input type="checkbox">
-                                    <span class="slider"></span>
-                                </label>
-                
-                            </div>
-                    </div>
-                
-                </div>
-                
-            </div>
-          </div>
-        </div>
-    </div>
-
-
-
-
-
-
-    
-
-
-
-
-
-
-    <div @click.self='notifCancel()' v-if='notificTree' class="float">
-            <div class="notific-float zoomOut" >
-                <div>
-                    <Icon name='material-symbols:person-cancel-outline-rounded' style="color: red; zoom:2.2"/>
-                </div>
-                <div>
-                    <div>
-                        <h3>
-                        Deletar usuário
-                        </h3>
-                        <p>
-                            Tem certeza que que deseja deletar este usuário? 
-                        </p>
-                    </div>
-                    <div>   
-                        <button @click='submitDelete()' class="pill-can ex">Deletar</button>
-                        <button @click="notifCancel()" class="pill-can can">Cancelar</button>
-                    </div>
-                </div>
-    
-            </div>
-    </div>
-    <div v-if='notificFour' class="float">
-            <div class="notific-float-two zoomOut" >
-                <div>
-                    <Icon name='line-md:circle-to-confirm-circle-transition' style="color: green; zoom:2.2"/>
-                </div>
-                <div>
-                    <div>
-                        <h3>
-                        Usuário deletado com sucesso!
-                        </h3>
-                    </div>
-                    
-                </div>
-    
-            </div>
-    </div>
-<div v-if='notificFive' class="float">
-            <div class="notific-float-two zoomOut" >
-                <div>
-                    <Icon name='line-md:circle-to-confirm-circle-transition' style="color: green; zoom:2.2"/>
-                </div>
-                <div>
-                    <div>
-                        <h3>
-                        Dados atualizado com sucesso!
-                        </h3>
-                    </div>
-                    
-                </div>
-    
-            </div>
-    </div>
 </template>
+
 <style scoped>
-*{
-  font-family: "ubuntu";
+/* --- base (reescrevendo/resumindo um pouco do estilo anterior) --- */
+* { box-sizing: border-box; }
+:root {
+  --card-bg: rgba(255,255,255,0.05);
+  --muted: rgba(255,255,255,0.7);
+  --accent: #6ea8fe;
 }
-.nav-bar {
-    z-index: 200;
-    transform: translateX(0%);
-    position: fixed;
-    height: calc(100% - 0px);
-    bottom: 0px;
-    width: 100%;
-    position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.logo-nav-bar {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-    flex-wrap: wrap;
-    transform: translateX(0%);
-    position: fixed;
-    bottom: 0px;
-    height: calc(100% - 0px);
-    width: 100%;
-    background: linear-gradient(to bottom right, #00dc8290 0%, #00d4ff90 50%, #04be7a90 100%);
-    backdrop-filter: blur(5px);
-    z-index: 1134004;
-
-}
-
-.logo-nav-bar img {
-    width: 300px;
-    border-radius: 200px;
-    border: #00dc82 1px solid;
-    opacity: 1;
-    z-index: 100;
-
-}
-
-.photo {
-    position: absolute;
-    top: 96px;
-    height: 25px;
-    border-radius: 50%;
-}
-
-.photo .icon {
-    color: #00dc82;
-    zoom:1;
-}
-
-.logo {
+.login-screen {
+  min-height: 100vh;
+  height: 100dvh;
   position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.float{
-    position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 1002;
-      background: #ecedf060;
-      backdrop-filter: blur(1px); /* Desfoque do fundo */
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Sombras (opcional) */
-      color: #333; /* Cor do texto */
-      width: 100%; /* Largura fixa */
-      height: 100vh; /* Altura fixa */
-      padding: 20px; /* Espaçamento interno */
-      text-align: center;
-}
-
-.floating-div {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #f1fef9;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  
-}
-
-.alt-image {
-    height: 300px;
-    border-radius: 200px;
-    width: 300px;
-    margin: 10px;
-    background: #00dc8220;
-}
-
-.floating-div img {
-  width: 300px;
-  border-radius: 200px;
-  height: 300px;
-  display: block;
-  margin: 10px auto;
-  object-fit: cover; /* Preenche o contêiner sem deformar */
-}
-
-
-.dark-mode .floating-div{
-  background: #111827;
-}
-
-.floating-div button {
-    margin: 5px;
-    padding: 8px 12px;
-    border-radius: 8px;
-  border: none;
-  cursor: pointer;
-}
-
-.floating-div button:first-child {
-  background: green;
-  color: white;
-}
-
-.floating-div button:last-child {
-  background: red;
-  color: white;
-}
-
-.floating-div button:disabled {
-  background: gray;
-  cursor: not-allowed;
-}
-/* Esconde o input de arquivo */
-input[type="file"] {
-  display: none;
-}
-
-/* Estiliza o botão substituto */
-.custom-file-upload {
-    display: inline-block;
-    padding: 10px 20px;
-    background: linear-gradient(90deg, #00dc82 0%, #00d4ff 35%, #04be7a 100%);
-    color: white;
-    border-radius: 200px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-    text-align: center;
-    transition: background-color 0.3s ease;
-    margin-top: 25px;
-    height: 98px;
-    width: 98px;
-}
-
-.custom-file-upload:hover {
-  background-color: #0056b3;
-}
-.notific-float {
-    background: #f1fef9;
-    width:576px; /* Largura fixa */
-      height: 128px; /* Altura fixa */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    position: relative; /* Fixa a div em relação à tela */
-    top: 50%; /* Posiciona a div no meio da altura */
-    left: 50%; /* Posiciona a div no meio da largura */
-    transform: translate(
-        -50%,
-        -50%
-    ); /* Centraliza ajustando a posição do elemento */
-    z-index: 9999; /* Garante que esteja acima de todo o conteúdo */
-    color: #777;
-    padding:20px; /* Espaço interno */
-    border-radius: 10px; /* Cantos arredondados (opcional) */
-    text-align: left; /* Alinha o texto centralizado */
-    backdrop-filter: blur(10px); /* Desfoque do fundo */
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Sombras (opcional) */
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-start;
-      align-items: flex-start;
-}
-
-.notific-float div {
-    margin: 0px 15px 12px 15px;
-}
-
-.dark-mode .notific-float {
-    color:#fff;
-    background: #0f172a;
-}
-
-.notific-float button{
-    margin: 0 5px 0 0px;
-}
-.notific-float-two {
-    background: #f1fef9;
-    width:576px; /* Largura fixa */
-      height: 128px; /* Altura fixa */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    position: relative; /* Fixa a div em relação à tela */
-    top: 50%; /* Posiciona a div no meio da altura */
-    left: 50%; /* Posiciona a div no meio da largura */
-    transform: translate(
-        -50%,
-        -50%
-    ); /* Centraliza ajustando a posição do elemento */
-    z-index: 9999; /* Garante que esteja acima de todo o conteúdo */
-    color: #777;
-    padding:20px; /* Espaço interno */
-    border-radius: 10px; /* Cantos arredondados (opcional) */
-    text-align: left; /* Alinha o texto centralizado */
-    backdrop-filter: blur(10px); /* Desfoque do fundo */
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Sombras (opcional) */
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-start;
-      align-items: center;
-}
-
-.notific-float-two div {
-    margin: 0px 15px 0px 15px;
-}
-
-.notific-float-two button{
-    margin: 0 5px 0 0px;
-}
-
-.float{
-    position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 1002;
-      background: #ecedf060;
-      backdrop-filter: blur(1px); /* Desfoque do fundo */
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Sombras (opcional) */
-      color: #333; /* Cor do texto */
-      width: 100%; /* Largura fixa */
-      height: 100vh; /* Altura fixa */
-      padding: 20px; /* Espaçamento interno */
-      text-align: center;
-}
-
-.ex{
-    background: red;
-    color: #fff;
-    width: 100px;
-}
-.ex:hover{
-    background: red;
-    opacity:.7;
-}
-.can{
-    background: #00dc8210;
-    width: 100px;
-  color: #333;
-}
-.can:hover{
-    opacity:.7;
-}
-.pill-can {
-  font-weight: bolder;
-  padding: 0.3rem .7rem;
-  font-size: 1rem;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-}
-
-.dark-mode .pill-can {
-    color:#fff;
-}
-    
-      /* Container do botão */
-      .switch {
-  position: relative;
-  display: inline-block;
-  width: 36px;
-  height: 20px;
-}
-
-
-/* Oculta o checkbox padrão */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* Slider (parte deslizante do botão) */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: 0.4s;
-  border-radius: 20px;
-}
-
-/* Círculo dentro do slider */
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 2px;
-  bottom: 2px;
-  background-color: white;
-  transition: 0.4s;
-  border-radius: 50%;
-}
-
-/* Efeito ligado (quando o checkbox está marcado) */
-input:checked + .slider {
-  background-color: #00dc82;
-}
-
-input:checked + .slider:before {
-  transform: translateX(16px);
-
-}
-
-.line {
-    display: flex;
-    justify-content: space-between;
-    flex-direction: column;
-    align-items: stretch;
-    margin: 20px 1%;
-    margin:20px 1%;
-    padding: 10px 0 20px 0;
-    border-bottom: solid 1px #00dc8230;
-}
-
-.line-columns {
-    display: grid;
-    grid-template-columns: .5fr 1fr; /* Barra fixa e conteúdo */
-}
-
-.bor {
-    border-left: solid 1px #00dc8240;
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: stretch;
-    flex-direction: column;
-  width: 100%;
-}
-.bor-logo {
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: stretch;
-    flex-direction: column;
-  width: 100%;
-}
-
-.theme-switch {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-direction: row;
-  gap: .5rem;
-  margin: 10px;
-}
-.theme-switch:not(:last-child) {
-    padding-bottom: 10px;
-    border-bottom: solid 1px #00dc8240;
-}
-
-.theme-switch .icon {
-    margin-top:-3p
-}
-
-.radio-input {
-  display: none;
-}
-
-.pill {
-  padding: 0.3rem .7rem;
-  font-size: 1rem;
-  border: 2px solid #ccc;
-  border-radius: 3px;
-  background: #ddd;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-}
-
-.radio-input:checked + .pill {
-  background-color: #00dc82;
-  border-color: #00d4ff50;
-  color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.pill:hover {
-  background-color: #04be7a ;
-  color:#fff;
-}
-.layout-no-sidebar {
   display: grid;
-  grid-template-rows: auto 1fr; /* Barra fixa e conteúdo */
-}
-
-.upper {
-    text-transform: Capitalize;
-    color: #00dc82;
-}
-
-.topbar {
+  place-items: center;
   color: white;
-  height: 60px;
-  text-align: center;
-  position: sticky;
-  top: 0;
-  border-bottom: solid .1px #00dc8230;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  z-index: 10; /* Garante que a barra fique visível acima do conteúdo */
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+}
+.wallpaper {
+  position: absolute; inset: 0;
+  background-image: url('/chromeos-wallpaper.jpg'), linear-gradient(135deg,#0f172a 0%, #071133 100%);
+  background-size: cover; background-position: center;
+  filter: blur(8px) saturate(1.05); transform: scale(1.04); z-index: 0;
+}
+.center-wrap { position: relative; z-index: 2; width: 100%; max-width: 460px; padding: 24px; display:flex; flex-direction:column; gap:18px; align-items:center; }
+
+/* card */
+.login-card {
+  width: 100%; background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  border-radius: 14px; padding: 20px; box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+  backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.04); display:grid; gap:12px; text-align:center;
+}
+
+/* user */
+.user-block .avatar { width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,0.06);margin:0 auto;transition: transform .28s ease; }
+.user-name { margin:6px 0 0; font-size:1.1rem; }
+.user-email { margin:0; color:var(--muted); font-size:.9rem; }
+
+/* tabs */
+.mode-switch { display:flex; gap:8px; justify-content:center; margin-top:6px; }
+.tab { padding:8px 12px; border-radius:10px; background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); cursor:pointer; }
+.tab.active { background: linear-gradient(90deg,var(--accent), #4a89ff); color:white; border-color: rgba(255,255,255,0.06); transform: translateY(-2px); }
+
+/* PIN display */
+.pin-display { margin: 12px 0; display:flex; justify-content:center; align-items:center; min-height:36px; }
+.dots { display:flex; gap:10px; }
+.dot { width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,0.12); background:transparent; transition: all .18s ease; }
+.dot.filled { background:white; transform: scale(0.95); box-shadow: 0 6px 14px rgba(2,6,23,0.6); }
+
+/* shake animation */
+@keyframes shakeX { 0%{transform:translateX(0)}25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-6px)}100%{transform:translateX(0)} }
+.shake { animation: shakeX .45s cubic-bezier(.36,.07,.19,.97); }
+
+/* keypad */
+.keypad { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:8px; }
+.key { padding:18px 0; border-radius:10px; font-size:1.05rem; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.04); cursor:pointer; user-select:none; transition: transform .12s cubic-bezier(.2,.9,.3,1), box-shadow .12s; display:flex; align-items:center; justify-content:center; }
+.key:active { transform: scale(.96); box-shadow: 0 6px 18px rgba(2,6,23,0.6); }
+.key.ghost { background: transparent; color: var(--muted); }
+.key.action { grid-column: 3 / 4; background: linear-gradient(90deg,var(--accent), #4a89ff); color:white; font-weight:600; }
+.num { font-weight:600; font-size:1.05rem; }
+
+/* actions */
+.pin-actions { display:flex; gap:10px; justify-content:center; align-items:center; margin-top:8px; flex-wrap:wrap; }
+.remember { display:flex; gap:8px; align-items:center; color:var(--muted); font-size:.9rem; }
+
+/* password area */
+.password-input { padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(0,0,0,0.16); color:white; width:100%; margin-top:8px; }
+.actions-row { display:flex; gap:8px; margin-top:10px; justify-content:center; }
+
+/* buttons */
+.login-btn { padding:10px 16px; border-radius:10px; background: linear-gradient(90deg,var(--accent), #4a89ff); color:white; border:none; font-weight:600; cursor:pointer; min-width:110px; display:inline-flex; align-items:center; gap:8px; justify-content:center;}
+.secondary-btn { padding:10px 12px; border-radius:10px; background: transparent; border:1px solid rgba(255,255,255,0.06); color:var(--muted); cursor:pointer; }
+.ghost { background: transparent; border: none; color: var(--muted); cursor: pointer; }
+
+/* spinner */
+.spinner { width:14px; height:14px; border-radius:50%; border:2px solid rgba(255,255,255,0.14); border-top-color:white; animation: spin .9s linear infinite; display:inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* errors / hints */
+.error { color: #ffb4b4; margin-top:8px; font-size:.9rem; }
+.hint { color: var(--muted); margin-top:4px; font-size:.9rem; }
+
+/* footer */
+.footer-controls { width:100%; display:flex; justify-content:space-between; align-items:center; color: var(--muted); gap:12px; font-size:.9rem; padding:6px 6px 0 6px; }
+
+/* modal */
+.modal-backdrop { position: fixed; inset:0; background: rgba(2,6,23,0.6); display:flex; align-items:center; justify-content:center; z-index: 50; }
+.modal { background: #0f172a; padding:18px; border-radius:12px; width: min(420px, 92%); border:1px solid rgba(255,255,255,0.04); box-shadow: 0 20px 60px rgba(2,6,23,0.8); display:flex; flex-direction:column; gap:10px; }
+.modal input { padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); color:white; }
+.modal .muted { color: var(--muted); font-size:.9rem; }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:6px; }
+
+/* responsive */
+@media (max-width:420px) {
+  .key { padding:14px 0; }
+  .avatar { width:80px;height:80px; }
 }
-.topbar div{
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-evenly;
-}
-
-.topbar h3 {
-    margin-left: 2rem;
-}
-.topbar h4 {
-    color: #777;
-    margin-left: .2rem;
-    padding: 4px 6px;
-    border-radius: 8px;
-    background: #00dc8280;
-    color: #fff;
-}
-
-.dark-mode .topbar h4 {
-    color: #fff;
-}
-
-
-.add-client-max, .edit-client-max {
-    display:none;
-}
-
-@media (max-width: 650px) {
-    .none {
-        display: none;
-    }
-
-    .add-client-mini, .edit-client-mini {
-        display: none;
-    }
-
-        .add-client-max, .edit-client-max {
-            display: inherit;
-        }
-}
-
-.lost h5 {
-    font-size: .6rem;
-}
-
-.login .icon {
-    margin: -2px 0px 2px 4px;
-}
-
-.login:hover {
-    cursor: pointer;
-    background-color: #00dc82;
-    color: #fff;
-}
-
-.login:hover .icon {
-    margin: -2px 0px 2px 4px;
-    transform: translateX(6px);
-}
-.inputs {
-    display: flex;
-    justify-content: center;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    font-weight: bolder;
-    font-size: 14px;
-}
-
-.inputs div {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    margin: .5rem
-}
-
-.inputs #masculino.check,
-.inputs #feminino.check {
-    text-decoration: underline;
-    margin: -15px -94px;
-    height: 15px;
-    cursor: pointer;
-}
-
-.inputs .radio {
-    margin: 30px 0px 15px 0px;
-}
-
-
-.inputs .terms {
-    text-decoration: underline;
-    color: #00dc82;
-    height: 15px;
-    cursor: pointer;
-}
-
-.inputs #terms.check {
-    text-decoration: underline;
-    margin: 10px -64px;
-    height: 15px;
-    cursor: pointer;
-}
-
-.dont-user {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    width: 200px;
-    background-color: #ff1900;
-    color: #fff;
-    text-shadow: 2px 2px 2px #111;
-    z-index: 20;
-    display: flex;
-    justify-content: center;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: nowrap;
-    border-radius: 5px;
-    font-weight: bolder;
-    padding: 8px 0px;
-}
-
-input {
-    border: solid 2px #00dc82;
-    text-align: left;
-    width: 500px;
-    font-weight: 600;
-    border-radius: 3px;
-    font-size: 14px;
-    padding: 0px 5px;
-    color:#555;
-    transition: all .4s linear; 
-}
-textarea {
-    border: solid 2px #00dc82;
-    text-align: left;
-    width: 500px;
-    font-weight: 600;
-    border-radius: 8px;
-    height: 120px;
-    background: transparent;
-    font-size: 14px;
-    color:#555;
-     
-}
-textarea:focus {
-    border: solid 2px #00dc82;
-    outline: 0;
-    padding: 5px;
-    color: #555;
-    background: #00dc8270;
-}
-.dark-mode textarea:focus {
-    color: #fff;
-}
-textarea:active {
-    border: solid 2px #00dc82;
-     
-}
-textarea:focus-visible {
-    border: solid 2px #00dc82;
-}
-
-
-.p{
-        box-shadow: 0 1px 7px rgba(0, 0, 0, 0.3);
-}
-.ex{
-    background: red;
-    color: #fff;
-}
-.ex:hover{
-    background: red;
-    opacity:.9;
-    color: #fff;
-}
-.sw-icon {
-    margin-right: -40px;
-    z-index:100;
-}
-.sw-tx {
-    margin-right: -109px;
-    z-index:100;
-    font-weight: bolder;
-    color: #aaa;
-}
-.sw-i-tx {
-    padding: 2px 100px;
-    margin-top:6px;
-}
-.sw-i-txx {
-    padding: 2px 10px;
-    margin-top:6px;
-}
-
-.sw-i-txx::placeholder {
-    color: #333;
-}
-.dark-mode .sw-i-txx::placeholder {
-    color: #999;
-}
-.avatar {
-    height: 60px;
-    width: 60px;
-    border-radius: 30px;
-    background:#999;
-    margin-right: 0px;
-    margin-left: 0px;
-    border: solid 3px #999;
-}
-
-.avatar-tx {
-    border-radius: 30px;
-    margin: 3px -48px;
-    margin-left: -640px;
-    color: #fff;
-    z-index: 2;
-}
-.inputs #username {
-    width: 190px
-}
-
-.inputs #lastName {
-    width: 130px
-}
-
-.inputs #email {
-    width: 335px
-}
-
-.inputs div h4 {
-    text-align: left;
-}
-
-input:focus-visible {
-    border: solid 1px #00dc82;
-}
-input:active {
-    border-color: #00dc8280;
-}
-
-input:hover {
-    background-color: #00dc82;
-    color:#000;
-}
-
-
-input:focus {
-    border: 0 none;
-    border: solid 2px #00dc82;
-    outline: 0;
-}
-
-
-
-h4 {
-    margin: 00px;
-    text-align: left;
-    color: #999;
-}
-
-
-
-
-.login {
-    border: solid 2px #00dc82;
-    cursor: pointer;
-    width: 140px;
-    text-align: center;
-    line-height: 18px;
-    border-radius: 88px;
-    font-weight: 600;
-    height: 30px;
-    font-size: 14px;
-    padding-inline: 16px;
-    padding-top: 6px;
-    padding-bottom: 8px;
-    margin: 1rem 1.5rem;
-}
-
-.lost h5 {
-    font-size: .6rem;
-}
-
-.login .icon {
-    margin: -2px 0px 2px 4px;
-}
-
-.login:hover {
-    cursor: pointer;
-    background-color: #00dc82;
-    color: #fff;
-}
-
-.login:hover .icon {
-    margin: -2px 0px 2px 4px;
-    transform: translateX(6px);
-}
-.Doughnut {
-    width: 320px;
-    height: 320px;
-}
-.nav-top {
-    position: sticky;
-    top: 0px;
-    display: flex;
-    justify-content: space-between;
-    flex-direction: row;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    width: 100%;
-    z-index: 1;
-    height: 40px;
-    font-weight: bolder;
-    border-bottom: .10px solid #00dc8240;
-    backdrop-filter: blur(45px);
-    border-bottom: solid 1px #00dc8240;
-    border-right: solid 1px #00dc8240;
-}
-
-
-.clients {
-    margin: 11px;
-}
-
-.clients span {
-    border: 1px solid #00dc8290;
-    padding: 3px 6px;
-    border-radius: 4px;
-    color: #00dc82;
-    background-color: #00dc8230;
-    margin-left: 3px;
-}
-
-.notifications {
-    border: solid 1px transparent;
-    padding: 4px 5px;
-    margin: 6px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.notifications:hover {
-    padding: 4px 5px;
-    border-radius: 4px;
-    color: #00dc82;
-}
-
-.users-list {
-    display: flex;
-    justify-content: center;
-    flex-direction: row;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    z-index: 1;
-    margin-bottom: 1rem;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.color {
-    display: flex;
-    justify-content: space-around;
-    flex-direction: column;
-    align-items: center;
-    flex-wrap: wrap;
-    position: fixed;
-    height: 35px;
-    width: 35px;
-    bottom: 6rem;
-    right: 1.5rem;
-    border-radius: 9px;
-    cursor: pointer;
-    z-index: 100;
-    border: solid 1px #00dc8210;
-    box-shadow: 0 0px 5px #00dc8240;
-    backdrop-filter: blur(100px)
-}
-
-.whats {
-    display: flex;
-    justify-content: space-around;
-    flex-direction: column;
-    align-items: center;
-    flex-wrap: wrap;
-    position: fixed;
-    height: 35px;
-    width: 35px;
-    bottom: 3.5rem;
-    right: 1.5rem;
-    border-radius: 9px;
-    cursor: pointer;
-    z-index: 100;
-    border: solid 1px #00dc8210;
-    box-shadow: 0 0px 5px #00dc8240;
-    backdrop-filter: blur(100px)
-}
-
-.whats .icon,
-.color .icon {
-    color: #00dc8290;
-    zoom: 1;
-}
-.subscriberOk {
-    background-color: #00dc82;
-    text-shadow: 2px 2px 2px #111;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 10px 20px 20px 20px;
-    padding: 15px;
-    border-radius: 4px;
-    position: fixed;
-    bottom: 10px;
-    width: 80%;
-    left: 50%;
-    color: #fff;
-    margin-left: -40%;
-    font-weight: 900;
-    border: solid 1px #00dc8210;
-    z-index: 10000;
-}
-#customers {
-    font-family: Arial, Helvetica, sans-serif;
-    border-collapse: collapse;
-    width: 100%;
-}
-
-#customers th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    text-align: left;
-    background-color: #00dc8280;
-font-weight: bolder;
-}
-
-#customers td,
-#customers th {
-    border: 1px solid #00dc8240;
-    padding: 8px;
-    color: white;
-    font-weight: bolder;
-}
-
-#customers tr:nth-child(1) {
-    background-color: #00dc8230;
-    }
-#customers tr:nth-child(2n) {
-    background-color: #00dc8230;
-    }
-    
-    #customers tr:hover {
-        background-color: #00dc8250 ;
-    }
-   
-input[type="radio"] {
-  accent-color: #00dc82; /* Muda a cor do botão de rádio */
-  transform: scale(1); /* Diminui o tamanho do botão de rádio */
-  width: 15px; /* Ajusta a largura do botão de rádio */
-  height: 15px; /* Ajusta a altura do botão de rádio */
-}
-.row {
-    display: flex;
-    flex-direction: row;
-    border: 1px solid #00dc8240;
-    font-size: 1rem;
-}
-
-.row:nth-child(1) {
-    position: sticky;
-    top: 90px;
-    font-size: 1.1rem;
-    font-weight: bolder;
-}
-
-.row:nth-child(2n) {
-    background-color: #00dc8210;
-
-}
-
-.header {
-    font-weight: bold;
-}
-
-.cell {
-    flex: 1;
-    overflow: hidden;
-    border-right: 1px solid #00dc8240;
-}
-
-.cell:nth-child(1) {
-    flex: .17;
-}
-
-
-
-.cell:nth-child(2),
-.cell:nth-child(3),
-.cell:nth-child(4),
-.cell:nth-child(6),
-.cell:nth-child(7),
-.cell:nth-child(8),
-.cell:nth-child(9),
-.cell:nth-child(10),
-.cell:nth-child(11) {
-    flex: 2;
-}
-
-
-.cell-two {
-    flex: 1;
-    overflow: hidden;
-    border-right: 1px solid #00dc8240;
-}
-
-.cell-two:nth-child(1) {
-    flex: 1;
-}
-
-.cell-two:nth-child(2),
-.cell-two:nth-child(3),
-.cell-two:nth-child(4),
-.cell-two:nth-child(6),
-.cell-two:nth-child(7),
-.cell-two:nth-child(8),
-.cell-two:nth-child(9),
-.cell-two:nth-child(10) {
-    flex: .4;
-}
-
-.cell-two:nth-child(10) {
-    flex: .2;
-}
-
-.main {
-    display: flex;
-    justify-content: space-around;
-    flex-direction: column;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.nav-top {
-    position: sticky;
-    top: 0px;
-    display: flex;
-    justify-content: space-between;
-    flex-direction: row;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    width: 100%;
-    z-index: 1;
-    height: 50px;
-    font-weight: bolder;
-    border-bottom: solid 1px #00dc8240;
-    border-right: solid 1px #00dc8240;
-    backdrop-filter: blur(45px);
-}
-
-.clients {
-    margin: 11px;
-}
-
-.clients span {
-    border: 1px solid #00dc8240;
-    padding: 3px 6px;
-    border-radius: 4px;
-    color: #00dc82;
-    background-color: #00dc8240;
-    margin-left: 3px;
-}
-
-.add-client {
-    border: solid 1px #00dc8290;
-    background-color: #00dc82;
-    padding: 5px 7px;
-    margin: 5px;
-    border-radius: 4px;
-    cursor: pointer;
-    color: #fff;
-}
-
-.add-client:hover {
-    border: solid 1px #00dc8290 ;
-    border-radius: 4px;
-    color: #00dc82;
-    background-color: #fff;
-}
-
-.edit-client {
-    border: solid 1px #fadb4090;
-    background-color: #fadb4080;
-    padding: 5px 7px;
-    margin: 1.5px 6px;
-    border-radius: 4px;
-    cursor: pointer;
-    color: #fff;
-}
-
-.edit-client:hover {
-    border: solid 1px #fadb4090 ;
-    border-radius: 4px;
-    color: #000;
-    background-color: #fadb40;
-}
-
-.close-client {
-    border: solid 1px #00dc82;
-    background-color: #00dc82;
-    padding: 5px 42px;
-        margin: 1.5px 6px;
-    border-radius: 4px;
-    cursor: pointer;
-    color: #fff;
-}
-
-.close-client:hover {
-    border: solid 1px #00dc8290 ;
-    border-radius: 4px;
-    color: #00dc82;
-    background-color: #fff;
-}
-.close-edit-client {
-    border: solid 1px #fadb40;
-    background-color: #fadb40;
-    padding: 5px 42px;
-        margin: 1.5px 6px;
-    border-radius: 4px;
-    cursor: pointer;
-    color: #fff;
-}
-
-.close-edit-client:hover {
-    border: solid 1px #00dc8290 ;
-    border-radius: 4px;
-    color: #00dc82;
-    background-color: #fff;
-}
-
-
-
-.nav-users {
-        display: flex;
-        justify-content: space-between;
-        flex-direction: row;
-        align-items: flex-start;
-        flex-wrap: wrap;
-        width: 100%;
-        z-index: 1;
-        height: 46px;
-        font-weight: bolder;
-        backdrop-filter: blur(45px);
-        margin-right: 1.5rem;
-        border-bottom: solid .1px #00dc8230;
-}
-
-.users-conf .filter {
- color: #777;
-}
-.dark-mode .filter {
-  color: #ddd;
-}
-
-
-
-.users-conf {
-    margin: 6px 0;
-    padding: 7px;
-    border-radius: 6px;
-}
-
-.users-conf-two {
-  color: #777;
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-    padding: 7px;
-    border-radius: 6px;
-
-}
-
-.filter {
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-bottom: 10px;
-}
-
-.filter:hover {
-    color: #00dc8;
-    background-color: #00dc8220;
-}
-
-.filter.router-link-exact-active {
-    border-bottom: solid 2px #00dc8270; 
-    border-radius: 0;
-}
-
-a {
-  text-decoration: none
-}
-
-.nav-users a.router-link-exact-active {
-  color: #00dc82;
-}
-
-.users-list {
-    display: flex;
-    justify-content: center;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-    z-index: 1;
-    width: 100%;
-    overflow-y:auto;
-}
-
-
-.line-end {
-    display: flex;
-    justify-content: space-between;
-    flex-direction: row;
-    align-items: flex-start;
-    margin:20px 1%;
-    padding: 10px 0 20px 0;
-}
-.line p {
-    margin-top: 5px;
-}
-
-.line select {
-    margin-right: 2rem; 
-}
-
-.thed {
-    position: sticky;
-    top: 90px;
-}
-
-.title-user {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-    flex-wrap: wrap;
-    height: 120px;
-    width: 120px;
-    margin: 2px;
-    border-radius: 4px;
-    border: solid 2px #00dc8260;
-    text-align: center;
-}
-
-.title-user:hover {
-    background-color: #00dc8260;
-    color: #fff;
-}
-
-.title-user img {
-    width: 60px;
-    background-color: #00dc8260;
-    border: 3px solid #00dc82;
-    border-radius: 4px;
-}
-
-.title-user h4 {
-    text-align: center;
-    font-size:.6rem;
-    margin: 4px 1px 0px 1px;
-}
-
-
-.form-cliente {
-    border-radius: 50%;
-    border: solid 3px #00dc82;
-}
-
-.cliente {
-    height: 60px;
-    width: 60px;
-    border-radius: 50%;
-    color: #00dc82;
-}
-
-
-.file-cliente {
-    margin-top: -20px;
-    margin-left: 20px;
-    zoom: .8;
-}
-
-
-
-.close {
-    zoom: 1.6;
-}
-
-
-.length-full {
-    color: #fff;
-}
-
-.users-full h1 {
-    font-size: 3rem;
-    margin-bottom: -1rem;
-}
-
-.users-full-status {
-    display: flex;
-    justify-content: flex-start;
-    flex-direction: row;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    color: #00dc82;
-}
-
-.green {
-    color: #00ff00;
-}
-
-.red {
-    color: #cf0000;
-}
-
-.users-full-status h1 {
-    font-size: 1.3rem;
-}
-
-.users-full-status h2 {
-    font-size: 1.2rem;
-}
-
-
-.center {
-    display: flex;
-    justify-content: space-evenly;
-    flex-direction: row;
-    align-content: space-evenly;
-    align-items: center;
-    flex-wrap: wrap;
-    width: 100%;
-    padding-top: 5px;
-    margin-bottom: 1rem;
-}
-
-.center-start{
-    display: flex;
-        justify-content: flex-start;
-        flex-direction: row;
-        align-content: flex-start;
-        align-items: center;
-        flex-wrap: nowrap;
-        width: 100%;
-        margin-bottom: 4rem;
-}
-
-@media (max-width: 650px) {
-    .center-start-one {
-        display: none;
-    }
-}
-.center-start-one {
-    display: flex;
-    justify-content: flex-start;
-    flex-direction: column;
-    align-items: center;
-    flex-wrap: wrap;
-}
-.center-start-two {
-    display: flex;
-    justify-content: flex-start;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-top: -20px;
-}
-.center-start-tree {
-    display: flex;
-    justify-content: flex-start;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-    margin: -60px 0 -50px 10px;
-}
-.center-start-tree span{
-    margin: 5px 0px -10px 12px;
-    font-weight: bolder ;
-}
-
-.center-start div a {
-    margin: 0 20px;
-}
-
-.center-start input {
-    margin: 10px ;
-}
-
-.others {
-    z-index: 1;
-}
-
-.table-clients {
-    width: 100%;
-    z-index: 1;
-    margin-top: -2rem;
-}
-
-.others-full {
-    z-index: 1;
-    background-color: #00dc8250;
-}
-
-.others-details {
-    margin: 0 .5%;
-    z-index: 1;
-    background-color: #00dc8230;
-    border: solid 3px #00dc8240;
-    border-radius: 3px;
-}
-
-.list {
-    display: flex;
-    justify-content: flex-start;
-    flex-direction: row;
-    align-items: flex-start;
-    width: 100%;
-    height: 100%;
-}
-
-
-.head-logo {
-    z-index: 1;
-    display: flex;
-    justify-content: center;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.logo {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-    flex-wrap: wrap;
-    background: linear-gradient(90deg, #00dc82 0%, #00d4ff 35%, #04be7a 100%);
-    height: 98px;
-    width: 98px;
-    color: #718096;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 50px;
-    margin-left: 1rem;
-    z-index: 10;
-}
-
-.logo img {
-    height: 98px;
-    width: 98px;
-    border-radius: 50px;
-    /* border: #00dc82 2px solid; */
-    z-index: 100;
-    margin-right: 1.2rem;
-    padding: 4px;
-    opacity: 1;
-    object-fit: cover; /* Preenche o contêiner sem deformar */
-}
-
-.logo .nav-bar img {
-    height: 300px;
-    width: 300px;
-    border-radius: 200px;
-    /* border: #00dc82 2px solid; */
-    margin-right: 1.2rem;
-    padding: 4px;
-    opacity: 1;
-}
-
-.head-name {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: flex-start;
-    flex-wrap: nowrap;
-    width: 250px;    
-}
-
-.head-name div {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  gap:5px;
-}
-.head-name h4:nth-child(1){
-  border: solid 2px var(--player-color);
-  border-radius: 3px;
-  padding: 0 7px;
-}
-.head-name h4:nth-child(1) span {
-  color: var(--player-color);
-}
-
-.head-name span {
-    font-size: .9rem;
-    margin: 5px 0 7px 0;
-}
-
-.head-name h3 {
-    color: #00dc82;
-    text-transform: uppercase;
-}
-
-.status {
-    border: solid 2px #00dc8240;
-    Background: #00e900;
-    border-radius: 3px;
-    padding: 1px 20px;
-    color: #000;
-    width: 120px;
-    text-align: center;
-    display: block;
-}
-.statusOff {
-    border: solid 2px #00dc8240;
-    Background: #e70000;
-    border-radius: 3px;
-    padding: 1px 20px;
-    color: #fff;
-width: 120px;
-    text-align: center;
-    display: block;
-}
-
-.statusInativo {
-    border: solid 2px #00dc8240;
-    Background: #ffec00;
-    border-radius: 3px;
-    padding: 1px 20px;
-    color: #000;
-width: 120px;
-    text-align: center;
-    display: block;
-}
-
-.table {
-    display: flex;
-    flex-direction: column;
-}
-
-.row {
-    display: flex;
-    flex-direction: row;
-    border-bottom: 1px solid #00dc8240;
-    font-size: 1rem;
-}
-
-.row:nth-child(1) {
-    background-color: #00dc8290;
-    position: sticky;
-    top: 90px;
-    font-size: 1.1rem;
-    font-weight: bolder;
-}
-
-.row:nth-child(2n) {
-    background-color: #00dc8210;
-
-}
-
-td, th {
-    text-align: left;
-    border: none; /* Remove as bordas das células */
-    padding: 20px; /* Adiciona espaçamento interno para uma melhor aparência */
-}
-
-tr {
-    border: none; /* Remove as bordas das linhas */
-}
-select {
-    text-align: left;
-    background-color: #fff;
-    width:192px;
-    font-weight: 600;
-    font-size: 15px;
-    padding: 0px 5px;
-    color:#777;
-border: solid 2px var(--player-color);
-    border-radius: 3px;
-    transition: all .4s linear;
-}
-
-select:hover {
-  background-color: var(--player-color);
-    color: #000;
-}
-
-select::selection {
-    border: solid 1px #00dc82;
-    background: #00dc8240;
-}
-
-select:focus {
-    border: solid 2px #00dc82;
-}
-
-.dark-mode .select:focus {
-    border-color: #00dc82 ;
-}
-
-.select:focus-visible {
-    background-color: #fff;
-    border: solid 2px #00dc82;
-}
-
-.select:active {
-    background-color: #fff;
-}
-
-.dark-mode select:active {
-    background: #fff;
-    border: solid 2px #00dc82;
-}
-
-.select:hover {
-    background-color: var(player-color);
-}
-
-
 </style>
+

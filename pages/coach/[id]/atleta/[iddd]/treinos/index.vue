@@ -806,16 +806,6 @@ function openPhoto() {
                                         </div> 
                                     </NuxtLink>
                                 </div>
-                                <div v-else >
-                                    <h3>Sem treino!</h3>
-                                    <br>
-                                    <NuxtLink @click="coachFloatCreate">
-                                        <div class='blue'>
-                                            <h3>Criar treino</h3>
-                                        </div>
-
-                                    </NuxtLink>
-                                </div>
 
                               </div>
                               <div class="float-ex zoom" v-if='menuFloatEx'>
@@ -2764,7 +2754,7 @@ select {
     text-align: left;
     height: 24px;
     font-size: 14px;
-    background: #00dc8210;
+    background: #fff;
     border: solid 1px #00dc82;
 }
 

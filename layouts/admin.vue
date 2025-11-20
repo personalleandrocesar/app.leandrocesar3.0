@@ -992,7 +992,7 @@ a {
 
 .radio-input:checked+.pill {
     background-color: #00dc82;
-    border-color: #00d4ff50;
+    border-color: var(--player-color);
     color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -1289,7 +1289,7 @@ input:focus {
 .left-column,
 .right-column {
     text-align: center;
-    border-right: solid 0.1px #00dc8230;
+    border-right: solid 0.1px var(--player-color);
 }
 
 .right-column {
@@ -1304,7 +1304,7 @@ input:focus {
     width: 100%;
     transition: all 0.3s ease; /* Suavizar colapso/expansão */
     z-index: 100;
-    border-right: solid 0.1px #00dc8230;
+    border-right: solid 0.1px var(--player-color);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -1474,7 +1474,7 @@ input:focus {
 }
 
 .search{
-    border: solid .1px #00dc8220;
+    border: solid .1px var(--player-color);
     box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
 }
 .search:hover:nth-child(1){
@@ -1489,17 +1489,18 @@ input:focus {
     padding:1px;
     height: 20px;
     width: 20px;
-    background: #00dc8250;
+    background: #dbdbdb;
     color:#777;
     text-align:center;
     border-radius: 5px;
-    border: solid .1px #00dc8240;
+    border: solid .1px var(--player-color);
     font-weight: bolder;
     font-size: .9rem;
 }
 
 .dark-mode .trap span {
     color:#fff;
+    background: #27385a;
 }
 
 .menu-button div {
@@ -1543,22 +1544,27 @@ input:focus {
     cursor: pointer;
     background: transparent;
     color: #04be7a;
-    background: #00dc8240;
+    background: #000;
 }
 
 .menu-button.router-link-exact-active {
-    color: #00dc82;
+    color: #000;
     cursor: pointer;
     border-left: transparent;
-    background: #00dc8220;
+    background: var(--player-color);
 }
 .menu-button.router-link-exact-active p {
-    color: #00dc82;
+    color: #000;;
     cursor: pointer;
 }
 .menu-button.router-link-exact-active p:hover,
 .menu-button.router-link-exact-active:hover .icon {
-    color: #00dc82;
+    color: #000;
+    cursor: pointer;
+}
+.dark-mode .menu-button.router-link-exact-active p:hover,
+.dark-mode .menu-button.router-link-exact-active:hover .icon {
+    color: #fff;
     cursor: pointer;
 }
 .menu-button.router-link-exact-active p {

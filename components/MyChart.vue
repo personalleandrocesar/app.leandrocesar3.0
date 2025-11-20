@@ -49,7 +49,7 @@
       </div>
     </div>
     <div class="info">
-      <h3 :style="{color:`${colors.inactive}`}">Clientes Inativos</h3>
+     <h3 :style="{color:`${colors.inactive}`}">Clientes Inativos</h3>
       <p>{{ inativosCount }} Clientes</p>
     </div>
   </div>
@@ -72,14 +72,15 @@
     </div>
   </div>
   </div>
-<!-- 3º template = Personal -->
+
+  
   <div class='template'>
   <!-- Total de Personais -->
-<div class="card">
+<div @click='detailPersonal' class="card">
     <div
       class="circle-two"
       :style="{
-              background: `conic-gradient(${colors.personal} 0% ${percentPersonal}%, #444 ${percentPersonal}% 100%)`
+              background: `conic-gradient(${colors.personal} 0% ${percentPersonal}%, ${background} ${percentPersonal}% 100%)`
       }"
     >
       <div class="inner-circle-two">
@@ -91,69 +92,11 @@
       <p>{{ personalCount }} Clientes</p>
     </div>
   </div>
-  
-  <!-- Personais Ativos -->
-<div class="card-tree">
-    <div
-      class="circle-tree"
-      :style="{
-              background: `conic-gradient(blue 0% ${percentAtivos}%, ${background} ${percentAtivos}% 100%)`
-      }"
-    >
-      <div class="inner-circle-tree">
-        <span>{{ percentAtivos }}%</span>
-      </div>
-    </div>
-    <div class="info-tree">
-      <h3 :style="{color:` ${blue}`}"> Personais Ativos</h3>
-      <p>{{ ativosCount }} Clientes</p>
-    </div>
-  </div>
-<!-- Clientes totais Inativos -->
-<div class="card-tree">
-    <div
-      class="circle-tree"
-      :style="{
-              background: `conic-gradient(${yellow} 0% ${percentInativos}%, ${background} ${percentInativos}% 100%)`
-      }"
-    >
-      <div class="inner-circle-tree">
-        <span>{{ percentInativos }}%</span>
-      </div>
-    </div>
-    <div class="info-tree">
-      <h3 :style="{color:`${yellow}`}">Personais Inativos</h3>
-      <p>{{ inativosCount }} Clientes</p>
-    </div>
-  </div>
-
-  <!-- Clientes totais Bloqueados -->
-<div class="card-tree">
-    <div
-      class="circle-tree"
-      :style="{
-              background: `conic-gradient(red 0% ${percentBloqueados}%, ${background} ${percentBloqueados}% 100%)`
-      }"
-    >
-      <div class="inner-circle-tree">
-        <span>{{ percentBloqueados }}%</span>
-      </div>
-    </div>
-    <div class="info-tree">
-      <h3 :style="{color: `${red}`}">Personais bloqueados</h3>
-      <p>{{ bloqueadosCount }} Clientes</p>
-    </div>
-  </div>
- </div>
-
-<!-- 4º template -->
-  <div class='template'>
-<!-- consultoria -->
-<div class="card">
+ <div @click='detailConsultoria' class="card">
     <div
       class="circle-two"
       :style="{
-        background: `conic-gradient(var(--player-color) 0% ${percentPersonal}%, #444 ${percentPersonal}% 100%)`
+              background: `conic-gradient(var(--player-color) 0% ${percentPersonal}%, ${background} ${percentPersonal}% 100%)`
       }"
     >
       <div class="inner-circle-two">
@@ -165,16 +108,12 @@
       <p>{{ consultoriaCount }} Clientes</p>
     </div>
   </div>
-  </div>
 
-<!-- 4º template -->
-  <div class='template'>
-<!-- consultoria -->
-<div class="card">
+<div @click='detailAvaliacao' class="card">
     <div
       class="circle-two"
       :style="{
-        background: `conic-gradient(var(--player-color) 0% ${percentAvaliacao}%, #444 ${percentAvaliacao}% 100%)`
+              background: `conic-gradient(var(--player-color) 0% ${percentAvaliacao}%, ${background} ${percentAvaliacao}% 100%)`
       }"
     >
       <div class="inner-circle-two">
@@ -184,6 +123,177 @@
     <div class="info">
       <h3>{{ avalicaoText }}</h3>
       <p>{{ avaliacaoCount }} Clientes</p>
+    </div>
+
+  </div>
+ 
+</div>
+<!-- 3º template = Personal -->
+  <div class='template'>
+  
+  <!-- Personais Ativos -->
+<div v-if='personalDetails' class="card-tree">
+    <div
+      class="circle-tree"
+      :style="{
+              background: `conic-gradient(blue 0% ${percentAtivos}%, ${background} ${percentAtivos}% 100%)`
+      }"
+    >
+      <div class="inner-circle-tree">
+        <span>{{ percentPersonalAtivos }}%</span>
+      </div>
+    </div>
+    <div class="info-tree">
+      <h3 :style="{color:` ${colors.active}`}"> Personais Ativos</h3>
+      <p>{{ personalAtivos }} Clientes</p>
+    </div>
+  </div>
+<!-- Personais Inativos -->
+<div v-if='personalDetails' class="card-tree">
+    <div
+      class="circle-tree"
+      :style="{
+              background: `conic-gradient(${colors.inactive} 0% ${percentPersonalInativos}%, ${background} ${percentPersonalInativos}% 100%)`
+      }"
+    >
+      <div class="inner-circle-tree">
+        <span>{{ percentPersonalInativos }}%</span>
+      </div>
+    </div>
+    <div class="info-tree">
+      <h3 :style="{color:`${colors.inactive}`}">Personais Inativos</h3>
+      <p>{{ personalInativos }} Clientes</p>
+    </div>
+  </div>
+
+  <!-- Personais Bloqueados -->
+<div v-if='personalDetails' class="card-tree">
+    <div
+      class="circle-tree"
+      :style="{
+              background: `conic-gradient(${colors.blocked} 0% ${percentPersonalBlocked}%, ${background} ${percentPersonalBlocked}% 100%)`
+      }"
+    >
+      <div class="inner-circle-tree">
+        <span>{{ percentPersonalBlocked }}%</span>
+      </div>
+    </div>
+    <div class="info-tree">
+      <h3 :style="{color: `${colors.blocked}`}">Personais bloqueados</h3>
+      <p>{{ personalBlocked }} Clientes</p>
+    </div>
+  </div>
+ </div>
+
+<!-- 4º template = Consultoria-->
+  <div class='template'>
+
+  <!-- Consultoria Ativos -->
+<div v-if='consultoriaDetails' class="card-tree">
+    <div
+      class="circle-tree"
+      :style="{
+              background: `conic-gradient(blue 0% ${percentConsultoriaAtivos}%, ${background} ${percentConsultoriaAtivos}% 100%)`
+      }"
+    >
+      <div class="inner-circle-tree">
+        <span>{{ percentConsultoriaAtivos }}%</span>
+      </div>
+    </div>
+    <div class="info-tree">
+      <h3 :style="{color:` ${colors.active}`}"> Consultoria Ativos</h3>
+      <p>{{ consultoriaAtivos }} Clientes</p>
+    </div>
+  </div>
+<!-- Consultoria Inativos -->
+<div v-if='consultoriaDetails' class="card-tree">
+    <div
+      class="circle-tree"
+      :style="{
+              background: `conic-gradient(${colors.inactive} 0% ${percentConsultoriaInativos}%, ${background} ${percentConsultoriaInativos}% 100%)`
+      }"
+    >
+      <div class="inner-circle-tree">
+        <span>{{ percentConsultoriaInativos }}%</span>
+      </div>
+    </div>
+    <div class="info-tree">
+      <h3 :style="{color:`${colors.inactive}`}">Consultoria Inativos</h3>
+      <p>{{ consultoriaInativos }} Clientes</p>
+    </div>
+  </div>
+
+  <!-- Consultoria Bloqueados -->
+<div v-if='consultoriaDetails' class="card-tree">
+    <div
+      class="circle-tree"
+      :style="{
+              background: `conic-gradient(${colors.blocked} 0% ${percentConsultoriaBlocked}%, ${background} ${percentConsultoriaBlocked}% 100%)`
+      }"
+    >
+      <div class="inner-circle-tree">
+        <span>{{ percentConsultoriaBlocked }}%</span>
+      </div>
+    </div>
+    <div class="info-tree">
+      <h3 :style="{color: `${colors.blocked}`}">Consultoria bloqueados</h3>
+      <p>{{ consultoriaBlocked }} Clientes</p>
+    </div>
+  </div>
+  </div>
+
+<!-- 5º template = Avaliação Física -->
+  <div class='template'>
+  <!-- Avaliação Ativos -->
+<div  v-if='avaliacaoDetails' class="card-tree">
+    <div
+      class="circle-tree"
+      :style="{
+              background: `conic-gradient(blue 0% ${percentAvaliacaoActive}%, ${background} ${percentAvaliacaoActive}% 100%)`
+      }"
+    >
+      <div class="inner-circle-tree">
+        <span>{{ percentAvaliacaoActive }}%</span>
+      </div>
+    </div>
+    <div class="info-tree">
+      <h3 :style="{color:` ${colors.active}`}"> Avaliação Ativos</h3>
+      <p>{{ avaliacaoActive }} Clientes</p>
+    </div>
+  </div>
+<!-- Avaliação Inativos -->
+<div v-if='avaliacaoDetails' class="card-tree">
+    <div
+      class="circle-tree"
+      :style="{
+              background: `conic-gradient(${colors.inactive} 0% ${percentAvaliacaoInactive}%, ${background} ${percentAvaliacaoInactive}% 100%)`
+      }"
+    >
+      <div class="inner-circle-tree">
+        <span>{{ percentAvaliacaoInactive }}%</span>
+      </div>
+    </div>
+    <div class="info-tree">
+      <h3 :style="{color:`${colors.inactive}`}">Consultoria Inativos</h3>
+      <p>{{ avaliacaoInactive }} Clientes</p>
+    </div>
+  </div>
+
+  <!-- Avaliação Bloqueados -->
+<div v-if='avaliacaoDetails' class="card-tree">
+    <div
+      class="circle-tree"
+      :style="{
+              background: `conic-gradient(${colors.blocked} 0% ${percentAvaliacaoBlocked}%, ${background} ${percentAvaliacaoBlocked}% 100%)`
+      }"
+    >
+      <div class="inner-circle-tree">
+        <span>{{ percentAvaliacaoBlocked }}%</span>
+      </div>
+    </div>
+    <div class="info-tree">
+      <h3 :style="{color: `${colors.blocked}`}">Consultoria bloqueados</h3>
+      <p>{{ avaliacaoBlocked }} Clientes</p>
     </div>
   </div>
   </div>
@@ -209,7 +319,7 @@ const colors = {
 }
 
 // 🌗 Fundo dinâmico com base no modo de cor
-const background = computed(() => (colorMode.value === 'dark' ? '#444' : '#ccc'))
+const background = computed(() => (colorMode.value === 'dark' ? '#333' : '#ccc'))
 
 // 📊 Total de serviços
 const totalServices = computed(() => team.value?.length || 0)
@@ -255,9 +365,62 @@ const percentConsultoria = percentService(consultoriaCount)
 const percentAvaliacao = percentService(avaliacaoCount)
 
 const personalAtivos = computed (()=>
-team.value?.filter(item => item.status?.includes('Ativo')).length & team.value?.filter(item => item.service?.includes('Personal')).length
+team.value?.filter(item => item.status?.includes('Ativo') && item.service?.includes('Personal')).length || 0
 )
-console.log(personalAtivos.value)
+const percentPersonalAtivos = percentOf(personalAtivos)
+
+const personalInativos = computed (()=>
+team.value?.filter(item => item.status?.includes('Inativo') && item.service?.includes('Personal')).length || 0
+)
+const percentPersonalInativos = percentOf(personalInativos)
+
+const personalBlocked = computed (()=>
+team.value?.filter(item => item.status?.includes('Bloqueado') && item.service?.includes('Personal')).length || 0
+)
+const percentPersonalBlocked = percentOf(personalBlocked)
+
+const consultoriaAtivos = computed (()=>
+team.value?.filter(item => item.status?.includes('Ativo') && item.service?.includes('Consultoria')).length || 0
+)
+const percentConsultoriaAtivos = percentOf(consultoriaAtivos)
+
+const consultoriaInativos = computed (()=>
+team.value?.filter(item => item.status?.includes('Inativo') && item.service?.includes('Consultoria')).length || 0
+)
+const percentConsultoriaInativos = percentOf(consultoriaInativos)
+
+const consultoriaBlocked = computed (()=>
+team.value?.filter(item => item.status?.includes('Bloqueado') && item.service?.includes('Consultoria')).length || 0
+)
+const percentConsultoriaBlocked = percentOf(consultoriaBlocked)
+
+const avaliacaoActive = computed (()=>
+team.value?.filter(item => item.status?.includes('Ativo') && item.service?.includes('Avaliacao')).length || 0
+)
+const percentAvaliacaoActive = percentOf(avaliacaoActive)
+const avaliacaoInactive = computed (()=>
+team.value?.filter(item => item.status?.includes('Inativo') && item.service?.includes('Avaliacao')).length || 0
+)
+const percentAvaliacaoInactive = percentOf(avaliacaoInactive)
+const avaliacaoBlocked = computed (()=>
+team.value?.filter(item => item.status?.includes('Bloqueado') && item.service?.includes('Avaliacao')).length || 0
+)
+const percentAvaliacaoBlocked = percentOf(avaliacaoBlocked)
+
+const personalDetails = ref(false)
+function detailPersonal() {
+  personalDetails.value = !personalDetails.value
+}
+
+const consultoriaDetails = ref(false)
+function detailConsultoria() {
+  consultoriaDetails.value = !consultoriaDetails.value
+}
+
+const avaliacaoDetails = ref(false)
+function detailAvaliacao() {
+  avaliacaoDetails.value = !avaliacaoDetails.value
+}
 </script>
 
 <style scoped>
@@ -338,7 +501,6 @@ console.log(personalAtivos.value)
   flex-direction: row;
   border-radius: 12px;
   padding: 5px 10px;
-  color: white;
   font-family: sans-serif;
   width: fit-content;
 }

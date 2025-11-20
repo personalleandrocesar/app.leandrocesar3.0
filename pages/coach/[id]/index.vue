@@ -72,7 +72,7 @@ html, body {
   text-align: center;
   position: sticky;
   top: 0;
-  border-bottom: solid .1px #00dc8230;
+  border-bottom: solid .1px var(--player-color);
   display: flex;
   flex-direction: row;
   align-items: center;

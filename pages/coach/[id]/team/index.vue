@@ -28,7 +28,7 @@ const time = ref('');
 const payDay = ref('');
 const periodEnd = newDate;
 const terms = ref('');
-const status = ref('');
+const status = ref('Ativo');
 const creationUser = ref('');
 const _id = ref('');
 
@@ -493,7 +493,7 @@ loadTeamImages();
                 <div  v-else="state === 'list'" class="users-list">
                 
                 <table class="styled-table" v-if="filteredUsers.length">
-                  <thead>
+                  <thead >
                     <tr class="header-row">
                       <th>#</th>
                       <th></th>
@@ -895,12 +895,12 @@ loadTeamImages();
   font-family: "Ubuntu";
 }
 .no-user {
-    color: #00dc82;
+    color: var(--player-color);
     font-weight: bolder;
     line-height: 100px;
     text-transform: uppercase;
     margin: auto;
-    border-top: 1px solid #00dc8240;
+    border-top: 1px solid var(--player-color);
     width: 100%;
     text-align: center;
 }
@@ -917,7 +917,7 @@ loadTeamImages();
 
 /* Cabeçalho */
 .styled-table thead {
-  background-color: #00dc8270;
+  background-color: var(--player-color);
   color: white;
   text-align: left;
 }
@@ -931,17 +931,24 @@ loadTeamImages();
 
 /* Linhas do corpo */
 .styled-table tbody tr {
-  border-bottom: 1px solid #00dc8240;
+  border-bottom: 1px solid var(--player-color);
   transition: background-color 0.3s ease;
 }
 .styled-table tbody tr:nth-child(2n) {
-    background-color: #00dc8220;
-  border-bottom: 1px solid #00dc8240;
+    background-color: #fafafa;
+  border-bottom: 1px solid var(--player-color);
   transition: background-color 0.3s ease;
+}
+.dark-mode .styled-table tbody tr:nth-child(2n) {
+  background-color: #131b2a;
+}
+
+.dark-mode .styled-table tbody tr:nth-child(2n):hover {
+  background-color: var(--player-color);
 }
 
 .styled-table tbody tr:hover {
-  background-color: #00dc8250;
+  background-color: var(--player-color);
   cursor: pointer;
 }
 
@@ -1013,7 +1020,7 @@ loadTeamImages();
   text-align: center;
   position: sticky;
   top: 0;
-  border-bottom: solid .1px #00dc8230;
+  border-bottom: solid .1px var(--player-color);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -1040,7 +1047,7 @@ loadTeamImages();
     margin-left: .2rem;
     padding: 4px 6px;
     border-radius: 4px;
-    background: #00dc8280;
+    background: var(--player-color);
     color: #fff;
 }
 
@@ -1070,14 +1077,14 @@ loadTeamImages();
 }
 
 .status {
-    border: solid 2px #00dc8240;
+    border: solid 2px var(--player-color);
     Background: #00e900;
     border-radius: 8px;
     padding: 1px 25px;
     color: #fff;;
 }
 .statusOff {
-    border: solid 2px #00dc8240;
+    border: solid 2px var(--player-color);
     Background: #e70000;
     border-radius: 8px;
     padding: 1px 20px;
@@ -1112,7 +1119,7 @@ loadTeamImages();
 
 .login:hover {
     cursor: pointer;
-    background-color: #00dc82;
+    background-color: var(--player-color);
     color: #fff;
 }
 
@@ -1190,7 +1197,7 @@ loadTeamImages();
 
 .inputs .terms {
     text-decoration: underline;
-    color: #00dc82;
+    color: var(--player-color);
     height: 15px;
     cursor: pointer;
 }
@@ -1223,12 +1230,12 @@ loadTeamImages();
 
 input {
     text-align: left;
-    background-color: #00dc8210;
+    background-color: var(--player-color);
     font-weight: 600;
     border-radius: 8px;
     height: 30px;
     font-size: 14px;
-border: solid 2px #00dc82;
+border: solid 2px var(--player-color);
 width: 265px;
 }
 
@@ -1237,27 +1244,27 @@ width: 265px;
 }
 
 input:focus-visible {
-    border: solid 1px #00dc82;
+    border: solid 1px var(--player-color);
 }
 
 input:active {
-    border-color: #00dc8280;
+    border-color: var(--player-color);
 }
 
 input:hover {
-    background-color: #00dc8210;
+    background-color: var(--player-color);
 }
 input::placeholder {
-    color: #000;
+    color: #fff;
 }
 .dark-mode input::placeholder {
-    color: #aaa;
+    color: #000;
 }
 
 
 input:focus {
     border: 0 none;
-    border: solid 2px #00dc82;
+    border: solid 2px var(--player-color);
     color: #000;
     outline: 0;
 }
@@ -1287,8 +1294,8 @@ h4:nth-child(1) {
 .select {
     border: 0;
     color: inherit;
-    background-color: #00dc8220;
-    border: solid 2px #00dc82;
+    background-color: var(--player-color);
+    border: solid 2px var(--player-color);
     border-radius: 8px;
     cursor: pointer;
     width: 265px;
@@ -1305,24 +1312,24 @@ h4:nth-child(1) {
 
 .select:focus {
     border: 0 none;
-    border: solid 2px #00dc82;
+    border: solid 2px var(--player-color);
     outline: 0;
 }
 
 .select:focus-visible {
-    background-color: #00dc8210;
+    background-color: var(--player-color);
 }
 
 .select:active {
-    background-color: #00dc8210;
+    background-color: var(--player-color);
 }
 
 .select:hover {
-    background-color: #00dc8210;
+    background-color: var(--player-color);
 }
 
 .login {
-    border: solid 2px #00dc82;
+    border: solid 2px var(--player-color);
     cursor: pointer;
     width: 140px;
     text-align: center;
@@ -1347,7 +1354,7 @@ h4:nth-child(1) {
 
 .login:hover {
     cursor: pointer;
-    background-color: #00dc82;
+    background-color: var(--player-color);
     color: #fff;
 }
 
@@ -1371,10 +1378,10 @@ h4:nth-child(1) {
     z-index: 1;
     height: 40px;
     font-weight: bolder;
-    border-bottom: .10px solid #00dc8240;
+    border-bottom: .10px solid var(--player-color);
     backdrop-filter: blur(45px);
-    border-bottom: solid 1px #00dc8240;
-    border-right: solid 1px #00dc8240;
+    border-bottom: solid 1px var(--player-color);
+    border-right: solid 1px var(--player-color);
 }
 
 
@@ -1383,11 +1390,11 @@ h4:nth-child(1) {
 }
 
 .clients span {
-    border: 1px solid #00dc8290;
+    border: 1px solid var(--player-color);
     padding: 3px 6px;
     border-radius: 4px;
-    color: #00dc82;
-    background-color: #00dc8230;
+    color: var(--player-color);
+    background-color: var(--player-color);
     margin-left: 3px;
 }
 
@@ -1402,7 +1409,7 @@ h4:nth-child(1) {
 .notifications:hover {
     padding: 4px 5px;
     border-radius: 4px;
-    color: #00dc82;
+    color: var(--player-color);
 }
 
 .users-list {
@@ -1435,8 +1442,8 @@ h4:nth-child(1) {
     border-radius: 9px;
     cursor: pointer;
     z-index: 100;
-    border: solid 1px #00dc8210;
-    box-shadow: 0 0px 5px #00dc8240;
+    border: solid 1px var(--player-color);
+    box-shadow: 0 0px 5px var(--player-color);
     backdrop-filter: blur(100px)
 }
 
@@ -1454,18 +1461,18 @@ h4:nth-child(1) {
     border-radius: 9px;
     cursor: pointer;
     z-index: 100;
-    border: solid 1px #00dc8210;
-    box-shadow: 0 0px 5px #00dc8240;
+    border: solid 1px var(--player-color);
+    box-shadow: 0 0px 5px var(--player-color);
     backdrop-filter: blur(100px)
 }
 
 .whats .icon,
 .color .icon {
-    color: #00dc8290;
+    color: var(--player-color);
     zoom: 1;
 }
 .subscriberOk {
-    background-color: #00dc82;
+    background-color: var(--player-color);
     text-shadow: 2px 2px 2px #111;
     display: flex;
     flex-direction: column;
@@ -1481,7 +1488,7 @@ h4:nth-child(1) {
     color: #fff;
     margin-left: -40%;
     font-weight: 900;
-    border: solid 1px #00dc8210;
+    border: solid 1px var(--player-color);
     z-index: 10000;
 }
 #customers {
@@ -1494,13 +1501,13 @@ h4:nth-child(1) {
     padding-top: 12px;
     padding-bottom: 12px;
     text-align: left;
-    background-color: #00dc8280;
+    background-color: var(--player-color);
 font-weight: bolder;
 }
 
 #customers td,
 #customers th {
-    border: 1px solid #00dc8240;
+    border: 1px solid var(--player-color);
     color: white;
     font-weight: bolder;
 }
@@ -1527,14 +1534,14 @@ td:nth-child(4){
 }
 
 #customers tr:nth-child(1) {
-    background-color: #00dc8210;
+    background-color: var(--player-color);
     }
 #customers tr:nth-child(2n) {
-    background-color: #00dc8230;
+    background-color: var(--player-color);
     }
     
     #customers tr:hover {
-        background-color: #00dc8250 ;
+        background-color: var(--player-color) ;
     }
     
 input {
@@ -1548,7 +1555,7 @@ input {
 }
 
 input[type="radio"] {
-  accent-color: #00dc82; /* Muda a cor do botão de rádio */
+  accent-color: var(--player-color); /* Muda a cor do botão de rádio */
   transform: scale(1); /* Diminui o tamanho do botão de rádio */
   width: 15px; /* Ajusta a largura do botão de rádio */
   height: 15px; /* Ajusta a altura do botão de rádio */
@@ -1556,7 +1563,7 @@ input[type="radio"] {
 .row {
     display: flex;
     flex-direction: row;
-    border-bottom: 1px solid #00dc8240;
+    border-bottom: 1px solid var(--player-color);
     font-size: 1rem;
 }
 
@@ -1568,7 +1575,7 @@ input[type="radio"] {
 }
 
 .row:nth-child(2n) {
-    background-color: #00dc82;
+    background-color: var(--player-color);
 
 }
 
@@ -1579,7 +1586,7 @@ input[type="radio"] {
 .cell {
     flex: 1;
     overflow: hidden;
-    border-right: 1px solid #00dc8210;
+    border-right: 1px solid var(--player-color);
 }
 
 .cell:nth-child(1) {
@@ -1604,7 +1611,7 @@ input[type="radio"] {
 .cell-two {
     flex: 1;
     overflow: hidden;
-    border-right: 1px solid #00dc8240;
+    border-right: 1px solid var(--player-color);
 }
 
 .cell-two:nth-child(1) {
@@ -1647,8 +1654,8 @@ input[type="radio"] {
     z-index: 1;
     height: 50px;
     font-weight: bolder;
-    border-bottom: solid 1px #00dc8240;
-    border-right: solid 1px #00dc8240;
+    border-bottom: solid 1px var(--player-color);
+    border-right: solid 1px var(--player-color);
     backdrop-filter: blur(45px);
 }
 
@@ -1657,17 +1664,17 @@ input[type="radio"] {
 }
 
 .clients span {
-    border: 1px solid #00dc8240;
+    border: 1px solid var(--player-color);
     padding: 3px 6px;
     border-radius: 4px;
-    color: #00dc82;
-    background-color: #00dc8240;
+    color: var(--player-color);
+    background-color: var(--player-color);
     margin-left: 3px;
 }
 
 .add-client {
-    border: solid 1px #00dc8290;
-    background-color: #00dc82;
+    border: solid 1px var(--player-color);
+    background-color: var(--player-color);
     padding: 5px 25px;
     margin: 5px;
     border-radius: 8px;
@@ -1676,9 +1683,9 @@ input[type="radio"] {
 }
 
 .add-client:hover {
-    border: solid 1px #00dc8290 ;
+    border: solid 1px var(--player-color);
     border-radius: 4px;
-    color: #00dc82;
+    color: var(--player-color);
     background-color: #fff;
 }
 
@@ -1700,8 +1707,8 @@ input[type="radio"] {
 }
 
 .close-client {
-    border: solid 1px #00dc82;
-    background-color: #00dc82;
+    border: solid 1px var(--player-color);
+    background-color: var(--player-color);
     padding: 5px 42px;
         margin: 1.5px 6px;
     border-radius: 4px;
@@ -1710,9 +1717,9 @@ input[type="radio"] {
 }
 
 .close-client:hover {
-    border: solid 1px #00dc8290 ;
+    border: solid 1px var(--player-color);
     border-radius: 4px;
-    color: #00dc82;
+    color: var(--player-color);
     background-color: #fff;
 }
 .close-edit-client {
@@ -1726,9 +1733,9 @@ input[type="radio"] {
 }
 
 .close-edit-client:hover {
-    border: solid 1px #00dc8290 ;
+    border: solid 1px var(--player-color) ;
     border-radius: 4px;
-    color: #00dc82;
+    color: var(--player-color);
     background-color: #fff;
 }
 
@@ -1750,26 +1757,26 @@ input[type="radio"] {
 }
 
 .users-conf span {
-    border: 1px solid #00dc8290;
+    border: 1px solid var(--player-color);
     padding: 2px;
     border-radius: 4px;
-    color: #00dc82;
-    background-color: #00dc8230;
+    color: var(--player-color);
+    background-color: var(--player-color);
     margin-left: 3px;
 }
 
 .filter {
-    border: solid 1px #00dc8290;
+    border: solid 1px var(--player-color);
     padding: 4px 12px;
     margin: 5.5px 14px;
     border-radius: 4px;
     cursor: pointer;
-    background-color: #00dc8210;
+    background-color: var(--player-color);
 }
 
 .filter:hover {
     color: #fff;
-    background-color: #00dc8290;
+    background-color: var(--player-color);
 }
 
 .users-list {
@@ -1798,17 +1805,17 @@ input[type="radio"] {
     width: 130px;
     margin: 2px;
     border-radius: 4px;
-    border: solid 2px #00dc8260;
+    border: solid 2px var(--player-color);
     text-align: center;
 }
 
 .title-user:hover {
-    background-color: #00dc8260;
+    background-color: var(--player-color);
     color: #fff;
 }
 
 .user-bd {
-    background: linear-gradient(90deg, #00dc82 0%, #00d4ff 35%, #04be7a 100%);
+    background: linear-gradient(90deg, var(--player-color) 0%, #00d4ff 35%, #04be7a 100%);
     height: 70px;
     width: 70px;
     color: #718096;
@@ -1821,7 +1828,7 @@ input[type="radio"] {
     height: 70px;
     width: 70px;
     border-radius: 50px;
-    /* border: #00dc82 2px solid; */
+    /* border: var(--player-color) 2px solid; */
     z-index: 100;
     padding: 4px;
     opacity: 1;
@@ -1836,14 +1843,14 @@ input[type="radio"] {
 
 .form-cliente {
     border-radius: 50%;
-    border: solid 3px #00dc82;
+    border: solid 3px var(--player-color);
 }
 
 .cliente {
     height: 60px;
     width: 60px;
     border-radius: 50%;
-    color: #00dc82;
+    color: var(--player-color);
 }
 
 
@@ -1875,7 +1882,7 @@ input[type="radio"] {
     flex-direction: row;
     align-items: flex-start;
     flex-wrap: wrap;
-    color: #00dc82;
+    color: var(--player-color);
 }
 
 .button {
@@ -1981,14 +1988,14 @@ input[type="radio"] {
 
 .others-full {
     z-index: 1;
-    background-color: #00dc8250;
+    background-color: var(--player-color);
 }
 
 .others-details {
     margin: 0 .5%;
     z-index: 1;
-    background-color: #00dc8230;
-    border: solid 3px #00dc8240;
+    background-color: var(--player-color);
+    border: solid 3px var(--player-color);
     border-radius: 3px;
 }
 
@@ -2021,7 +2028,7 @@ input[type="radio"] {
     height: 46px;
     width: 46px;
     color: #718096;
-    box-shadow: 0px 7px 20px #00dc82;
+    box-shadow: 0px 7px 20px var(--player-color);
     border-radius: 4px;
     margin: 1rem;
     z-index: 10;
@@ -2031,7 +2038,7 @@ input[type="radio"] {
     height: 46px;
     width: 46px;
     border-radius: 4px;
-    border: #00dc82 2px solid;
+    border: var(--player-color) 2px solid;
     z-index: 100;
     opacity: 1;
 }
@@ -2052,12 +2059,12 @@ input[type="radio"] {
 .row {
     display: flex;
     flex-direction: row;
-    border-bottom: 1px solid #00dc8240;
+    border-bottom: 1px solid var(--player-color);
     font-size: 1rem;
 }
 
 .row:nth-child(1) {
-    background-color: #00dc8240;
+    background-color: var(--player-color);
     position: sticky;
     top: 90px;
     font-size: 1.1rem;
@@ -2065,7 +2072,7 @@ input[type="radio"] {
 }
 
 .row:nth-child(2n) {
-    background-color: #00dc82;
+    background-color: var(--player-color);
 
 }
 
@@ -2087,7 +2094,7 @@ tr {
 }
 
 .status {
-    border: solid 2px #00dc8240;
+    border: solid 2px var(--player-color);
     Background: #00e900;
     border-radius: 3px;
     padding: 1px 20px;
@@ -2097,7 +2104,7 @@ tr {
     display: block;
 }
 .statusOff {
-    border: solid 2px #00dc8240;
+    border: solid 2px var(--player-color);
     Background: #e70000;
     border-radius: 3px;
     padding: 1px 20px;
@@ -2108,7 +2115,7 @@ width: 120px;
 }
 
 .statusInativo {
-    border: solid 2px #00dc8240;
+    border: solid 2px var(--player-color);
     Background: #ffec00;
     border-radius: 3px;
     padding: 1px 20px;
