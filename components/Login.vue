@@ -564,8 +564,8 @@ function close () {
           <Nav/>
         </div>
         <div v-if='!hasPinStored' class="link">
-          <NuxtLink @click="buttonFeed" :class="{ aActive: linkClient }">Atletas</NuxtLink>
-          <NuxtLink @click="buttonPartner" :class="{ aActivee: linkPersonal }">Coach</NuxtLink>
+          <NuxtLink @click="buttonFeed" :class="{ aActive: linkClient }">Atleta</NuxtLink>
+          <NuxtLink v-if='!divSenha' @click="buttonPartner" :class="{ aActivee: linkPersonal }">Coach</NuxtLink>
         </div>
       </div>
 
@@ -616,7 +616,7 @@ function close () {
       <!-- Cliente (formulário original) -->
       <div v-else-if='atletaShow' class="login-card inputs">
         <div v-if='divUser'>
-          <input class="password-input" type="email" @keyup.enter="checkUsername" id="username" placeholder="Usuário" autofocus
+          <input class="password-input" type="text" @keyup.enter="checkUsername" id="username" placeholder="Usuário" autofocus
             v-model="user" required autocomplete="username">
         </div>
         <div v-if='divUser' class="actions-row">
@@ -707,11 +707,11 @@ function close () {
   <!-- modal de criar PIN (aparece APENAS após senha válida) -->
   <div v-if="showSetPinModal" class="modal-backdrop" @click.self="closeSetPin">
     <div class="modal">
-      <h3>Criar / Alterar PIN</h3>
-      <p class="muted">PIN numérico — 4 a 6 dígitos. O PIN ficará armazenado localmente.</p>
+      <h3>Criar PIN</h3>
+      <p class="muted">PIN numérico — 4 a 6 dígitos.<br> O PIN ficará armazenado localmente.</p>
 
       <input v-model="newPin" inputmode="numeric" pattern="[0-9]*" placeholder="Novo PIN" />
-      <input v-model="confirmPin" inputmode="numeric" pattern="[0-9]*" placeholder="Confirmar PIN" />
+      <input v-model="confirmPin" @keyup.enter='handleSetPin' inputmode="numeric" pattern="[0-9]*" placeholder="Confirmar PIN" />
 
       <p v-if="setPinError" class="error">{{ setPinError }}</p>
 
@@ -834,7 +834,7 @@ flex-direction: row;
 }
 
 h3 {
-  margin: 30px 10px 0 10px;
+  margin: 0px 10px 0 10px;
 
 }
 
@@ -1039,6 +1039,10 @@ input[type="checkbox"] {
   margin: -8px 0;
 }
 
+.dark-mode input[type="checkbox"] {
+  accent-color: #2a61b4; /* muda a cor do "check" e do fundo quando marcado */
+  margin: -8px 0;
+}
 
 
 input:focus {
@@ -1217,12 +1221,12 @@ h4:nth-child(1) {
 
 /* card */
 .login-card {
-  width: 100%; background: linear-gradient(180deg, #ffffff, #ffffff, #ededed);;
+  width: 90%; margin: auto; background: linear-gradient(180deg, #ffffff, #ffffff, #ededed);;
   border-radius: 14px; padding: 0 20px 20px 20px; box-shadow: 0 10px 10px #ddd;
   backdrop-filter: blur(6px);  display:grid; gap:12px; text-align:center;
 }
 .dark-mode .login-card {
-  width: 100%; background: linear-gradient(180deg, #0f141e, #0f141e, #151d2e);
+  width: 90%; background: linear-gradient(180deg, #0f141e, #0f141e, #151d2e);
   border-radius: 14px; padding: 0 20px 20px 20px; box-shadow: 0 10px 10px #0a0e16;
   backdrop-filter: blur(6px); display:grid; gap:12px; text-align:center;
 }
@@ -1265,7 +1269,7 @@ h4:nth-child(1) {
 .remember { display:flex; gap:8px; align-items:center; color:var(--muted); font-size:.9rem; }
 
 /* password area */
-.password-input { padding:10px 12px; border-radius:10px; border:1px solid #ccc; background: #fff; color:white; width:100%; margin-top:8px; }
+.password-input { padding:10px 12px; border-radius:10px; border:1px solid #ccc; background: #fff; color: #000; width:100%; margin-top:8px; }
 .dark-mode .password-input { padding:10px 12px; border-radius:10px; border:1px solid #fff; background: #0000000f; color:white; width:100%; margin-top:8px; }
 .reset-user { margin-left: 10px; border-radius: 20px; border: 1px solid red; color: red; cursor: pointer; padding: 0px 5px; zoom: .8;}
 .actions-row { display:flex; gap:8px; margin-top:10px; justify-content:center; align-content: flex-end; }
@@ -1290,8 +1294,11 @@ h4:nth-child(1) {
 
 /* modal */
 .modal-backdrop { position: fixed; inset:0; background: rgba(2,6,23,0.6); display:flex; align-items:center; justify-content:center; z-index: 50; }
-.modal { background: #0f172a; padding:18px; border-radius:12px; width: min(420px, 92%); border:1px solid rgba(255,255,255,0.04); box-shadow: 0 20px 60px rgba(2,6,23,0.8); display:flex; flex-direction:column; gap:10px; }
-.modal input { padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); color:white; }
+.modal { background: #fff; padding:18px; border-radius:12px; width: min(420px, 92%); border:1px solid rgba(255,255,255,0.04); box-shadow: 0 20px 60px rgba(2,6,23,0.8); display:flex; flex-direction:column; gap:10px; }
+.dark-mode .modal { background: #0f172a; padding:18px; border-radius:12px; width: min(420px, 92%); border:1px solid rgba(255,255,255,0.04); box-shadow: 0 20px 60px rgba(2,6,23,0.8); display:flex; flex-direction:column; gap:10px; }
+.modal input { padding:10px; border-radius:8px; border:1px solid #ccc; background: #fff; color: #000; }
+.modal input:focus { padding:10px; border-radius:8px; background: #f4f4f4; color: #000; border: solid 2px #000;}
+.dark-mode .modal input { padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); color:white; }
 .modal .muted { color: var(--muted); font-size:.9rem; }
 .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:6px; }
 
