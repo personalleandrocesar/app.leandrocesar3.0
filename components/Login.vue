@@ -85,7 +85,35 @@ async function hashStringHex(input) {
   const arr = Array.from(new Uint8Array(hash));
   return arr.map(b => b.toString(16).padStart(2, '0')).join('');
 }
+function clearLastUser(alsoClearRememberChoice = false) {
+  try {
+    localStorage.removeItem(LAST_USER_KEY);
 
+    if (alsoClearRememberChoice) {
+      localStorage.removeItem('vault.rememberChoice');
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Erro ao limpar lastUserId:', err);
+    return false;
+  }
+}
+function resetLoginInputs() {
+  // limpa usuário e senha
+  user.value = '';
+  senha.value = '';
+
+  // volta a tela de login para o modo inicial
+  divUser.value = true;
+  divSenha.value = false;
+
+  // limpa o usuário encontrado temporário
+  tempFoundUser.value = null;
+
+  // limpa o armazenamento local do último usuário
+  clearLastUser(); 
+}
 /* ---------- fluxo atualizado: checar usuário antes de mostrar senha ---------- */
 const divUser = ref(true);
 const divSenha = ref(false);
@@ -591,14 +619,14 @@ function close () {
           <input class="password-input" type="email" @keyup.enter="checkUsername" id="username" placeholder="Usuário" autofocus
             v-model="user" required autocomplete="username">
         </div>
-        <div v-if='divUser'>
+        <div v-if='divUser' class="actions-row">
           <button class="login-btn" @click="checkUsername">
             AVANÇAR
             <Icon name="ic:round-keyboard-arrow-right" />
           </button>
         </div>
 
-        <h3 v-if='divSenha'>{{ tempFoundUser ? (tempFoundUser.username || tempFoundUser.email) : user }}</h3>
+        <h3 v-if='divSenha'>@{{ tempFoundUser ? (tempFoundUser.username || tempFoundUser.email) : user }}<span class='reset-user' @click="resetLoginInputs">x</span></h3>
 
         <div v-if='divSenha' class="senha" style="width:100%;">
           <input class="password-input" :type="pass" @keyup.enter="submitPassword" id="password" placeholder="Senha"
@@ -607,7 +635,7 @@ function close () {
           <Icon @click="swPass" v-else name="mdi:eye-off" id="password-icon" />
         </div>
 
-        <label v-if='divSenha' style="color:var(--muted); display:flex; align-items:center; gap:8px; margin-top:8px;">
+        <label v-if='divSenha' style="color:var(--muted); display:flex; align-items:flex-start; gap:8px;">
           <input type="checkbox" v-model="rememberDevice" /> Criar PIN após autenticar.
         </label>
 
@@ -618,9 +646,6 @@ function close () {
           </button>
         </div>
 
-        <div class="pin-actions">
-          <button v-if="!hasPinStored" class="secondary-btn" @click="handleRemovePin">Remover PIN</button>
-        </div>
         <div class="lost" style="margin-top:12px;">
           <a href="https://api.whatsapp.com/send?phone=5521936184024%20&text=Ol%C3%A1%20professor!%20Esqueci%20o%20meu%20email%20e%20minha%20senha!"
             target="_blank">
@@ -1007,8 +1032,13 @@ input:active {
 }
 
 input:hover {
-  background-color: var(--player-color)10;
+  background-color: #0000002b;
 }
+input[type="checkbox"] {
+  accent-color: #ccc; /* muda a cor do "check" e do fundo quando marcado */
+  margin: -8px 0;
+}
+
 
 
 input:focus {
@@ -1187,9 +1217,14 @@ h4:nth-child(1) {
 
 /* card */
 .login-card {
-  width: 100%; background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-  border-radius: 14px; padding: 20px; box-shadow: 0 10px 30px rgba(2,6,23,0.6);
-  backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.04); display:grid; gap:12px; text-align:center;
+  width: 100%; background: linear-gradient(180deg, #ffffff, #ffffff, #ededed);;
+  border-radius: 14px; padding: 0 20px 20px 20px; box-shadow: 0 10px 10px #ddd;
+  backdrop-filter: blur(6px);  display:grid; gap:12px; text-align:center;
+}
+.dark-mode .login-card {
+  width: 100%; background: linear-gradient(180deg, #0f141e, #0f141e, #151d2e);
+  border-radius: 14px; padding: 0 20px 20px 20px; box-shadow: 0 10px 10px #0a0e16;
+  backdrop-filter: blur(6px); display:grid; gap:12px; text-align:center;
 }
 
 /* user */
@@ -1230,11 +1265,14 @@ h4:nth-child(1) {
 .remember { display:flex; gap:8px; align-items:center; color:var(--muted); font-size:.9rem; }
 
 /* password area */
-.password-input { padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(0,0,0,0.16); color:white; width:100%; margin-top:8px; }
-.actions-row { display:flex; gap:8px; margin-top:10px; justify-content:center; }
+.password-input { padding:10px 12px; border-radius:10px; border:1px solid #ccc; background: #fff; color:white; width:100%; margin-top:8px; }
+.dark-mode .password-input { padding:10px 12px; border-radius:10px; border:1px solid #fff; background: #0000000f; color:white; width:100%; margin-top:8px; }
+.reset-user { margin-left: 10px; border-radius: 20px; border: 1px solid red; color: red; cursor: pointer; padding: 0px 5px; zoom: .8;}
+.actions-row { display:flex; gap:8px; margin-top:10px; justify-content:center; align-content: flex-end; }
 
 /* buttons */
-.login-btn { padding:10px 16px; border-radius:10px; background: linear-gradient(90deg,var(--accent), #4a89ff); color:white; border:none; font-weight:600; cursor:pointer; min-width:110px; display:inline-flex; align-items:center; gap:8px; justify-content:center;}
+.login-btn { padding:6px 16px; border-radius:10px; background: linear-gradient(90deg,var(--accent), #4a89ff); border: 1px solid #ccc; color:#000;  font-weight:600; cursor:pointer; min-width:110px; display:inline-flex; align-items:center; gap:8px; justify-content:center;}
+.dark-mode .login-btn { padding:6px 16px; border-radius:10px; background: linear-gradient(90deg,var(--accent), #4a89ff); color:#fff; border: 1px solid #fff; font-weight:600; cursor:pointer; min-width:110px; display:inline-flex; align-items:center; gap:8px; justify-content:center;}
 .secondary-btn { padding:10px 12px; border-radius:10px; background: transparent; border:1px solid #aaa; color:var(--muted); cursor:pointer; }
 .dark-mode .secondary-btn { padding:10px 12px; border-radius:10px; background: transparent; border:1px solid rgba(255,255,255,0.06); color:var(--muted); cursor:pointer; }
 .ghost { background: transparent; border: none; color: var(--muted); cursor: pointer; }
